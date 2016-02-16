@@ -33,8 +33,6 @@ public interface MatrixServerApi {
      */
     Constants saveReport(ReportModel reportModel);
 
-    Set<ReportModel> getAllReports(TokenModel tokenModel);
-
     Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId);
 
     void startWork(TimeModel timeModel);

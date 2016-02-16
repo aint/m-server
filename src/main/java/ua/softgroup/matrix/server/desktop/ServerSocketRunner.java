@@ -145,9 +145,6 @@ public class ServerSocketRunner implements CommandLineRunner {
         } else if (ServerCommands.SAVE_SCREENSHOT == command) {
             ScreenshotModel file = (ScreenshotModel) objectInputStream.readObject();
             matrixServerApi.saveScreenshot(file);
-        } else if (ServerCommands.GET_ALL_REPORTS == command) {
-            TokenModel token = (TokenModel) objectInputStream.readObject();
-            sendAllObjectsToClient(matrixServerApi.getAllReports(token));
         } else if (ServerCommands.GET_REPORTS_BY_PROJECT_ID == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
             long id = dataInputStream.readLong();

@@ -35,12 +35,6 @@ public enum ServerCommands {
     SAVE_REPORT,
 
     /**
-     * The command for retrieving a user's all reports. The server expects to read the {@link TokenModel} object
-     * and then return a set of {@link ReportModel}'s.
-     */
-    GET_ALL_REPORTS,
-
-    /**
      * The command for retrieving a user's reports of the specified project. The server expects
      * to read the {@link TokenModel} object and the project' id as a primitive {@code long} value sequentially.
      * Then the server returns a set of {@link ReportModel}'s.
