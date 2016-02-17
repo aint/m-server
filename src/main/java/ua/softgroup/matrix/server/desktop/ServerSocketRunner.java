@@ -12,7 +12,6 @@ import ua.softgroup.matrix.server.desktop.api.ServerCommands;
 import ua.softgroup.matrix.server.desktop.model.ActiveWindowsModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
-import ua.softgroup.matrix.server.desktop.model.SynchronizedModel;
 import ua.softgroup.matrix.server.desktop.model.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.TokenModel;
 import ua.softgroup.matrix.server.desktop.model.UserPassword;
@@ -161,10 +160,6 @@ public class ServerSocketRunner implements CommandLineRunner {
         } else if (ServerCommands.STOP_DOWNTIME == command) {
             TimeModel token = (TimeModel) objectInputStream.readObject();
             matrixServerApi.endDowntime(token);
-        } else if (ServerCommands.SYNCHRONIZED == command) {
-            boolean syncFlag = matrixServerApi.sync((SynchronizedModel) objectInputStream.readObject());
-            dataOutputStream.writeBoolean(syncFlag);
-            dataOutputStream.flush();
         } else if (ServerCommands.GET_TODAY_TIME == command) {
             TimeModel workTime = matrixServerApi.getTodayWorkTime((TimeModel) objectInputStream.readObject());
             sendAllObjectsToClient(workTime);

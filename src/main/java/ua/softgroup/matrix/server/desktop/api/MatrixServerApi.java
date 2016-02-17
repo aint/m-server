@@ -5,7 +5,6 @@ import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
-import ua.softgroup.matrix.server.desktop.model.SynchronizedModel;
 import ua.softgroup.matrix.server.desktop.model.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.TokenModel;
 import ua.softgroup.matrix.server.desktop.model.UserPassword;
@@ -46,8 +45,6 @@ public interface MatrixServerApi {
     TimeModel getTodayWorkTime(TimeModel timeModel);
 
     TimeModel getTotalWorkTime(TimeModel timeModel);
-
-    boolean sync(SynchronizedModel synchronizedModel);
 
     ClientSettingsModel getClientSettings();
 

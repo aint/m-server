@@ -12,7 +12,6 @@ import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
-import ua.softgroup.matrix.server.desktop.model.SynchronizedModel;
 import ua.softgroup.matrix.server.desktop.model.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.TokenModel;
 import ua.softgroup.matrix.server.desktop.model.UserPassword;
@@ -37,10 +36,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @PropertySource("classpath:desktop.properties")
@@ -171,54 +167,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             workDayService.save(workDay);
         }
 
-    }
-
-    @Override
-    public boolean sync(SynchronizedModel synchronizedModel) {
-        LOG.warn("Sync {}", synchronizedModel);
-
-        Optional.ofNullable(synchronizedModel.getReportModel())
-                .ifPresent(reportModels -> reportModels.stream()
-                        .filter(Objects::nonNull)
-                        .forEach(this::saveReport));
-
-        Optional.ofNullable(synchronizedModel.getTimeModel())
-                .ifPresent(timeModels -> timeModels.stream()
-                        .filter(Objects::nonNull)
-                        .forEach(timeModel -> {
-                                LOG.info("OFFLINE Timemodel {}", timeModel);
-                                Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-                                LOG.info("OFFLINE {}", project);
-                                project.setWorkStarted(null);
-                                project.setTotalMinutes(project.getTotalMinutes() + timeModel.getMinute());
-                                project.setTodayMinutes(project.getTodayMinutes() + timeModel.getMinute());
-                                projectService.save(project);
-
-                                WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
-                                workDay.setWorkMinutes(workDay.getWorkMinutes() + timeModel.getMinute());
-                                workDayService.save(workDay);
-
-                                workTimePeriodService.save(new WorkTimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), workDay));
-                        }));
-
-        Optional.ofNullable(synchronizedModel.getDowntimeModel())
-                .ifPresent(downtimeModels -> downtimeModels.stream()
-                        .filter(Objects::nonNull)
-                        .forEach(downtimeModel -> {
-                                LOG.info("Offline Downtime {}", downtimeModel);
-                                Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-                                project.setIdleStarted(null);
-                                long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getHours() - downtimeModel.getMinute());
-                                LOG.info("Downtime diff {}", diff);
-                                project.setIdleMinutes(diff > 0 ? diff : project.getIdleMinutes());
-                                projectService.save(project);
-
-                                WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
-                                workDay.setIdleMinutes(diff > 0 ? diff : workDay.getIdleMinutes());
-                                workDayService.save(workDay);
-                        }));
-
-        return true;
     }
 
     @Override

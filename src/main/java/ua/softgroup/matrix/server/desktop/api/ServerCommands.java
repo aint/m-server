@@ -5,7 +5,6 @@ import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
-import ua.softgroup.matrix.server.desktop.model.SynchronizedModel;
 import ua.softgroup.matrix.server.desktop.model.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.TokenModel;
 import ua.softgroup.matrix.server.desktop.model.UserPassword;
@@ -76,12 +75,6 @@ public enum ServerCommands {
      * The command for updating client's settings. The server returns the {@link ClientSettingsModel} object.
      */
     UPDATE_SETTING,
-
-    /**
-     * The command for syncing with client after offline. The server expects to read
-     * the {@link SynchronizedModel} object and then return a primitive {@code boolean} flag of success/failure.
-     */
-    SYNCHRONIZED,
 
     /**
      * That command indicates that starts idling. The server expects to read the {@link TimeModel} object
