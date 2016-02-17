@@ -171,10 +171,6 @@ public class ServerSocketRunner implements CommandLineRunner {
         } else if (ServerCommands.GET_TOTAL_TIME == command) {
             TimeModel workTime = matrixServerApi.getTotalWorkTime((TimeModel) objectInputStream.readObject());
             sendAllObjectsToClient(workTime);
-        } else if (ServerCommands.CHECK_UPDATE_SETTING == command) {
-            long version = dataInputStream.readLong();
-            dataOutputStream.writeBoolean(matrixServerApi.isClientSettingsUpdated(version));
-            dataOutputStream.flush();
         } else if (ServerCommands.UPDATE_SETTING == command) {
             sendAllObjectsToClient(matrixServerApi.getClientSettings());
         } else if (ServerCommands.KEYBOARD_LOG == command) {

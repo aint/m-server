@@ -8,9 +8,6 @@ public class ClientSettings extends AbstractEntity<Long> {
     private static final long serialVersionUID = -4678740217747959072L;
 
     @Column
-    private int settingsVersion;
-
-    @Column
     private int screenshotUpdateFrequentlyInMinutes;
 
     @Column
@@ -25,24 +22,14 @@ public class ClientSettings extends AbstractEntity<Long> {
     public ClientSettings() {
     }
 
-    public ClientSettings(int settingsVersion,
-                          int screenshotUpdateFrequentlyInMinutes,
+    public ClientSettings(int screenshotUpdateFrequentlyInMinutes,
                           int keyboardUpdateFrequentlyInMinutes,
                           int startDowntimeAfterInMinutes,
                           int reportEditablePeriodInDays) {
-        this.settingsVersion = settingsVersion;
         this.screenshotUpdateFrequentlyInMinutes = screenshotUpdateFrequentlyInMinutes;
         this.keyboardUpdateFrequentlyInMinutes = keyboardUpdateFrequentlyInMinutes;
         this.startDowntimeAfterInMinutes = startDowntimeAfterInMinutes;
         this.reportEditablePeriodInDays = reportEditablePeriodInDays;
-    }
-
-    public int getSettingsVersion() {
-        return settingsVersion;
-    }
-
-    public void setSettingsVersion(int settingsVersion) {
-        this.settingsVersion = settingsVersion;
     }
 
     public int getScreenshotUpdateFrequentlyInMinutes() {
@@ -81,7 +68,6 @@ public class ClientSettings extends AbstractEntity<Long> {
     public String toString() {
         return "ClientSettings{" +
                 "id=" + super.getId() +
-                ", settingsVersion=" + settingsVersion +
                 ", screenshotUpdateFrequentlyInMinutes=" + screenshotUpdateFrequentlyInMinutes +
                 ", keyboardUpdateFrequentlyInMinutes=" + keyboardUpdateFrequentlyInMinutes +
                 ", startDowntimeAfterInMinutes=" + startDowntimeAfterInMinutes +

@@ -49,8 +49,6 @@ public interface MatrixServerApi {
 
     boolean sync(SynchronizedModel synchronizedModel);
 
-    boolean isClientSettingsUpdated(long settingsVersion);
-
     ClientSettingsModel getClientSettings();
 
     void saveKeyboardLog(WriteKeyboard writeKeyboard);

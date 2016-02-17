@@ -5,10 +5,12 @@ import java.io.Serializable;
 public class ClientSettingsModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    //TODO remove this useless field
     private int version;
 
     private int screenshotUpdateFrequently;
 
+    //TODO remove this useless field
     private int keyboardUpdateFrequently;
 
     private int downTime;

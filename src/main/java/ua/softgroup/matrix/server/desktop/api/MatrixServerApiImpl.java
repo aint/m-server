@@ -222,17 +222,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public boolean isClientSettingsUpdated(long settingsVersion) {
-        LOG.debug("Client settings version {}", settingsVersion);
-        ClientSettings clientSettings = clientSettingsService.getAll().stream()
-                .findFirst()
-                .orElseThrow(NoSuchElementException::new);
-        int dbSettingsVersion = clientSettings.getSettingsVersion();
-        LOG.debug("DB settings version {}", dbSettingsVersion);
-        return dbSettingsVersion != settingsVersion;
-    }
-
-    @Override
     public ClientSettingsModel getClientSettings() {
         return clientSettingsService.getAll().stream()
                 .findFirst()
@@ -310,7 +299,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {
         return new ClientSettingsModel(
-                settings.getSettingsVersion(),
+                0,
                 settings.getScreenshotUpdateFrequentlyInMinutes(),
                 settings.getKeyboardUpdateFrequentlyInMinutes(),
                 settings.getStartDowntimeAfterInMinutes());

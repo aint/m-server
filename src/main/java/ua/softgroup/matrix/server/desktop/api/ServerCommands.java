@@ -73,12 +73,6 @@ public enum ServerCommands {
     GET_TODAY_TIME,
 
     /**
-     * The command for checking if available new setting. ABSOLUTELY MEANINGLESS AND NEEDLESS.
-     * The server expects to read a primitive {@code long} value and return a primitive {@code boolean} value.
-     */
-    CHECK_UPDATE_SETTING,
-
-    /**
      * The command for updating client's settings. The server returns the {@link ClientSettingsModel} object.
      */
     UPDATE_SETTING,
