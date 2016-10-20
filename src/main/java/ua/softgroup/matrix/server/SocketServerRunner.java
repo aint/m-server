@@ -5,12 +5,14 @@ import ua.softgroup.matrix.server.api.MatrixServerApiImpl;
 import ua.softgroup.matrix.server.api.ServerCommands;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
+import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.UserPassword;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 public class SocketServerRunner {
 
@@ -106,11 +108,20 @@ public class SocketServerRunner {
         } else if (ServerCommands.SAVE_SCREENSHOT == command) {
             ScreenshotModel file = (ScreenshotModel) objectInputStream.readObject();
             matrixServerApi.saveScreenshot(file);
+        } else if (ServerCommands.GET_ALL_REPORTS == command) {
+            TokenModel token = (TokenModel) objectInputStream.readObject();
+            sendAllReportsToClient(matrixServerApi.getAllReports(token));
         } else if (ServerCommands.CLOSE == command) {
             closeClientSocket();
         } else {
             System.out.println("No such command");
         }
+    }
+
+    private void sendAllReportsToClient(Set<ReportModel> reports) throws IOException {
+        ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+        out.writeObject(reports);
+        out.flush();
     }
 
     private void sendReportToClient(ReportModel report) throws IOException {

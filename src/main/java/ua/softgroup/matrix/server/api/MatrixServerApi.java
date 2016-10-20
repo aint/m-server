@@ -2,8 +2,10 @@ package ua.softgroup.matrix.server.api;
 
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
+import ua.softgroup.matrix.server.model.TokenModel;
 
 import java.util.List;
+import java.util.Set;
 
 public interface MatrixServerApi {
 
@@ -47,5 +49,7 @@ public interface MatrixServerApi {
     Constants saveReport(ReportModel reportModel);
 
     void saveScreenshot(ScreenshotModel file);
+
+    Set<ReportModel> getAllReports(TokenModel tokenModel);
 
 }

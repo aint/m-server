@@ -12,6 +12,8 @@ public enum ServerCommands {
 
     SAVE_REPORT,
 
+    GET_ALL_REPORTS,
+
     SAVE_SCREENSHOT,
 
     CLOSE
