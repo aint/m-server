@@ -1,13 +1,12 @@
 package ua.softgroup.matrix.server;
 
+import org.jasypt.util.password.StrongPasswordEncryptor;
 import ua.softgroup.matrix.server.api.ServerCommands;
-import ua.softgroup.matrix.server.request.Authentication;
-import ua.softgroup.matrix.server.request.Report;
+import ua.softgroup.matrix.server.model.ReportModel;
+import ua.softgroup.matrix.server.model.UserPassword;
 
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
-import java.time.LocalDate;
 
 public class SimpleClient {
 
@@ -18,14 +17,38 @@ public class SimpleClient {
             OutputStream os = socket.getOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(os);
 
+            InputStream is = socket.getInputStream();
+//            ObjectInputStream objectInputStream = new ObjectInputStream(is);
+
 
             oos.writeObject(ServerCommands.AUTHENTICATE);
-            Authentication auth = new Authentication("vasia", "123456");
+            UserPassword auth = new UserPassword();
+            auth.setUsername("ivan");
+            StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
+            String encryptedPassword = passwordEncryptor.encryptPassword("123456");
+            auth.setPassword(encryptedPassword);
             oos.writeObject(auth);
 
-            oos.writeObject(ServerCommands.SAVE_REPORT);
-            Report report = new Report("text text text text ", LocalDate.now());
-            oos.writeObject(report);
+            DataInputStream in = new DataInputStream(is);
+            String token = in.readUTF();
+            System.out.println(token);
+
+//            oos.writeObject(ServerCommands.GET_REPORT);
+//            ReportModel reportRequest = new ReportModel(token, "", "");
+//            reportRequest.setId(1488);
+//            oos.writeObject(reportRequest);
+//            ReportModel report = (ReportModel) objectInputStream.readObject();
+//            System.out.println("title: " + report.getTitle());
+//            System.out.println("desc: " + report.getDiscription());
+
+//            oos.writeObject(ServerCommands.SAVE_REPORT);
+//            ReportModel reportModel = new ReportModel(token, "title", "description");
+//            oos.writeObject(reportModel);
+//
+//            ReportModel report = (ReportModel) objectInputStream.readObject();
+//
+//            String token = in.readUTF();
+//            System.out.println(token);
 
             oos.writeObject(ServerCommands.CLOSE);
 

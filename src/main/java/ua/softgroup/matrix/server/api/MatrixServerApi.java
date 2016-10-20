@@ -1,6 +1,8 @@
 package ua.softgroup.matrix.server.api;
 
-import java.time.LocalDate;
+import ua.softgroup.matrix.server.model.ReportModel;
+import ua.softgroup.matrix.server.model.ScreenshotModel;
+
 import java.util.List;
 
 public interface MatrixServerApi {
@@ -8,10 +10,11 @@ public interface MatrixServerApi {
     /**
      * Tries to authenticate a user using the given credentials
      *
-     * @param credentials encrypted login and password of the user
+     * @param login encrypted login
+     * @param password encrypted password
      * @return a token in the case of successful authentication, 'invalid credentials' otherwise
      */
-    String authenticate(String credentials);
+    String authenticate(String login, String password);
 
     /**
      * Returns all projects of the authenticated user
@@ -30,18 +33,19 @@ public interface MatrixServerApi {
     /**
      * Returns a report for the given id
      *
-     * @param reportId the report' id
+     * @param reportRequest the report' id and token
      * @return the report's text
      */
-    String getReport(Long reportId);
+    ReportModel getReport(ReportModel reportRequest);
 
     /**
      * Saves a report for the given date
      *
-     * @param report the report's text
-     * @param date the report's date
+     * @param reportModel report's model
      * @return an id of the saved report
      */
-    Long saveReport(String report, LocalDate date);
+    Constants saveReport(ReportModel reportModel);
+
+    void saveScreenshot(ScreenshotModel file);
 
 }

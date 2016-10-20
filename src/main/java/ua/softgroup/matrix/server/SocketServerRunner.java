@@ -3,13 +3,14 @@ package ua.softgroup.matrix.server;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.MatrixServerApiImpl;
 import ua.softgroup.matrix.server.api.ServerCommands;
-import ua.softgroup.matrix.server.request.Authentication;
-import ua.softgroup.matrix.server.request.Report;
+import ua.softgroup.matrix.server.model.ReportModel;
+import ua.softgroup.matrix.server.model.ScreenshotModel;
+import ua.softgroup.matrix.server.model.UserPassword;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
 
 public class SocketServerRunner {
 
@@ -19,6 +20,7 @@ public class SocketServerRunner {
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private ObjectInputStream objectInputStream;
+    private DataOutputStream dataOutputStream;
 
 
     public static void main(String args[]) throws Exception {
@@ -29,9 +31,10 @@ public class SocketServerRunner {
 
         while (true) {
             socketServerRunner.acceptClientSocket();
-            System.out.println("Client connected \n");
+            System.out.println(LocalDateTime.now() + " Client connected \n");
 
             socketServerRunner.openObjectInputStream();
+            socketServerRunner.openDataInputStream();
 
             ServerCommands command;
             while (!socketServerRunner.clientRequestClose(command = socketServerRunner.readServerCommand())) {
@@ -54,6 +57,16 @@ public class SocketServerRunner {
         objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
     }
 
+    private void openDataInputStream() throws IOException {
+        dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
+    }
+
+    private void sendStringResponse(String text) throws IOException {
+        dataOutputStream.writeUTF(text);
+        dataOutputStream.flush();
+//        out.close();
+    }
+
     private ServerCommands readServerCommand() throws IOException, ClassNotFoundException {
         return (ServerCommands) objectInputStream.readObject();
     }
@@ -69,28 +82,46 @@ public class SocketServerRunner {
     }
 
     private void closeClientSocket() throws IOException {
+        dataOutputStream.close();
         objectInputStream.close();
         clientSocket.close();
     }
 
     private void processClientInput(ServerCommands command) throws IOException, ClassNotFoundException {
         if (ServerCommands.AUTHENTICATE == command) {
-            Authentication auth = (Authentication) objectInputStream.readObject();
-            matrixServerApi.authenticate(auth.getLogin() + auth.getPassword());
+            UserPassword auth = (UserPassword) objectInputStream.readObject();
+            String token = matrixServerApi.authenticate(auth.getUsername(), auth.getPassword());
+            System.out.println("TOKEN " + token);
+            sendStringResponse(token);
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
             matrixServerApi.getAllProjects();
         } else if (ServerCommands.SET_CURRENT_PROJECT == command) {
             matrixServerApi.setCurrentProject(0L);
         } else if (ServerCommands.GET_REPORT == command) {
-            matrixServerApi.getReport(0L);
+            ReportModel reportRequest = (ReportModel) objectInputStream.readObject();
+            sendReportToClient(matrixServerApi.getReport(reportRequest));
         } else if (ServerCommands.SAVE_REPORT == command) {
-            Report report = (Report) objectInputStream.readObject();
-            matrixServerApi.saveReport(report.getText(), report.getDate());
+            ReportModel report = (ReportModel) objectInputStream.readObject();
+            sendConstantStatus(matrixServerApi.saveReport(report).name());
+        } else if (ServerCommands.SAVE_SCREENSHOT == command) {
+            ScreenshotModel file = (ScreenshotModel) objectInputStream.readObject();
+            matrixServerApi.saveScreenshot(file);
         } else if (ServerCommands.CLOSE == command) {
             closeClientSocket();
         } else {
             System.out.println("No such command");
         }
+    }
+
+    private void sendReportToClient(ReportModel report) throws IOException {
+        ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+        out.writeObject(report);
+        out.flush();
+    }
+
+    private void sendConstantStatus(String status) throws IOException {
+        dataOutputStream.writeUTF(status);
+        dataOutputStream.flush();
     }
 
 
