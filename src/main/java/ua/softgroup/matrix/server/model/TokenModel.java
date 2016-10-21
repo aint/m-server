@@ -7,6 +7,9 @@ public class  TokenModel implements Serializable {
 
     private String token;
 
+    public TokenModel() {
+    }
+
     public TokenModel(String token) {
         this.token = token;
     }

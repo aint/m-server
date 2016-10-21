@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.api;
 
+import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.TokenModel;
@@ -23,7 +24,7 @@ public interface MatrixServerApi {
      *
      * @return a list of projects
      */
-    List<Object> getAllProjects();
+    Set<ProjectModel> getAllProjects(TokenModel tokenModel);
 
     /**
      * Sets project as current for the authenticated user

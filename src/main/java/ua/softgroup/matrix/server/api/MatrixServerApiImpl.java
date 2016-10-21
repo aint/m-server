@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.api;
 
+import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.TokenModel;
@@ -31,8 +32,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public List<Object> getAllProjects() {
-        return null;
+    public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
+        String token = tokenModel.getToken();
+        // TODO extract user
+        ProjectModel pr1 = new ProjectModel("Project 1", "Description 1", 111.111);
+        ProjectModel pr2 = new ProjectModel("Project 2", "Description 2", 222.222);
+        ProjectModel pr3 = new ProjectModel("Project 3", "Description 3", 333.333);
+        return new HashSet<>(Arrays.asList(pr1, pr2, pr3));
     }
 
     @Override

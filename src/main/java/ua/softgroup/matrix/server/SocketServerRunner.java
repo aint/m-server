@@ -96,7 +96,8 @@ public class SocketServerRunner {
             System.out.println("TOKEN " + token);
             sendStringResponse(token);
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
-            matrixServerApi.getAllProjects();
+            TokenModel token = (TokenModel) objectInputStream.readObject();
+            sendAllObjectsToClient(matrixServerApi.getAllProjects(token));
         } else if (ServerCommands.SET_CURRENT_PROJECT == command) {
             matrixServerApi.setCurrentProject(0L);
         } else if (ServerCommands.GET_REPORT == command) {
@@ -110,7 +111,7 @@ public class SocketServerRunner {
             matrixServerApi.saveScreenshot(file);
         } else if (ServerCommands.GET_ALL_REPORTS == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
-            sendAllReportsToClient(matrixServerApi.getAllReports(token));
+            sendAllObjectsToClient(matrixServerApi.getAllReports(token));
         } else if (ServerCommands.START_WORK == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
             matrixServerApi.startWork(token);
@@ -124,7 +125,7 @@ public class SocketServerRunner {
         }
     }
 
-    private void sendAllReportsToClient(Set<ReportModel> reports) throws IOException {
+    private void sendAllObjectsToClient(Object reports) throws IOException {
         ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
         out.writeObject(reports);
         out.flush();
