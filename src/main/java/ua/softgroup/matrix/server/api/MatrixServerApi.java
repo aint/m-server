@@ -52,4 +52,8 @@ public interface MatrixServerApi {
 
     Set<ReportModel> getAllReports(TokenModel tokenModel);
 
+    void startWork(TokenModel tokenModel);
+
+    void endWork(TokenModel tokenModel);
+
 }

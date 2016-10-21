@@ -22,7 +22,7 @@ public class SimpleClient {
 
 
             oos.writeObject(ServerCommands.AUTHENTICATE);
-            UserPassword auth = new UserPassword();
+            UserPassword auth = new UserPassword("", "");
             auth.setUsername("ivan");
             StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
             String encryptedPassword = passwordEncryptor.encryptPassword("123456");

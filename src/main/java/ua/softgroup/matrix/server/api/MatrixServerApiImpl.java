@@ -10,12 +10,17 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class MatrixServerApiImpl implements MatrixServerApi {
+
+    private LocalDateTime workTime;
 
     private TokenAuthService tokenAuthService = new TokenAuthService();
 
@@ -77,5 +82,18 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         ReportModel r2 = new ReportModel(token, "Title 2", "Description 2");
         ReportModel r3 = new ReportModel(token, "Title 3", "Description 3");
         return new HashSet<>(Arrays.asList(r1, r2, r3));
+    }
+
+    @Override
+    public void startWork(TokenModel tokenModel) {
+        workTime = LocalDateTime.now();
+    }
+
+    @Override
+    public void endWork(TokenModel tokenModel) {
+        Duration duration = Duration.between(workTime, LocalDateTime.now());
+        System.out.println(duration.toDays());
+        System.out.println(duration.toHours());
+        System.out.println(duration.toMillis());
     }
 }

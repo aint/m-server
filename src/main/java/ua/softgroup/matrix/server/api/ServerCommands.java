@@ -16,6 +16,10 @@ public enum ServerCommands {
 
     SAVE_SCREENSHOT,
 
+    START_WORK,
+
+    END_WORK,
+
     CLOSE
 
 }

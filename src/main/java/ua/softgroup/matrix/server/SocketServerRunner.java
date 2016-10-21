@@ -111,6 +111,12 @@ public class SocketServerRunner {
         } else if (ServerCommands.GET_ALL_REPORTS == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
             sendAllReportsToClient(matrixServerApi.getAllReports(token));
+        } else if (ServerCommands.START_WORK == command) {
+            TokenModel token = (TokenModel) objectInputStream.readObject();
+            matrixServerApi.startWork(token);
+        } else if (ServerCommands.END_WORK == command) {
+            TokenModel token = (TokenModel) objectInputStream.readObject();
+            matrixServerApi.endWork(token);
         } else if (ServerCommands.CLOSE == command) {
             closeClientSocket();
         } else {
