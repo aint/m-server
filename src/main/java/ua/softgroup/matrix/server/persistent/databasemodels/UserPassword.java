@@ -1,14 +1,21 @@
-package ua.softgroup.matrix.server.model;
+package ua.softgroup.matrix.server.persistent.databasemodels;
 
+import javax.persistence.*;
 import java.io.Serializable;
 
+@Entity
+@Table(name = "Users")
 public class UserPassword implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "Username")
     private String username;
 
+    @Column(name = "Password")
     private String password;
 
     public UserPassword(String username, String password) {

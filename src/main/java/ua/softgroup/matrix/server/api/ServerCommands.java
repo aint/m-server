@@ -14,6 +14,8 @@ public enum ServerCommands {
 
     GET_ALL_REPORTS,
 
+    GET_REPORTS_BY_PROJECT_ID,
+
     SAVE_SCREENSHOT,
 
     START_WORK,

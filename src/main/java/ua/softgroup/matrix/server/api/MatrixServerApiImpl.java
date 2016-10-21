@@ -1,10 +1,21 @@
 package ua.softgroup.matrix.server.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.persistent.entity.Project;
+import ua.softgroup.matrix.server.persistent.entity.Report;
+import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.security.TokenAuthService;
+import ua.softgroup.matrix.server.service.ProjectService;
+import ua.softgroup.matrix.server.service.ReportService;
+import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.impl.ProjectServiceImpl;
+import ua.softgroup.matrix.server.service.impl.ReportServiceImpl;
+import ua.softgroup.matrix.server.service.impl.UserServiceImpl;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -14,58 +25,100 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MatrixServerApiImpl implements MatrixServerApi {
+    private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
 
     private LocalDateTime workTime;
 
     private TokenAuthService tokenAuthService = new TokenAuthService();
 
+    private UserService userService = new UserServiceImpl();
+    private ReportService reportService = new ReportServiceImpl();
+    private ProjectService projectService = new ProjectServiceImpl();
+
     @Override
     public String authenticate(String login, String password) {
-        System.out.println("- service layer: authenticate: " + login + " " + password + "\n");
+        LOG.info("authenticate: {}, {}", login, password);
+//        System.out.println("- service layer: authenticate: " + login + " " + password + "\n");
         return tokenAuthService.authenticate(login, password);
     }
 
     @Override
-    public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
+    public Constants saveReport(ReportModel reportModel) {
+        LOG.info("saveReport: {}", reportModel);
+//        System.out.println("- service layer: saveReport: " + reportModel.getTitle() + reportModel.getDiscription() + "\n");
+//        System.out.println(reportModel);
+
+        if (!isTokenValidated(reportModel.getToken())) {
+            return Constants.TOKEN_EXPIRED;
+        }
+
+        Report report = new Report(reportModel.getTitle(), reportModel.getDiscription(), retrieveUserFromToken(reportModel));
+        report.setId(reportModel.getId());
+        report.setProject(projectService.getById(reportModel.getProjectId()));
+        reportService.save(report);
+
+        return Constants.TOKEN_VALIDATED;
+    }
+
+    @Deprecated
+    @Override
+    public ReportModel getReport(ReportModel reportModel) {
+        LOG.info("getReport: {}", reportModel);
+//        System.out.println("- service layer: getReport: " + reportModel.getId() + "\n");
+//        System.out.println(reportModel);
+
+        Report report = reportService.getById(reportModel.getId());
+        System.out.println(report);
+
+        reportModel.setId(report.getId());
+        reportModel.setTitle(report.getTitle());
+        reportModel.setDiscription(report.getDescription());
+        reportModel.setStatus(isTokenValidated(reportModel.getToken()) ? 0 : -1);
+        return reportModel;
+    }
+
+    @Override
+    public Set<ReportModel> getAllReports(TokenModel tokenModel) {
         String token = tokenModel.getToken();
-        // TODO extract user
-        ProjectModel pr1 = new ProjectModel("Project 1", "Description 1", 111.111);
-        ProjectModel pr2 = new ProjectModel("Project 2", "Description 2", 222.222);
-        ProjectModel pr3 = new ProjectModel("Project 3", "Description 3", 333.333);
-        return new HashSet<>(Arrays.asList(pr1, pr2, pr3));
+        return reportService.getAllReportsOf(retrieveUserFromToken(tokenModel)).stream()
+                .map(r -> new ReportModel(r.getId(), token, r.getTitle(), r.getDescription(), r.getProject().getId()))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Override
+    public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
+//        User user = retrieveUserFromToken(tokenModel);
+        return projectService.getAll().stream()
+                .map(p -> new ProjectModel(p.getId(), p.getName(), p.getDescription(), p.getTotalPrice()))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Override
+    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
+        String token = tokenModel.getToken();
+        return projectService.getById(projectId).getReports().stream()
+                .map(report ->  new ReportModel(token, report.getTitle(), report.getDescription()))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+
+
+    private User retrieveUserFromToken(TokenModel tokenModel) {
+        String username = tokenAuthService.extractUsername(tokenModel);
+        return userService.getByUsername(username);
+    }
+
+    private boolean isTokenValidated(String token) {
+        return tokenAuthService.validateToken(token) == Constants.TOKEN_VALIDATED;
     }
 
     @Override
     public void setCurrentProject(Long projectId) {
 
-    }
-
-    @Override
-    public ReportModel getReport(ReportModel reportModel) {
-        System.out.println("- service layer: getReport: " + reportModel.getId() + "\n");
-
-        reportModel.setStatus(0);
-        if (tokenAuthService.validateToken(reportModel.getToken()) == Constants.TOKEN_EXPIRED) {
-            reportModel.setStatus(-1);
-        }
-
-        reportModel.setDiscription("Test description");
-        reportModel.setTitle("Test Title");
-
-        return reportModel;
-    }
-
-    @Override
-    public Constants saveReport(ReportModel reportModel) {
-        System.out.println("- service layer: saveReport: " + reportModel.getTitle() + reportModel.getDiscription() + "\n");
-        System.out.println("- service layer: saveReport: " + reportModel.getToken());
-        return tokenAuthService.validateToken(reportModel.getToken());
     }
 
     @Override
@@ -78,16 +131,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             e.printStackTrace();
         }
         System.out.println("saved");
-    }
-
-    @Override
-    public Set<ReportModel> getAllReports(TokenModel tokenModel) {
-        String token = tokenModel.getToken();
-        // TODO extract user
-        ReportModel r1 = new ReportModel(token, "Title 1", "Description 1");
-        ReportModel r2 = new ReportModel(token, "Title 2", "Description 2");
-        ReportModel r3 = new ReportModel(token, "Title 3", "Description 3");
-        return new HashSet<>(Arrays.asList(r1, r2, r3));
     }
 
     @Override

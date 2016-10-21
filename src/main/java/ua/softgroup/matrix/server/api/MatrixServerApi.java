@@ -39,6 +39,7 @@ public interface MatrixServerApi {
      * @param reportRequest the report' id and token
      * @return the report's text
      */
+    @Deprecated
     ReportModel getReport(ReportModel reportRequest);
 
     /**
@@ -52,6 +53,8 @@ public interface MatrixServerApi {
     void saveScreenshot(ScreenshotModel file);
 
     Set<ReportModel> getAllReports(TokenModel tokenModel);
+
+    Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId);
 
     void startWork(TokenModel tokenModel);
 

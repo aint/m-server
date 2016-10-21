@@ -1,25 +1,24 @@
 package ua.softgroup.matrix.server.model;
 
-import javax.persistence.*;
 import java.io.Serializable;
 
-@Entity
-@Table(name = "Projects")
 public class ProjectModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
-    @Column(name = "Project_Name")
     private String projectName;
 
-    @Column(name = "Project_Description")
     private String projectDiscription;
 
-    @Column(name = "Project_Price")
     private double projectPrice;
+
+    public ProjectModel(long id, String projectName, String projectDiscription, double projectPrice) {
+        this.id = id;
+        this.projectName = projectName;
+        this.projectDiscription = projectDiscription;
+        this.projectPrice = projectPrice;
+    }
 
     public ProjectModel(String projectName, String projectDiscription, double projectPrice) {
         this.projectName = projectName;
@@ -27,11 +26,11 @@ public class ProjectModel implements Serializable {
         this.projectPrice = projectPrice;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

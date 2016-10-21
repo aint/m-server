@@ -1,7 +1,13 @@
 package ua.softgroup.matrix.server.security;
 
 import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ua.softgroup.matrix.server.api.Constants;
+import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.persistent.SpringDataConfig;
+import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,13 +19,13 @@ import static java.time.ZoneId.systemDefault;
 
 public class TokenAuthService {
 
-    private static final String DUMMY_LOGIN = "ivan";
-    private static final String DUMMY_PASSWORD = "123456";
-
     private String login;
     private String password;
 
     private StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
+
+    private ApplicationContext applicationContext = new AnnotationConfigApplicationContext(SpringDataConfig.class);
+    private UserRepository userRepository = applicationContext.getBean(UserRepository.class);
 
     private static final int EXPIRATION_PERIOD_DAYS = 30;
 
@@ -38,9 +44,10 @@ public class TokenAuthService {
     }
 
     private String tryToAuthenticate() {
-        if (!DUMMY_LOGIN.equals(login)) {
+        User user = userRepository.findByUsername(login);
+        if (user == null || !user.getUsername().equals(login)) {
             return Constants.INVALID_USERNAME.name();
-        } else if (!passwordEncryptor.checkPassword(DUMMY_PASSWORD, password)) {
+        } else if (!passwordEncryptor.checkPassword(user.getPassword(), password)) {
             return Constants.INVALID_PASSWORD.name();
         }
         return generateToken(login);
@@ -72,6 +79,18 @@ public class TokenAuthService {
     private boolean isDateExpired(Long timestamp) {
         LocalDate expirationDate = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate();
         return LocalDate.now().isAfter(expirationDate);
+    }
+
+    public String extractUsername(TokenModel tokenModel) {
+        String token = tokenModel.getToken();
+        if (Constants.TOKEN_EXPIRED == validateToken(token)) {
+            throw new RuntimeException("TOKEN EXPIRED");
+        }
+        String decryptToken = decryptToken(token);
+        System.out.println("decryptToken " + decryptToken);
+        String username = decryptToken.substring(0, decryptToken.length() - 13 - 1);
+        System.out.println("extractUsername " + username);
+        return username;
     }
 
 }

@@ -2,6 +2,7 @@ package ua.softgroup.matrix.server.test;
 
 import org.jasypt.util.text.StrongTextEncryptor;
 import ua.softgroup.matrix.server.api.Constants;
+import ua.softgroup.matrix.server.model.TokenModel;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,17 +22,27 @@ public class Main {
         Main main = new Main();
         String token = main.generateToken(login);
         System.out.println(token);
-        String decryptToken = main.decryptToken(token);
-        System.out.println(decryptToken);
-        String timestamp = decryptToken.substring(decryptToken.length() - 13);
-        System.out.println(timestamp);
-        LocalDate expirationDate = Instant.ofEpochMilli(Long.valueOf(timestamp)).atZone(ZoneId.systemDefault()).toLocalDate();
-        if (LocalDate.now().isAfter(expirationDate)) {
-            System.out.println("expired");
-        } else {
-            System.out.println("ok");
-        }
+//        String decryptToken = main.decryptToken(token);
+//        System.out.println(decryptToken);
+//        String timestamp = decryptToken.substring(decryptToken.length() - 13);
+//        System.out.println(timestamp);
+//        LocalDate expirationDate = Instant.ofEpochMilli(Long.valueOf(timestamp)).atZone(ZoneId.systemDefault()).toLocalDate();
+//        if (LocalDate.now().isAfter(expirationDate)) {
+//            System.out.println("expired");
+//        } else {
+//            System.out.println("ok");
+//        }
 
+        main.extractUsername(token);
+    }
+
+
+    public String extractUsername(String token) {
+        String decryptToken = decryptToken(token);
+        System.out.println("decryptToken " + decryptToken);
+        String username = decryptToken.substring(0, decryptToken.length() - 13 - 1);
+        System.out.println(username);
+        return username;
     }
 
 

@@ -1,5 +1,7 @@
 package ua.softgroup.matrix.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.MatrixServerApiImpl;
 import ua.softgroup.matrix.server.api.ServerCommands;
@@ -12,9 +14,9 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 public class SocketServerRunner {
+    private static final Logger LOG = LoggerFactory.getLogger(SocketServerRunner.class);
 
     private static final int SERVER_PORT = 6666;
     private static final MatrixServerApi matrixServerApi = new MatrixServerApiImpl();
@@ -23,24 +25,26 @@ public class SocketServerRunner {
     private Socket clientSocket;
     private ObjectInputStream objectInputStream;
     private DataOutputStream dataOutputStream;
+    private DataInputStream dataInputStream;
 
 
     public static void main(String args[]) throws Exception {
         SocketServerRunner socketServerRunner = new SocketServerRunner();
 
         socketServerRunner.createServerSocket();
-        System.out.println("Waiting for a client...\n");
+        LOG.info("Waiting for a client...");
 
         while (true) {
             socketServerRunner.acceptClientSocket();
-            System.out.println(LocalDateTime.now() + " Client connected \n");
+            LOG.info("Client connected {}", LocalDateTime.now());
 
             socketServerRunner.openObjectInputStream();
+            socketServerRunner.openDataOutputStream();
             socketServerRunner.openDataInputStream();
 
             ServerCommands command;
             while (!socketServerRunner.clientRequestClose(command = socketServerRunner.readServerCommand())) {
-                System.out.println("Client enter command: " + command.name() + "\n");
+                LOG.info("Client enter command {}", command.name());
 
                 socketServerRunner.processClientInput(command);
             }
@@ -59,7 +63,7 @@ public class SocketServerRunner {
         objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
     }
 
-    private void openDataInputStream() throws IOException {
+    private void openDataOutputStream() throws IOException {
         dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
     }
 
@@ -76,8 +80,8 @@ public class SocketServerRunner {
     private boolean clientRequestClose(ServerCommands command) throws IOException {
         if ((ServerCommands.CLOSE == command)) {
             closeClientSocket();
-            System.out.println("Client quit");
-            System.out.println("-----------------------");
+            LOG.info("Client quit {}",LocalDateTime.now());
+            LOG.info("-----------------------");
             return true;
         }
         return false;
@@ -93,7 +97,7 @@ public class SocketServerRunner {
         if (ServerCommands.AUTHENTICATE == command) {
             UserPassword auth = (UserPassword) objectInputStream.readObject();
             String token = matrixServerApi.authenticate(auth.getUsername(), auth.getPassword());
-            System.out.println("TOKEN " + token);
+            LOG.info("TOKEN {}", token);
             sendStringResponse(token);
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
@@ -112,6 +116,13 @@ public class SocketServerRunner {
         } else if (ServerCommands.GET_ALL_REPORTS == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
             sendAllObjectsToClient(matrixServerApi.getAllReports(token));
+        } else if (ServerCommands.GET_REPORTS_BY_PROJECT_ID == command) {
+            TokenModel token = (TokenModel) objectInputStream.readObject();
+            long idl = dataInputStream.readLong();
+            System.out.println("PROJECT IDL " + idl);
+            sendAllObjectsToClient(matrixServerApi.getAllReportsByProjectId(token, idl));
+
+
         } else if (ServerCommands.START_WORK == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
             matrixServerApi.startWork(token);
@@ -124,6 +135,11 @@ public class SocketServerRunner {
             System.out.println("No such command");
         }
     }
+
+    private void openDataInputStream() throws IOException {
+        dataInputStream = new DataInputStream(clientSocket.getInputStream());
+    }
+
 
     private void sendAllObjectsToClient(Object reports) throws IOException {
         ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
