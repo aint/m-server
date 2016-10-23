@@ -10,10 +10,13 @@ import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.UserPassword;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDateTime;
 
 public class SocketServerRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SocketServerRunner.class);
@@ -36,7 +39,7 @@ public class SocketServerRunner {
 
         while (true) {
             socketServerRunner.acceptClientSocket();
-            LOG.info("Client connected {}", LocalDateTime.now());
+            LOG.info("Client connected");
 
             socketServerRunner.openObjectInputStream();
             socketServerRunner.openDataOutputStream();
@@ -44,7 +47,7 @@ public class SocketServerRunner {
 
             ServerCommands command;
             while (!socketServerRunner.clientRequestClose(command = socketServerRunner.readServerCommand())) {
-                LOG.info("Client enter command {}", command.name());
+                LOG.info("Client entered command {}", command.name());
 
                 socketServerRunner.processClientInput(command);
             }
@@ -80,7 +83,7 @@ public class SocketServerRunner {
     private boolean clientRequestClose(ServerCommands command) throws IOException {
         if ((ServerCommands.CLOSE == command)) {
             closeClientSocket();
-            LOG.info("Client quit {}",LocalDateTime.now());
+            LOG.info("Client closed connection");
             LOG.info("-----------------------");
             return true;
         }
@@ -97,7 +100,6 @@ public class SocketServerRunner {
         if (ServerCommands.AUTHENTICATE == command) {
             UserPassword auth = (UserPassword) objectInputStream.readObject();
             String token = matrixServerApi.authenticate(auth.getUsername(), auth.getPassword());
-            LOG.info("TOKEN {}", token);
             sendStringResponse(token);
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
@@ -118,11 +120,8 @@ public class SocketServerRunner {
             sendAllObjectsToClient(matrixServerApi.getAllReports(token));
         } else if (ServerCommands.GET_REPORTS_BY_PROJECT_ID == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
-            long idl = dataInputStream.readLong();
-            System.out.println("PROJECT IDL " + idl);
-            sendAllObjectsToClient(matrixServerApi.getAllReportsByProjectId(token, idl));
-
-
+            long id = dataInputStream.readLong();
+            sendAllObjectsToClient(matrixServerApi.getAllReportsByProjectId(token, id));
         } else if (ServerCommands.START_WORK == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
             matrixServerApi.startWork(token);
@@ -132,7 +131,7 @@ public class SocketServerRunner {
         } else if (ServerCommands.CLOSE == command) {
             closeClientSocket();
         } else {
-            System.out.println("No such command");
+            LOG.warn("No such command {}", command);
         }
     }
 

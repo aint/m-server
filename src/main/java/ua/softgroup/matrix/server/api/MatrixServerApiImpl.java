@@ -6,7 +6,6 @@ import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.TokenModel;
-import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.security.TokenAuthService;
@@ -24,8 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MatrixServerApiImpl implements MatrixServerApi {
@@ -41,16 +40,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public String authenticate(String login, String password) {
-        LOG.info("authenticate: {}, {}", login, password);
-//        System.out.println("- service layer: authenticate: " + login + " " + password + "\n");
+        LOG.debug("authenticate: {}, {}", login, password);
         return tokenAuthService.authenticate(login, password);
     }
 
     @Override
     public Constants saveReport(ReportModel reportModel) {
-        LOG.info("saveReport: {}", reportModel);
-//        System.out.println("- service layer: saveReport: " + reportModel.getTitle() + reportModel.getDiscription() + "\n");
-//        System.out.println(reportModel);
+        LOG.debug("saveReport: {}", reportModel);
 
         if (!isTokenValidated(reportModel.getToken())) {
             return Constants.TOKEN_EXPIRED;
@@ -67,12 +63,10 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Deprecated
     @Override
     public ReportModel getReport(ReportModel reportModel) {
-        LOG.info("getReport: {}", reportModel);
-//        System.out.println("- service layer: getReport: " + reportModel.getId() + "\n");
-//        System.out.println(reportModel);
+        LOG.debug("getReport: {}", reportModel);
 
         Report report = reportService.getById(reportModel.getId());
-        System.out.println(report);
+        LOG.debug("getReport: {}", report);
 
         reportModel.setId(report.getId());
         reportModel.setTitle(report.getTitle());
@@ -99,6 +93,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
+        LOG.debug("Requested project id {}", projectId);
         String token = tokenModel.getToken();
         return projectService.getById(projectId).getReports().stream()
                 .map(report ->  new ReportModel(token, report.getTitle(), report.getDescription()))
@@ -128,9 +123,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             File outputFile = new File("image.png");
             ImageIO.write(img, "png", outputFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Failed to save screenshot", e);
         }
-        System.out.println("saved");
     }
 
     @Override
@@ -141,8 +135,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public void endWork(TokenModel tokenModel) {
         Duration duration = Duration.between(workTime, LocalDateTime.now());
-        System.out.println(duration.toDays());
-        System.out.println(duration.toHours());
-        System.out.println(duration.toMillis());
+        LOG.debug("Work period in days {}", duration.toDays());
+        LOG.debug("Work period in hours {}", duration.toHours());
+        LOG.debug("Work period in millis {}", duration.toMillis());
     }
 }

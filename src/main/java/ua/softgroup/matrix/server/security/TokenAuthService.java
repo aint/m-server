@@ -1,6 +1,8 @@
 package ua.softgroup.matrix.server.security;
 
 import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ua.softgroup.matrix.server.api.Constants;
@@ -18,6 +20,7 @@ import java.util.Base64;
 import static java.time.ZoneId.systemDefault;
 
 public class TokenAuthService {
+    private static final Logger LOG = LoggerFactory.getLogger(TokenAuthService.class);
 
     private String login;
     private String password;
@@ -71,7 +74,6 @@ public class TokenAuthService {
 
     public Constants validateToken(String encryptedToken) {
         String token = decryptToken(encryptedToken);
-        System.out.println("decryptToken " + token);
         String timestamp = token.substring(token.length() - 13);
         return isDateExpired(Long.valueOf(timestamp)) ? Constants.TOKEN_EXPIRED : Constants.TOKEN_VALIDATED;
     }
@@ -87,9 +89,9 @@ public class TokenAuthService {
             throw new RuntimeException("TOKEN EXPIRED");
         }
         String decryptToken = decryptToken(token);
-        System.out.println("decryptToken " + decryptToken);
+        LOG.debug("token {}", decryptToken);
         String username = decryptToken.substring(0, decryptToken.length() - 13 - 1);
-        System.out.println("extractUsername " + username);
+        LOG.debug("username {}", username);
         return username;
     }
 
