@@ -2,16 +2,16 @@ package ua.softgroup.matrix.server.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ua.softgroup.matrix.server.model.ProjectModel;
-import ua.softgroup.matrix.server.model.ReportModel;
-import ua.softgroup.matrix.server.model.ScreenshotModel;
-import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.model.*;
+import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.security.TokenAuthService;
+import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.impl.ClientSettingsServiceImpl;
 import ua.softgroup.matrix.server.service.impl.ProjectServiceImpl;
 import ua.softgroup.matrix.server.service.impl.ReportServiceImpl;
 import ua.softgroup.matrix.server.service.impl.UserServiceImpl;
@@ -23,8 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MatrixServerApiImpl implements MatrixServerApi {
@@ -37,6 +36,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private UserService userService = new UserServiceImpl();
     private ReportService reportService = new ReportServiceImpl();
     private ProjectService projectService = new ProjectServiceImpl();
+    private ClientSettingsService clientSettingsService = new ClientSettingsServiceImpl();
 
     @Override
     public String authenticate(String login, String password) {
@@ -138,5 +138,31 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("Work period in days {}", duration.toDays());
         LOG.debug("Work period in hours {}", duration.toHours());
         LOG.debug("Work period in millis {}", duration.toMillis());
+    }
+
+    @Override
+    public boolean isClientSettingsUpdated(long settingsVersion) {
+        LOG.debug("Client settings version {}", settingsVersion);
+        ClientSettings clientSettings = clientSettingsService.getAll().stream()
+                .findFirst()
+                .orElseThrow(NoSuchElementException::new); //TODO set default settings
+        int dbSettingsVersion = clientSettings.getSettingsVersion();
+        LOG.debug("DB settings version {}", dbSettingsVersion);
+        return dbSettingsVersion > settingsVersion;
+    }
+
+    @Override
+    public ClientSettingsModel getClientSettings() {
+        return clientSettingsService.getAll().stream()
+                .findFirst()
+                .map(this::convertClientSettingsToModel)
+                .orElseThrow(NoSuchElementException::new); //TODO set default settings
+    }
+
+    private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {
+        return new ClientSettingsModel(
+                settings.getSettingsVersion(),
+                settings.getScreenshotUpdateFrequently(),
+                settings.getKeyboardUpdateFrequently());
     }
 }

@@ -129,6 +129,12 @@ public class SocketServerRunner {
         } else if (ServerCommands.END_WORK == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
             matrixServerApi.endWork(token);
+        } else if (ServerCommands.CHECK_UPDATE_SETTING == command) {
+            long version = dataInputStream.readLong();
+            dataOutputStream.writeBoolean(matrixServerApi.isClientSettingsUpdated(version));
+            dataOutputStream.flush();
+        } else if (ServerCommands.UPDATE_SETTING == command) {
+            sendAllObjectsToClient(matrixServerApi.getClientSettings());
         } else if (ServerCommands.CLOSE == command) {
             closeClientSocket();
         } else {
