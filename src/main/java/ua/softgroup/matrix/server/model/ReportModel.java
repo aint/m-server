@@ -13,6 +13,8 @@ public class ReportModel extends TokenModel {
 
     private int status;
 
+    private boolean checked;
+
     public ReportModel() {
     }
 
@@ -36,8 +38,6 @@ public class ReportModel extends TokenModel {
         this.title = title;
         this.discription = discription;
     }
-
-
 
     public String getDiscription() {
         return discription;
@@ -77,6 +77,14 @@ public class ReportModel extends TokenModel {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
     }
 
     @Override

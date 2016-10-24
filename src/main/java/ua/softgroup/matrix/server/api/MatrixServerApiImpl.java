@@ -100,6 +100,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         reportModel.setTitle(report.getTitle());
         reportModel.setDiscription(report.getDescription());
         reportModel.setStatus(isTokenValidated(reportModel.getToken()) ? 0 : -1);
+        reportModel.setChecked(report.isChecked());
         return reportModel;
     }
 
@@ -107,8 +108,19 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public Set<ReportModel> getAllReports(TokenModel tokenModel) {
         String token = tokenModel.getToken();
         return reportService.getAllReportsOf(retrieveUserFromToken(tokenModel)).stream()
-                .map(r -> new ReportModel(r.getId(), token, r.getTitle(), r.getDescription(), r.getProject().getId()))
+                .map(report -> convertReportEntityToModel(report, tokenModel.getToken()))
                 .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    private ReportModel convertReportEntityToModel(Report report, String token) {
+        ReportModel reportModel = new ReportModel();
+        reportModel.setToken(token);
+        reportModel.setId(report.getId());
+        reportModel.setTitle(report.getTitle());
+        reportModel.setDiscription(report.getDescription());
+        reportModel.setProjectId(report.getProject().getId());
+        reportModel.setChecked(report.isChecked());
+        return reportModel;
     }
 
     @Override

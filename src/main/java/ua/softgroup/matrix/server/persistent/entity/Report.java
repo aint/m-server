@@ -23,6 +23,12 @@ public class Report implements Serializable {
     @Column
     private String description;
 
+    @Column
+    private boolean checked;
+
+    @ManyToOne
+    private User checker;
+
     @ManyToOne
     private User author;
 
@@ -88,6 +94,22 @@ public class Report implements Serializable {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
+    public User getChecker() {
+        return checker;
+    }
+
+    public void setChecker(User checker) {
+        this.checker = checker;
     }
 
     public User getAuthor() {
