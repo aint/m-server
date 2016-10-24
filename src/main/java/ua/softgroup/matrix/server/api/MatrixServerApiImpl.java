@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.model.*;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
+import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.security.TokenAuthService;
@@ -121,9 +122,10 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
         LOG.debug("Requested project id {}", projectId);
-        String token = tokenModel.getToken();
-        return projectService.getById(projectId).getReports().stream()
-                .map(report ->  new ReportModel(token, report.getTitle(), report.getDescription()))
+        User user = retrieveUserFromToken(tokenModel);
+        Project project = projectService.getById(projectId);
+        return reportService.getAllReportsOf(user, project).stream()
+                .map(report ->  new ReportModel(report.getId(), tokenModel.getToken(), report.getTitle(), report.getDescription(), projectId))
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
