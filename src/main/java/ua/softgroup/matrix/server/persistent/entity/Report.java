@@ -2,6 +2,8 @@ package ua.softgroup.matrix.server.persistent.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name="Report")
@@ -11,6 +13,9 @@ public class Report implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     @Column
     private String title;
@@ -26,6 +31,10 @@ public class Report implements Serializable {
 
 
     public Report() {
+    }
+
+    public Report(Long id) {
+        this.id = id;
     }
 
     public Report(String title, String description, User author) {
@@ -47,6 +56,14 @@ public class Report implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
     }
 
     public String getTitle() {

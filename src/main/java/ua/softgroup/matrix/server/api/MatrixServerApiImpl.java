@@ -23,11 +23,14 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
+
+    private static final int REPORT_EDIT_MAX_PERIOD_DAYS = 1;
 
     private LocalDateTime workTime;
 
@@ -52,12 +55,36 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             return Constants.TOKEN_EXPIRED;
         }
 
-        Report report = new Report(reportModel.getTitle(), reportModel.getDiscription(), retrieveUserFromToken(reportModel));
-        report.setId(reportModel.getId());
-        report.setProject(projectService.getById(reportModel.getProjectId()));
-        reportService.save(report);
+        Report report = reportService.getById(reportModel.getId());
+        if (report != null) {
+           return updateReport(report, reportModel);
+        }
+
+        persistReport(new Report(reportModel.getId()), reportModel);
 
         return Constants.TOKEN_VALIDATED;
+    }
+
+    private Constants updateReport(Report report, ReportModel reportModel) {
+        LOG.debug("updateReport");
+        Duration duration = Duration.between(report.getCreationDate(), LocalDateTime.now());
+        LOG.debug("Report created {} hours ago", duration.toHours());
+        //TODO change to hours
+        if (duration.toMinutes() > REPORT_EDIT_MAX_PERIOD_DAYS) {
+            LOG.debug("Report expired");
+            return Constants.REPORT_EXPIRED;
+        }
+        persistReport(report, reportModel);
+
+        return Constants.TOKEN_VALIDATED;
+    }
+
+    private void persistReport(Report report, ReportModel reportModel) {
+        report.setTitle(reportModel.getTitle());
+        report.setDescription(reportModel.getDiscription());
+        report.setAuthor(retrieveUserFromToken(reportModel));
+        report.setProject(projectService.getById(reportModel.getProjectId()));
+        reportService.save(report);
     }
 
     @Deprecated
