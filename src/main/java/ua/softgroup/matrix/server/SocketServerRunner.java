@@ -5,23 +5,16 @@ import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.MatrixServerApiImpl;
 import ua.softgroup.matrix.server.api.ServerCommands;
-import ua.softgroup.matrix.server.model.ReportModel;
-import ua.softgroup.matrix.server.model.ScreenshotModel;
-import ua.softgroup.matrix.server.model.TokenModel;
-import ua.softgroup.matrix.server.model.UserPassword;
+import ua.softgroup.matrix.server.model.*;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Properties;
 
 public class SocketServerRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SocketServerRunner.class);
 
-    private static final int SERVER_PORT = 6666;
     private static final MatrixServerApi matrixServerApi = new MatrixServerApiImpl();
 
     private ServerSocket serverSocket;
@@ -54,8 +47,16 @@ public class SocketServerRunner {
         }
     }
 
+    private int readServerPortFromConfig() throws IOException {
+        InputStream in = SocketServerRunner.class.getClassLoader().getResourceAsStream("server.properties");
+        Properties prop = new Properties();
+        prop.load(in);
+        return Integer.valueOf(prop.getProperty("port"));
+
+    }
+
     private void createServerSocket() throws IOException {
-        serverSocket = new ServerSocket(SERVER_PORT);
+        serverSocket = new ServerSocket(readServerPortFromConfig());
     }
 
     private void acceptClientSocket() throws IOException {
