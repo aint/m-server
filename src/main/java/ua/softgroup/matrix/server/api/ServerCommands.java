@@ -22,6 +22,10 @@ public enum ServerCommands {
 
     END_WORK,
 
+    CHECK_UPDATE_SETTING,
+
+    UPDATE_SETTING,
+
     CLOSE
 
 }

@@ -1,9 +1,6 @@
 package ua.softgroup.matrix.server.api;
 
-import ua.softgroup.matrix.server.model.ProjectModel;
-import ua.softgroup.matrix.server.model.ReportModel;
-import ua.softgroup.matrix.server.model.ScreenshotModel;
-import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.model.*;
 
 import java.util.List;
 import java.util.Set;
@@ -59,5 +56,9 @@ public interface MatrixServerApi {
     void startWork(TokenModel tokenModel);
 
     void endWork(TokenModel tokenModel);
+
+    boolean isClientSettingsUpdated(long settingsVersion);
+
+    ClientSettingsModel getClientSettings();
 
 }
