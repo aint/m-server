@@ -16,7 +16,13 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     }
 
     @Override
+    public User getByTrackerToken(String token) {
+        return getRepository().findByTrackerToken(token);
+    }
+
+    @Override
     protected UserRepository getRepository() {
         return (UserRepository) repository;
     }
+
 }

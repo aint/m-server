@@ -1,100 +1,22 @@
-package ua.softgroup.matrix.server.persistent.entity;
+package ua.softgroup.matrix.server.supervisor.models;
 
 import com.google.gson.annotations.SerializedName;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+/**
+ * Created by Vadim on 24.10.2016.
+ */
+public class ProfileModel implements RetrofitModel {
 
-@Entity
-@Table(name="User2")
-public class User implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column
-    private String trackerToken;
-
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column
-    private String firstName;
-
-    @Column
-    private String lastName;
-
-    @Column
-    private String middleName;
-
-    @Column
-    private int monthlyRate;
-
-    @Column
-    private int monthlyRateCurrencyId;
-
-    @Column
-    private int externalHourlyRate;
-
-    @Column
-    private int externalHourlyRateCurrencyId;
-
-    @Column
-    private int internalHourlyRate;
-
-    @Column
-    private int internalHourlyRateCurrencyId;
-
-    @Column
-    private String emailHome;
-
-    @Column(nullable = false)
-    private String password;
-
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Report> reports = new HashSet<>();
-
-    public User() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTrackerToken() {
-        return trackerToken;
-    }
-
-    public void setTrackerToken(String trackerToken) {
-        this.trackerToken = trackerToken;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    @SerializedName("first_name") private String firstName;
+    @SerializedName("last_name") private String lastName;
+    @SerializedName("middle_name") private String middleName;
+    @SerializedName("monthly_rate") private int monthlyRate;
+    @SerializedName("monthly_rate_currency_id") private int monthlyRateCurrencyId;
+    @SerializedName("external_hourly_rate") private int externalHourlyRate;
+    @SerializedName("external_hourly_rate_currencyId") private int externalHourlyRateCurrencyId;
+    @SerializedName("internal_hourly_rate") private int internalHourlyRate;
+    @SerializedName("internal_hourly_rate_currencyId") private int internalHourlyRateCurrencyId;
+    @SerializedName("email_home") private String emailHome;
 
     public String getFirstName() {
         return firstName;
@@ -176,30 +98,10 @@ public class User implements Serializable {
         this.emailHome = emailHome;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Set<Report> getReports() {
-        return reports;
-    }
-
-    public void setReports(Set<Report> reports) {
-        this.reports = reports;
-    }
-
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", trackerToken='" + trackerToken + '\'' +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", firstName='" + firstName + '\'' +
+        return "ProfileModel{" +
+                "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", middleName='" + middleName + '\'' +
                 ", monthlyRate=" + monthlyRate +
@@ -209,7 +111,6 @@ public class User implements Serializable {
                 ", internalHourlyRate=" + internalHourlyRate +
                 ", internalHourlyRateCurrencyId=" + internalHourlyRateCurrencyId +
                 ", emailHome='" + emailHome + '\'' +
-                ", password='" + password +
                 '}';
     }
 }

@@ -6,4 +6,6 @@ public interface UserService extends GeneralEntityService<User> {
 
     User getByUsername(String username);
 
+    User getByTrackerToken(String token);
+
 }

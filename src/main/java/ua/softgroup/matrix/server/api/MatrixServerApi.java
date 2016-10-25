@@ -23,6 +23,8 @@ public interface MatrixServerApi {
      */
     Set<ProjectModel> getAllProjects(TokenModel tokenModel);
 
+    Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel);
+
     /**
      * Sets project as current for the authenticated user
      *

@@ -1,51 +1,28 @@
-package ua.softgroup.matrix.server.persistent.entity;
+package ua.softgroup.matrix.server.supervisor.models;
 
 import com.google.gson.annotations.SerializedName;
-import ua.softgroup.matrix.server.supervisor.models.RetrofitModel;
 
-import javax.persistence.*;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-@Entity
-@Table(name="Project")
-public class Project implements RetrofitModel {
+/**
+ * Created by Vadim on 24.10.2016.
+ */
+public class ProjectModel implements RetrofitModel {
 
-    @SerializedName("id")
-    @Id
-    private long id;
-    @SerializedName("title")
-    @Column
-    private String title;
-    @SerializedName("description_text")
-    @Column
-    private String description;
-    @SerializedName("author_name")
-    @Column
-    private String authorName;
-    @SerializedName("start_date")
-    @Column
-    private Date startDate;
-    @SerializedName("end_date")
-    @Column
-    private Date endDate;
-    @SerializedName("rate")
-    @Column
-    private int rate;
-    @SerializedName("rate_currency_id")
-    @Column
-    private int rateCurrencyId;
+    @SerializedName("id") private int id;
+    @SerializedName("title") private String title;
+    @SerializedName("description") private String description;
+    @SerializedName("author_name") private String authorName;
+    @SerializedName("start_date") private Date startDate;
+    @SerializedName("end_date") private Date endDate;
+    @SerializedName("rate") private int rate;
+    @SerializedName("rate_currency_id") private int rateCurrencyId;
 
-    //TODO FIX THIS
-    @OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Report> reports = new HashSet<>();
-
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -103,14 +80,6 @@ public class Project implements RetrofitModel {
 
     public void setRateCurrencyId(int rateCurrencyId) {
         this.rateCurrencyId = rateCurrencyId;
-    }
-
-    public Set<Report> getReports() {
-        return reports;
-    }
-
-    public void setReports(Set<Report> reports) {
-        this.reports = reports;
     }
 
     @Override

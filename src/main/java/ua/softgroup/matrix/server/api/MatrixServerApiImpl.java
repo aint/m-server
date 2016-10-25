@@ -3,10 +3,7 @@ package ua.softgroup.matrix.server.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.model.*;
-import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
-import ua.softgroup.matrix.server.persistent.entity.Project;
-import ua.softgroup.matrix.server.persistent.entity.Report;
-import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.*;
 import ua.softgroup.matrix.server.security.TokenAuthService;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
@@ -24,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -84,7 +80,10 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         report.setTitle(reportModel.getTitle());
         report.setDescription(reportModel.getDiscription());
         report.setAuthor(retrieveUserFromToken(reportModel));
-        report.setProject(projectService.getById(reportModel.getProjectId()));
+        Project proj = projectService.getById(reportModel.getProjectId());
+        LOG.warn("proj id {}", reportModel.getProjectId());
+        LOG.warn("proj {}", proj);
+        report.setProject(proj);
         reportService.save(report);
     }
 
@@ -127,7 +126,14 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
 //        User user = retrieveUserFromToken(tokenModel);
         return projectService.getAll().stream()
-                .map(p -> new ProjectModel(p.getId(), p.getName(), p.getDescription(), p.getTotalPrice()))
+                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    @Override
+    public Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel) {
+        return projectService.getUserActiveProjects(tokenModel.getToken()).stream()
+                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
@@ -141,15 +147,15 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
-
-
     private User retrieveUserFromToken(TokenModel tokenModel) {
-        String username = tokenAuthService.extractUsername(tokenModel);
-        return userService.getByUsername(username);
+//        String username = tokenAuthService.extractUsername(tokenModel);
+//        return userService.getByUsername(username);
+        return userService.getByTrackerToken(tokenModel.getToken());
     }
 
     private boolean isTokenValidated(String token) {
-        return tokenAuthService.validateToken(token) == Constants.TOKEN_VALIDATED;
+        return true;
+//        return tokenAuthService.validateToken(token) == Constants.TOKEN_VALIDATED;
     }
 
     @Override

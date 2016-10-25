@@ -3,10 +3,9 @@ package ua.softgroup.matrix.server.persistent.entity;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
-@Table(name="Report")
+@Table(name="Report1")
 public class Report implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -126,8 +125,6 @@ public class Report implements Serializable {
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", project=" + project.getName() +
-                ", author=" + author.getUsername() +
                 '}';
     }
 }

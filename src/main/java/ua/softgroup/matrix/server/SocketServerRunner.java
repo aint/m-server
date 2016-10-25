@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
+import java.util.Set;
 
 public class SocketServerRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SocketServerRunner.class);
@@ -104,7 +105,9 @@ public class SocketServerRunner {
             sendStringResponse(token);
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
-            sendAllObjectsToClient(matrixServerApi.getAllProjects(token));
+//            sendAllObjectsToClient(matrixServerApi.getAllProjects(token));
+            Set<ProjectModel> userActiveProjects = matrixServerApi.getUserActiveProjects(token);
+            sendAllObjectsToClient(userActiveProjects);
         } else if (ServerCommands.SET_CURRENT_PROJECT == command) {
             matrixServerApi.setCurrentProject(0L);
         } else if (ServerCommands.GET_REPORT == command) {

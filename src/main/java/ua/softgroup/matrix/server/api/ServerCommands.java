@@ -26,6 +26,8 @@ public enum ServerCommands {
 
     UPDATE_SETTING,
 
+    SYNCHRONIZED,
+
     CLOSE
 
 }

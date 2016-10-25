@@ -10,6 +10,8 @@ public interface ProjectService extends GeneralEntityService<Project> {
 
     Set<Project> getAllProjectsOf(User user);
 
+    Set<Project> getUserActiveProjects(String token);
+
     Set<Report> getAllReports();
 
 }
