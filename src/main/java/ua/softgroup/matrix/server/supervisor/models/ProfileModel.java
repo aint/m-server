@@ -13,9 +13,9 @@ public class ProfileModel implements RetrofitModel {
     @SerializedName("monthly_rate") private int monthlyRate;
     @SerializedName("monthly_rate_currency_id") private int monthlyRateCurrencyId;
     @SerializedName("external_hourly_rate") private int externalHourlyRate;
-    @SerializedName("external_hourly_rate_currencyId") private int externalHourlyRateCurrencyId;
+    @SerializedName("external_hourly_rate_currency_id") private int externalHourlyRateCurrencyId;
     @SerializedName("internal_hourly_rate") private int internalHourlyRate;
-    @SerializedName("internal_hourly_rate_currencyId") private int internalHourlyRateCurrencyId;
+    @SerializedName("internal_hourly_rate_currency_id") private int internalHourlyRateCurrencyId;
     @SerializedName("email_home") private String emailHome;
 
     public String getFirstName() {

@@ -2,7 +2,6 @@ package ua.softgroup.matrix.server.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import ua.softgroup.matrix.server.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
@@ -163,7 +162,11 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private User retrieveUserFromToken(TokenModel tokenModel) {
 //        String username = tokenAuthService.extractUsername(timeModel);
 //        return userService.getByUsername(username);
-        return userService.getByTrackerToken(tokenModel.getToken());
+        User user = userService.getByTrackerToken(tokenModel.getToken());
+        if (user == null) {
+            throw new RuntimeException("User can't be null");
+        }
+        return user;
     }
 
     private boolean isTokenValidated(String token) {
