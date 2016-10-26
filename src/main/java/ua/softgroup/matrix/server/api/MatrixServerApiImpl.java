@@ -2,17 +2,29 @@ package ua.softgroup.matrix.server.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ua.softgroup.matrix.server.model.*;
-import ua.softgroup.matrix.server.persistent.entity.*;
+
+import ua.softgroup.matrix.server.model.ClientSettingsModel;
+import ua.softgroup.matrix.server.model.ProjectModel;
+import ua.softgroup.matrix.server.model.ReportModel;
+import ua.softgroup.matrix.server.model.ScreenshotModel;
+import ua.softgroup.matrix.server.model.TimeModel;
+import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
+import ua.softgroup.matrix.server.persistent.entity.Project;
+import ua.softgroup.matrix.server.persistent.entity.Report;
+import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.security.TokenAuthService;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.service.impl.ClientSettingsServiceImpl;
 import ua.softgroup.matrix.server.service.impl.ProjectServiceImpl;
 import ua.softgroup.matrix.server.service.impl.ReportServiceImpl;
 import ua.softgroup.matrix.server.service.impl.UserServiceImpl;
+import ua.softgroup.matrix.server.service.impl.WorkTimeServiceImpl;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -21,7 +33,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MatrixServerApiImpl implements MatrixServerApi {
@@ -29,14 +43,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     private static final int REPORT_EDIT_MAX_PERIOD_DAYS = 1;
 
-    private LocalDateTime workTime;
-
     private TokenAuthService tokenAuthService = new TokenAuthService();
 
     private UserService userService = new UserServiceImpl();
     private ReportService reportService = new ReportServiceImpl();
     private ProjectService projectService = new ProjectServiceImpl();
     private ClientSettingsService clientSettingsService = new ClientSettingsServiceImpl();
+    private WorkTimeService workTimeService = new WorkTimeServiceImpl();
 
     @Override
     public String authenticate(String login, String password) {
@@ -54,7 +67,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
         Report report = reportService.getById(reportModel.getId());
         if (report != null) {
-           return updateReport(report, reportModel);
+            return updateReport(report, reportModel);
         }
 
         persistReport(new Report(reportModel.getId()), reportModel);
@@ -124,7 +137,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
-//        User user = retrieveUserFromToken(tokenModel);
+//        User user = retrieveUserFromToken(timeModel);
         return projectService.getAll().stream()
                 .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
                 .collect(Collectors.toCollection(HashSet::new));
@@ -143,12 +156,12 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         User user = retrieveUserFromToken(tokenModel);
         Project project = projectService.getById(projectId);
         return reportService.getAllReportsOf(user, project).stream()
-                .map(report ->  new ReportModel(report.getId(), tokenModel.getToken(), report.getTitle(), report.getDescription(), projectId))
+                .map(report -> new ReportModel(report.getId(), tokenModel.getToken(), report.getTitle(), report.getDescription(), projectId))
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
     private User retrieveUserFromToken(TokenModel tokenModel) {
-//        String username = tokenAuthService.extractUsername(tokenModel);
+//        String username = tokenAuthService.extractUsername(timeModel);
 //        return userService.getByUsername(username);
         return userService.getByTrackerToken(tokenModel.getToken());
     }
@@ -175,16 +188,43 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void startWork(TokenModel tokenModel) {
-        workTime = LocalDateTime.now();
+    public void startWork(TimeModel timeModel) {
+        LOG.debug("TimeModel {} ", timeModel);
+        User user = retrieveUserFromToken(timeModel);
+        LOG.debug("User {} start work", user);
+        Project project = projectService.getById(timeModel.getProjectId());
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        if (userWorkTime != null) {
+            userWorkTime.setStartedWork(LocalDateTime.now());
+        } else {
+            userWorkTime = new WorkTime(LocalDateTime.now(), projectService.getById(timeModel.getProjectId()), user);
+        }
+        workTimeService.save(userWorkTime);
     }
 
     @Override
-    public void endWork(TokenModel tokenModel) {
-        Duration duration = Duration.between(workTime, LocalDateTime.now());
-        LOG.debug("Work period in days {}", duration.toDays());
-        LOG.debug("Work period in hours {}", duration.toHours());
-        LOG.debug("Work period in millis {}", duration.toMillis());
+    public void endWork(TimeModel timeModel) {
+        LOG.debug("TimeModel {}", timeModel);
+        User user = retrieveUserFromToken(timeModel);
+        LOG.debug("User {} end work", user);
+        Project project = projectService.getById(timeModel.getProjectId());
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        if (userWorkTime != null) {
+            LocalDateTime startedWork = userWorkTime.getStartedWork();
+            if (startedWork != null) {
+                Duration duration = Duration.between(startedWork, LocalDateTime.now());
+                LOG.debug("Work period in minutes {}", duration.toMinutes());
+                LOG.debug("Work period in millis {}", duration.toMillis());
+                userWorkTime.setStartedWork(null);
+                // TODO perefer server time
+                if (timeModel.getMinute() != duration.toMinutes()) {
+                    userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
+                } else {
+                    userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) duration.toMinutes());
+                }
+                workTimeService.save(userWorkTime);
+            }
+        }
     }
 
     @Override

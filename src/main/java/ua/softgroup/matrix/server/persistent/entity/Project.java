@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name="Project")
+@Table(name="Project1")
 public class Project implements RetrofitModel {
 
     @SerializedName("id")

@@ -127,10 +127,10 @@ public class SocketServerRunner {
             long id = dataInputStream.readLong();
             sendAllObjectsToClient(matrixServerApi.getAllReportsByProjectId(token, id));
         } else if (ServerCommands.START_WORK == command) {
-            TokenModel token = (TokenModel) objectInputStream.readObject();
-            matrixServerApi.startWork(token);
+            TimeModel timeModel = (TimeModel) objectInputStream.readObject();
+            matrixServerApi.startWork(timeModel);
         } else if (ServerCommands.END_WORK == command) {
-            TokenModel token = (TokenModel) objectInputStream.readObject();
+            TimeModel token = (TimeModel) objectInputStream.readObject();
             matrixServerApi.endWork(token);
         } else if (ServerCommands.CHECK_UPDATE_SETTING == command) {
             long version = dataInputStream.readLong();

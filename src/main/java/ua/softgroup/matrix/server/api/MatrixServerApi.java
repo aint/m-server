@@ -55,9 +55,9 @@ public interface MatrixServerApi {
 
     Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId);
 
-    void startWork(TokenModel tokenModel);
+    void startWork(TimeModel timeModel);
 
-    void endWork(TokenModel tokenModel);
+    void endWork(TimeModel timeModel);
 
     boolean isClientSettingsUpdated(long settingsVersion);
 
