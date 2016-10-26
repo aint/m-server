@@ -44,7 +44,7 @@ public class SimpleClient {
 //            oos.writeObject(reportRequest);
 //            ReportModel report = (ReportModel) objectInputStream.readObject();
 //            LOG.debug("title: " + report.getTitle());
-//            LOG.debug("desc: " + report.getDiscription());
+//            LOG.debug("desc: " + report.getDescription());
 
 //            oos.writeObject(ServerCommands.SAVE_REPORT);
 //            ReportModel reportModel = new ReportModel(token, "title", "description");

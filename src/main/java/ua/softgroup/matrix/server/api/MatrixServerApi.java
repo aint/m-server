@@ -1,8 +1,14 @@
 package ua.softgroup.matrix.server.api;
 
-import ua.softgroup.matrix.server.model.*;
+import ua.softgroup.matrix.server.model.ClientSettingsModel;
+import ua.softgroup.matrix.server.model.ProjectModel;
+import ua.softgroup.matrix.server.model.ReportModel;
+import ua.softgroup.matrix.server.model.ScreenshotModel;
+import ua.softgroup.matrix.server.model.SynchronizedModel;
+import ua.softgroup.matrix.server.model.TimeModel;
+import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.persistent.entity.Project;
 
-import java.util.List;
 import java.util.Set;
 
 public interface MatrixServerApi {
@@ -23,7 +29,7 @@ public interface MatrixServerApi {
      */
     Set<ProjectModel> getAllProjects(TokenModel tokenModel);
 
-    Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel);
+    Set<Project> getUserActiveProjects(TokenModel tokenModel);
 
     /**
      * Sets project as current for the authenticated user
@@ -58,6 +64,8 @@ public interface MatrixServerApi {
     void startWork(TimeModel timeModel);
 
     void endWork(TimeModel timeModel);
+
+    void sync(SynchronizedModel synchronizedModel);
 
     boolean isClientSettingsUpdated(long settingsVersion);
 

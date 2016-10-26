@@ -1,8 +1,17 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name="WorkTime")
@@ -27,6 +36,9 @@ public class WorkTime implements Serializable {
 
     @ManyToOne
     private User user;
+
+    @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TimePeriod> timePeriods;
 
     public WorkTime() {
     }
@@ -98,4 +110,11 @@ public class WorkTime implements Serializable {
         this.user = user;
     }
 
+    public Set<TimePeriod> getTimePeriods() {
+        return timePeriods;
+    }
+
+    public void setTimePeriods(Set<TimePeriod> timePeriods) {
+        this.timePeriods = timePeriods;
+    }
 }

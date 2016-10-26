@@ -6,22 +6,26 @@ import ua.softgroup.matrix.server.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
+import ua.softgroup.matrix.server.model.SynchronizedModel;
 import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
+import ua.softgroup.matrix.server.persistent.entity.TimePeriod;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.security.TokenAuthService;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
+import ua.softgroup.matrix.server.service.TimePeriodService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.service.impl.ClientSettingsServiceImpl;
 import ua.softgroup.matrix.server.service.impl.ProjectServiceImpl;
 import ua.softgroup.matrix.server.service.impl.ReportServiceImpl;
+import ua.softgroup.matrix.server.service.impl.TimePeriodServiceImpl;
 import ua.softgroup.matrix.server.service.impl.UserServiceImpl;
 import ua.softgroup.matrix.server.service.impl.WorkTimeServiceImpl;
 
@@ -29,7 +33,12 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -40,7 +49,7 @@ import java.util.stream.Collectors;
 public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
 
-    private static final int REPORT_EDIT_MAX_PERIOD_DAYS = 1;
+    private static final int REPORT_EDIT_MAX_PERIOD_DAYS = 5;
 
     private TokenAuthService tokenAuthService = new TokenAuthService();
 
@@ -49,6 +58,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private ProjectService projectService = new ProjectServiceImpl();
     private ClientSettingsService clientSettingsService = new ClientSettingsServiceImpl();
     private WorkTimeService workTimeService = new WorkTimeServiceImpl();
+    private TimePeriodService timePeriodService = new TimePeriodServiceImpl();
 
     @Override
     public String authenticate(String login, String password) {
@@ -90,7 +100,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     private void persistReport(Report report, ReportModel reportModel) {
         report.setTitle(reportModel.getTitle());
-        report.setDescription(reportModel.getDiscription());
+        report.setDescription(reportModel.getDescription());
         report.setAuthor(retrieveUserFromToken(reportModel));
         Project proj = projectService.getById(reportModel.getProjectId());
         LOG.warn("proj id {}", reportModel.getProjectId());
@@ -109,7 +119,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
         reportModel.setId(report.getId());
         reportModel.setTitle(report.getTitle());
-        reportModel.setDiscription(report.getDescription());
+        reportModel.setDescription(report.getDescription());
         reportModel.setStatus(isTokenValidated(reportModel.getToken()) ? 0 : -1);
         reportModel.setChecked(report.isChecked());
         return reportModel;
@@ -128,7 +138,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         reportModel.setToken(token);
         reportModel.setId(report.getId());
         reportModel.setTitle(report.getTitle());
-        reportModel.setDiscription(report.getDescription());
+        reportModel.setDescription(report.getDescription());
         reportModel.setProjectId(report.getProject().getId());
         reportModel.setChecked(report.isChecked());
         return reportModel;
@@ -137,16 +147,18 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
 //        User user = retrieveUserFromToken(timeModel);
-        return projectService.getAll().stream()
-                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
-                .collect(Collectors.toCollection(HashSet::new));
+        return null;
+//                projectService.getAll().stream()
+//                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
+//                .collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
-    public Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel) {
-        return projectService.getUserActiveProjects(tokenModel.getToken()).stream()
-                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
-                .collect(Collectors.toCollection(HashSet::new));
+    public Set<Project> getUserActiveProjects(TokenModel tokenModel) {
+        return projectService.getUserActiveProjects(tokenModel.getToken());
+//        return projectService.getUserActiveProjects(tokenModel.getToken()).stream()
+//                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
+//                .collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
@@ -226,7 +238,70 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                     userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) duration.toMinutes());
                 }
                 workTimeService.save(userWorkTime);
+                timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), userWorkTime));
             }
+        }
+    }
+
+    private boolean checkIsSyncModelTheSame(SynchronizedModel synchronizedModel) {
+        SynchronizedModel syncFile = null;
+        final String fileName = "sync.ser";
+        try {
+            FileInputStream fileIn = new FileInputStream(fileName);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            syncFile = (SynchronizedModel) in.readObject();
+            if (synchronizedModel.equals(syncFile)) {
+                return true;
+            }
+            serializableFile(synchronizedModel);
+            in.close();
+            fileIn.close();
+        } catch (FileNotFoundException fnfe) {
+            serializableFile(synchronizedModel);
+        } catch(Exception e) {
+            LOG.error("checkIsSyncModelExist", e);
+            return true;
+        }
+        return false;
+    }
+
+    private void serializableFile(SynchronizedModel synchronizedModel) {
+        final String fileName = "sync.ser";
+        try {
+            FileOutputStream fileOut = new FileOutputStream(fileName);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(synchronizedModel);
+            out.close();
+            fileOut.close();
+            LOG.debug("Serialized sync model {}", synchronizedModel);
+        }catch(IOException e) {
+            LOG.error("checkIsSyncModelExist", e);
+        }
+    }
+
+    @Override
+    public void sync(SynchronizedModel synchronizedModel) {
+        LOG.warn("Sync {}", synchronizedModel);
+
+        if (checkIsSyncModelTheSame(synchronizedModel)) {
+            return;
+        }
+
+        ReportModel reportModel = synchronizedModel.getReportModel();
+        if (reportModel != null) {
+            saveReport(reportModel);
+        }
+        TimeModel timeModel = synchronizedModel.getTimeModel();
+        if (timeModel != null) {
+            User user = retrieveUserFromToken(timeModel);
+            Project project = projectService.getById(timeModel.getProjectId());
+            WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+            LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
+            if (userWorkTime == null) {
+                userWorkTime = new WorkTime(null, project, user);
+            }
+            userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
+            workTimeService.save(userWorkTime);
         }
     }
 

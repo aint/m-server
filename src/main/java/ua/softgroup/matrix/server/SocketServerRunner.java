@@ -5,11 +5,24 @@ import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.MatrixServerApiImpl;
 import ua.softgroup.matrix.server.api.ServerCommands;
-import ua.softgroup.matrix.server.model.*;
+import ua.softgroup.matrix.server.model.ProjectModel;
+import ua.softgroup.matrix.server.model.ReportModel;
+import ua.softgroup.matrix.server.model.ScreenshotModel;
+import ua.softgroup.matrix.server.model.SynchronizedModel;
+import ua.softgroup.matrix.server.model.TimeModel;
+import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.model.UserPassword;
+import ua.softgroup.matrix.server.persistent.entity.Project;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
@@ -106,8 +119,22 @@ public class SocketServerRunner {
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
 //            sendAllObjectsToClient(matrixServerApi.getAllProjects(token));
-            Set<ProjectModel> userActiveProjects = matrixServerApi.getUserActiveProjects(token);
-            sendAllObjectsToClient(userActiveProjects);
+            Set<Project> userActiveProjects = matrixServerApi.getUserActiveProjects(token);
+            Set<ProjectModel> set = new HashSet<>();
+            for (Project project : userActiveProjects) {
+                LOG.warn("PROJECT {}", project);
+                ProjectModel projectModel = new ProjectModel();
+                projectModel.setAuthorName(project.getAuthorName());
+                projectModel.setTitle(project.getAuthorName());
+                projectModel.setDescription(project.getAuthorName());
+                projectModel.setEndDate(project.getEndDate());
+                projectModel.setId(project.getId());
+                projectModel.setRate(project.getRate());
+                projectModel.setRateCurrencyId(project.getRateCurrencyId());
+                projectModel.setStartDate(project.getStartDate());
+                set.add(projectModel);
+            }
+            sendAllObjectsToClient(set);
         } else if (ServerCommands.SET_CURRENT_PROJECT == command) {
             matrixServerApi.setCurrentProject(0L);
         } else if (ServerCommands.GET_REPORT == command) {
@@ -132,6 +159,8 @@ public class SocketServerRunner {
         } else if (ServerCommands.END_WORK == command) {
             TimeModel token = (TimeModel) objectInputStream.readObject();
             matrixServerApi.endWork(token);
+        } else if (ServerCommands.SYNCHRONIZED == command) {
+            matrixServerApi.sync((SynchronizedModel) objectInputStream.readObject());
         } else if (ServerCommands.CHECK_UPDATE_SETTING == command) {
             long version = dataInputStream.readLong();
             dataOutputStream.writeBoolean(matrixServerApi.isClientSettingsUpdated(version));
