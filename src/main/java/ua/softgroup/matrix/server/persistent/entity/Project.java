@@ -4,13 +4,15 @@ import com.google.gson.annotations.SerializedName;
 import ua.softgroup.matrix.server.supervisor.models.RetrofitModel;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name="Project1")
-public class Project implements RetrofitModel {
+public class Project implements RetrofitModel, Serializable {
+    private static final long serialVersionUID = 1L;
 
     @SerializedName("id")
     @Id

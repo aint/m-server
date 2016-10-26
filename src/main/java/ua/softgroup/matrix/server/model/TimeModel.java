@@ -1,9 +1,6 @@
 package ua.softgroup.matrix.server.model;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class TimeModel extends TokenModel implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -52,6 +49,29 @@ public class TimeModel extends TokenModel implements Serializable {
 
     public void setForeignRate(boolean foreignRate) {
         this.foreignRate = foreignRate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TimeModel timeModel = (TimeModel) o;
+
+        if (projectId != timeModel.projectId) return false;
+        if (minute != timeModel.minute) return false;
+        if (hours != timeModel.hours) return false;
+        return foreignRate == timeModel.foreignRate;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (projectId ^ (projectId >>> 32));
+        result = 31 * result + (int) (minute ^ (minute >>> 32));
+        result = 31 * result + (int) (hours ^ (hours >>> 32));
+        result = 31 * result + (foreignRate ? 1 : 0);
+        return result;
     }
 
     @Override

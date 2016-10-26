@@ -7,7 +7,7 @@ public class ReportModel extends TokenModel {
 
     private String title;
 
-    private String discription;
+    private String description;
 
     private long projectId;
 
@@ -18,33 +18,33 @@ public class ReportModel extends TokenModel {
     public ReportModel() {
     }
 
-    public ReportModel(long id, String token, String title, String discription) {
+    public ReportModel(long id, String token, String title, String description) {
         super(token);
         this.id = id;
         this.title = title;
-        this.discription = discription;
+        this.description = description;
     }
 
-    public ReportModel(long id, String token, String title, String discription, long projectId) {
+    public ReportModel(long id, String token, String title, String description, long projectId) {
         super(token);
         this.id = id;
         this.title = title;
-        this.discription = discription;
+        this.description = description;
         this.projectId = projectId;
     }
 
-    public ReportModel(String token, String title, String discription) {
+    public ReportModel(String token, String title, String description) {
         super(token);
         this.title = title;
-        this.discription = discription;
+        this.description = description;
     }
 
-    public String getDiscription() {
-        return discription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDiscription(String discription) {
-        this.discription = discription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getTitle() {
@@ -88,11 +88,38 @@ public class ReportModel extends TokenModel {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ReportModel that = (ReportModel) o;
+
+        if (id != that.id) return false;
+        if (projectId != that.projectId) return false;
+        if (status != that.status) return false;
+        if (checked != that.checked) return false;
+        if (title != null ? !title.equals(that.title) : that.title != null) return false;
+        return description != null ? description.equals(that.description) : that.description == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (int) (projectId ^ (projectId >>> 32));
+        result = 31 * result + status;
+        result = 31 * result + (checked ? 1 : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "ReportModel{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", discription='" + discription + '\'' +
+                ", description='" + description + '\'' +
                 ", projectId=" + projectId +
                 ", status=" + status +
                 '}';
