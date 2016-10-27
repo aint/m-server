@@ -3,6 +3,7 @@ package ua.softgroup.matrix.server.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.model.ClientSettingsModel;
+import ua.softgroup.matrix.server.model.DownTimeModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
@@ -10,6 +11,7 @@ import ua.softgroup.matrix.server.model.SynchronizedModel;
 import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
+import ua.softgroup.matrix.server.persistent.entity.Downtime;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.TimePeriod;
@@ -17,12 +19,14 @@ import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.security.TokenAuthService;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
+import ua.softgroup.matrix.server.service.DowntimeService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.TimePeriodService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.service.impl.ClientSettingsServiceImpl;
+import ua.softgroup.matrix.server.service.impl.DowntimeServiceImpl;
 import ua.softgroup.matrix.server.service.impl.ProjectServiceImpl;
 import ua.softgroup.matrix.server.service.impl.ReportServiceImpl;
 import ua.softgroup.matrix.server.service.impl.TimePeriodServiceImpl;
@@ -59,6 +63,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private ClientSettingsService clientSettingsService = new ClientSettingsServiceImpl();
     private WorkTimeService workTimeService = new WorkTimeServiceImpl();
     private TimePeriodService timePeriodService = new TimePeriodServiceImpl();
+    private DowntimeService downtimeService = new DowntimeServiceImpl();
 
     @Override
     public String authenticate(String login, String password) {
@@ -146,7 +151,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
-//        User user = retrieveUserFromToken(timeModel);
+//        User user = retrieveUserFromToken(downtimeModel);
         return null;
 //                projectService.getAll().stream()
 //                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
@@ -172,7 +177,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     private User retrieveUserFromToken(TokenModel tokenModel) {
-//        String username = tokenAuthService.extractUsername(timeModel);
+//        String username = tokenAuthService.extractUsername(downtimeModel);
 //        return userService.getByUsername(username);
         User user = userService.getByTrackerToken(tokenModel.getToken());
         if (user == null) {
@@ -239,6 +244,43 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 }
                 workTimeService.save(userWorkTime);
                 timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), userWorkTime));
+            }
+        }
+    }
+
+    @Override
+    public void startDowntime(DownTimeModel downtimeModel) {
+        LOG.debug("startDowntime DownTimeModel {}", downtimeModel);
+        User user = retrieveUserFromToken(downtimeModel);
+        LOG.debug("startDowntime User {}", user);
+        Project project = projectService.getById(downtimeModel.getProjectId());
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        if (userWorkTime != null) {
+            Downtime downtime = userWorkTime.getDowntime();
+            if (downtime == null) {
+                downtime = new Downtime(userWorkTime);
+            }
+            downtime.setStartTime(LocalDateTime.now());
+            downtimeService.save(downtime);
+        }
+    }
+
+    @Override
+    public void endDowntime(DownTimeModel downtimeModel) {
+        LOG.debug("endDowntime DownTimeModel {}", downtimeModel);
+        User user = retrieveUserFromToken(downtimeModel);
+        LOG.debug("endDowntime User {}", user);
+        Project project = projectService.getById(downtimeModel.getProjectId());
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        if (userWorkTime != null) {
+            Downtime downtime = userWorkTime.getDowntime();
+            if (downtime != null) {
+                Duration duration = Duration.between(downtime.getStartTime(), LocalDateTime.now());
+                LOG.debug("Downtime in minutes {}", duration.toMinutes());
+                LOG.debug("Downtime in millis {}", duration.toMillis());
+                downtime.setMinutes(downtime.getMinutes() + duration.toMinutes());
+                downtime.setStartTime(null);
+                downtimeService.save(downtime);
             }
         }
     }

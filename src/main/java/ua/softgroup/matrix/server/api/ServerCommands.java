@@ -28,6 +28,10 @@ public enum ServerCommands {
 
     SYNCHRONIZED,
 
+    START_DOWNTIME,
+
+    STOP_DOWNTIME,
+
     CLOSE
 
 }

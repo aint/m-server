@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.MatrixServerApiImpl;
 import ua.softgroup.matrix.server.api.ServerCommands;
+import ua.softgroup.matrix.server.model.DownTimeModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
@@ -159,6 +160,12 @@ public class SocketServerRunner {
         } else if (ServerCommands.END_WORK == command) {
             TimeModel token = (TimeModel) objectInputStream.readObject();
             matrixServerApi.endWork(token);
+        } else if (ServerCommands.START_DOWNTIME == command) {
+            DownTimeModel timeModel = (DownTimeModel) objectInputStream.readObject();
+            matrixServerApi.startDowntime(timeModel);
+        } else if (ServerCommands.STOP_DOWNTIME == command) {
+            DownTimeModel token = (DownTimeModel) objectInputStream.readObject();
+            matrixServerApi.endDowntime(token);
         } else if (ServerCommands.SYNCHRONIZED == command) {
             matrixServerApi.sync((SynchronizedModel) objectInputStream.readObject());
         } else if (ServerCommands.CHECK_UPDATE_SETTING == command) {

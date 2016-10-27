@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -39,6 +40,9 @@ public class WorkTime implements Serializable {
 
     @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TimePeriod> timePeriods;
+
+    @OneToOne(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Downtime downtime;
 
     public WorkTime() {
     }
@@ -116,5 +120,13 @@ public class WorkTime implements Serializable {
 
     public void setTimePeriods(Set<TimePeriod> timePeriods) {
         this.timePeriods = timePeriods;
+    }
+
+    public Downtime getDowntime() {
+        return downtime;
+    }
+
+    public void setDowntime(Downtime downtime) {
+        this.downtime = downtime;
     }
 }
