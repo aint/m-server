@@ -2,6 +2,8 @@ package ua.softgroup.matrix.server.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
 import ua.softgroup.matrix.server.persistent.entity.Project;
@@ -17,12 +19,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Service
 public class ProjectServiceImpl extends AbstractEntityTransactionalService<Project> implements ProjectService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
-    public ProjectServiceImpl() {
-        repository = applicationContext.getBean(ProjectRepository.class);
+    @Autowired
+    public ProjectServiceImpl(ProjectRepository repository) {
+        super(repository);
     }
 
     @Override

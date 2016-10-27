@@ -1,19 +1,19 @@
 package ua.softgroup.matrix.server.service.impl;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.repository.CrudRepository;
-import ua.softgroup.matrix.server.persistent.SpringDataConfig;
-import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 import ua.softgroup.matrix.server.service.GeneralEntityService;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class AbstractEntityTransactionalService<T> implements GeneralEntityService<T> {
 
-    protected ApplicationContext applicationContext = new AnnotationConfigApplicationContext(SpringDataConfig.class);
-
     protected CrudRepository<T, Long> repository;
+
+    protected AbstractEntityTransactionalService(CrudRepository<T, Long> repository) {
+        this.repository = repository;
+    }
 
     protected abstract CrudRepository<T, Long> getRepository();
 

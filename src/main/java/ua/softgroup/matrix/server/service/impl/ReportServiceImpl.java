@@ -1,5 +1,7 @@
 package ua.softgroup.matrix.server.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
@@ -8,10 +10,12 @@ import ua.softgroup.matrix.server.service.ReportService;
 
 import java.util.Set;
 
+@Service
 public class ReportServiceImpl extends AbstractEntityTransactionalService<Report> implements ReportService {
 
-    public ReportServiceImpl() {
-       repository = applicationContext.getBean(ReportRepository.class);
+    @Autowired
+    public ReportServiceImpl(ReportRepository repository) {
+        super(repository);
     }
 
     @Override

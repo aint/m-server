@@ -15,7 +15,8 @@ import java.net.Socket;
 public class SimpleClient {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleClient.class);
 
-    public static void main(String args[]) {
+//    public static void main(String args[]) {
+    public static void nonMain(String args[]) {
         try {
             Socket socket = new Socket("localhost", 6666);
 

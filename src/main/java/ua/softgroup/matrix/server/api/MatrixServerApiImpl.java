@@ -2,6 +2,8 @@ package ua.softgroup.matrix.server.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ua.softgroup.matrix.server.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.model.DownTimeModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
@@ -25,13 +27,6 @@ import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.TimePeriodService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
-import ua.softgroup.matrix.server.service.impl.ClientSettingsServiceImpl;
-import ua.softgroup.matrix.server.service.impl.DowntimeServiceImpl;
-import ua.softgroup.matrix.server.service.impl.ProjectServiceImpl;
-import ua.softgroup.matrix.server.service.impl.ReportServiceImpl;
-import ua.softgroup.matrix.server.service.impl.TimePeriodServiceImpl;
-import ua.softgroup.matrix.server.service.impl.UserServiceImpl;
-import ua.softgroup.matrix.server.service.impl.WorkTimeServiceImpl;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -50,20 +45,28 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Service
 public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
 
     private static final int REPORT_EDIT_MAX_PERIOD_DAYS = 5;
 
-    private TokenAuthService tokenAuthService = new TokenAuthService();
-
-    private UserService userService = new UserServiceImpl();
-    private ReportService reportService = new ReportServiceImpl();
-    private ProjectService projectService = new ProjectServiceImpl();
-    private ClientSettingsService clientSettingsService = new ClientSettingsServiceImpl();
-    private WorkTimeService workTimeService = new WorkTimeServiceImpl();
-    private TimePeriodService timePeriodService = new TimePeriodServiceImpl();
-    private DowntimeService downtimeService = new DowntimeServiceImpl();
+    @Autowired
+    private TokenAuthService tokenAuthService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ReportService reportService;
+    @Autowired
+    private ProjectService projectService;
+    @Autowired
+    private ClientSettingsService clientSettingsService;
+    @Autowired
+    private WorkTimeService workTimeService ;
+    @Autowired
+    private TimePeriodService timePeriodService;
+    @Autowired
+    private DowntimeService downtimeService;
 
     @Override
     public String authenticate(String login, String password) {

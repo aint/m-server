@@ -2,8 +2,10 @@ package ua.softgroup.matrix.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
-import ua.softgroup.matrix.server.api.MatrixServerApiImpl;
 import ua.softgroup.matrix.server.api.ServerCommands;
 import ua.softgroup.matrix.server.model.DownTimeModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
@@ -27,10 +29,11 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-public class SocketServerRunner {
+@Component
+public class SocketServerRunner implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SocketServerRunner.class);
 
-    private static final MatrixServerApi matrixServerApi = new MatrixServerApiImpl();
+    private final MatrixServerApi matrixServerApi;
 
     private ServerSocket serverSocket;
     private Socket clientSocket;
@@ -38,26 +41,29 @@ public class SocketServerRunner {
     private DataOutputStream dataOutputStream;
     private DataInputStream dataInputStream;
 
+    @Autowired
+    public SocketServerRunner(MatrixServerApi matrixServerApi) {
+        this.matrixServerApi = matrixServerApi;
+    }
 
-    public static void main(String args[]) throws Exception {
-        SocketServerRunner socketServerRunner = new SocketServerRunner();
-
-        socketServerRunner.createServerSocket();
+    @Override
+    public void run(String... args) throws Exception {
+        createServerSocket();
         LOG.info("Waiting for a client...");
 
         while (true) {
-            socketServerRunner.acceptClientSocket();
+            acceptClientSocket();
             LOG.info("Client connected");
 
-            socketServerRunner.openObjectInputStream();
-            socketServerRunner.openDataOutputStream();
-            socketServerRunner.openDataInputStream();
+            openObjectInputStream();
+            openDataOutputStream();
+            openDataInputStream();
 
             ServerCommands command;
-            while (!socketServerRunner.clientRequestClose(command = socketServerRunner.readServerCommand())) {
+            while (!clientRequestClose(command = readServerCommand())) {
                 LOG.info("Client entered command {}", command.name());
 
-                socketServerRunner.processClientInput(command);
+                processClientInput(command);
             }
         }
     }

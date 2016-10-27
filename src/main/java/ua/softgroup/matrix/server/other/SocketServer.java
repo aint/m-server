@@ -12,7 +12,8 @@ public class SocketServer {
 
     private TokenAuthService tokenAuthService = new TokenAuthService();
 
-    public static void main(String[] args) throws Throwable {
+//    public static void main(String[] args) throws Throwable {
+    public static void nonMain(String[] args) throws Throwable {
         ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
         while (true) {
             Socket socket = serverSocket.accept();

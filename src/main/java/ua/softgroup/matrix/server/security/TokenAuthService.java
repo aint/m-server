@@ -3,13 +3,11 @@ package ua.softgroup.matrix.server.security;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import retrofit2.Call;
 import retrofit2.Response;
 import ua.softgroup.matrix.server.api.Constants;
-import ua.softgroup.matrix.server.model.TokenModel;
-import ua.softgroup.matrix.server.persistent.SpringDataConfig;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 import ua.softgroup.matrix.server.supervisor.SupervisorQueriesSingleton;
@@ -22,12 +20,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 
 import static java.time.ZoneId.systemDefault;
 
+@Component
 public class TokenAuthService {
     private static final Logger LOG = LoggerFactory.getLogger(TokenAuthService.class);
 
@@ -36,8 +32,8 @@ public class TokenAuthService {
 
     private StrongPasswordEncryptor passwordEncryptor = new StrongPasswordEncryptor();
 
-    private ApplicationContext applicationContext = new AnnotationConfigApplicationContext(SpringDataConfig.class);
-    private UserRepository userRepository = applicationContext.getBean(UserRepository.class);
+    @Autowired
+    private UserRepository userRepository;
 
     private static final int EXPIRATION_PERIOD_DAYS = 30;
 
