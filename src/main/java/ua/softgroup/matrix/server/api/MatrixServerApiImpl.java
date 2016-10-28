@@ -373,6 +373,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         return new ClientSettingsModel(
                 settings.getSettingsVersion(),
                 settings.getScreenshotUpdateFrequently(),
-                settings.getKeyboardUpdateFrequently());
+                settings.getKeyboardUpdateFrequently(),
+                settings.getStartDowntimeAfter());
     }
 }

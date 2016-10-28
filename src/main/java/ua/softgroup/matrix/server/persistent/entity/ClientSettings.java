@@ -21,6 +21,9 @@ public class ClientSettings implements Serializable {
     @Column
     private int keyboardUpdateFrequently;
 
+    @Column
+    private int startDowntimeAfter;
+
     public ClientSettings() {
     }
 
@@ -59,5 +62,13 @@ public class ClientSettings implements Serializable {
 
     public void setKeyboardUpdateFrequently(int keyboardUpdateFrequently) {
         this.keyboardUpdateFrequently = keyboardUpdateFrequently;
+    }
+
+    public int getStartDowntimeAfter() {
+        return startDowntimeAfter;
+    }
+
+    public void setStartDowntimeAfter(int startDowntimeAfter) {
+        this.startDowntimeAfter = startDowntimeAfter;
     }
 }

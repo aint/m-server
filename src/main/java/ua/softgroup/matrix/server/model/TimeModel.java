@@ -7,6 +7,7 @@ public class TimeModel extends TokenModel implements Serializable {
     private long projectId;
     private long minute, hours;
     private boolean foreignRate = false;
+    private boolean isDownTime = false;
 
     public TimeModel(TokenModel tokenModel) {
         super(tokenModel.getToken());
@@ -51,6 +52,14 @@ public class TimeModel extends TokenModel implements Serializable {
         this.foreignRate = foreignRate;
     }
 
+    public boolean isDownTime() {
+        return isDownTime;
+    }
+
+    public void setDownTime(boolean downTime) {
+        isDownTime = downTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -81,6 +90,7 @@ public class TimeModel extends TokenModel implements Serializable {
                 ", minute=" + minute +
                 ", hours=" + hours +
                 ", foreignRate=" + foreignRate +
+                ", isDownTime=" + isDownTime +
                 '}';
     }
 }

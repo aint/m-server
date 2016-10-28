@@ -11,6 +11,8 @@ public class ClientSettingsModel implements Serializable {
 
     private int keyboardUpdateFrequently;
 
+    private int downTime;
+
     public ClientSettingsModel() {
     }
 
@@ -23,6 +25,13 @@ public class ClientSettingsModel implements Serializable {
         this.version = version;
         this.screenshotUpdateFrequently = screenshotUpdateFrequently;
         this.keyboardUpdateFrequently = keyboardUpdateFrequently;
+    }
+
+    public ClientSettingsModel(int version, int screenshotUpdateFrequently, int keyboardUpdateFrequently, int downTime) {
+        this.version = version;
+        this.screenshotUpdateFrequently = screenshotUpdateFrequently;
+        this.keyboardUpdateFrequently = keyboardUpdateFrequently;
+        this.downTime = downTime;
     }
 
     public int getVersion() {
@@ -47,5 +56,13 @@ public class ClientSettingsModel implements Serializable {
 
     public void setKeyboardUpdateFrequently(int keyboardUpdateFrequently) {
         this.keyboardUpdateFrequently = keyboardUpdateFrequently;
+    }
+
+    public int getDownTime() {
+        return downTime;
+    }
+
+    public void setDownTime(int downTime) {
+        this.downTime = downTime;
     }
 }
