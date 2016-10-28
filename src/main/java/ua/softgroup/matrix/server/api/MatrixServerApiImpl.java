@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.softgroup.matrix.server.model.ClientSettingsModel;
-import ua.softgroup.matrix.server.model.DownTimeModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
@@ -252,7 +251,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void startDowntime(DownTimeModel downtimeModel) {
+    public void startDowntime(TimeModel downtimeModel) {
         LOG.debug("startDowntime DownTimeModel {}", downtimeModel);
         User user = retrieveUserFromToken(downtimeModel);
         LOG.debug("startDowntime User {}", user);
@@ -269,7 +268,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void endDowntime(DownTimeModel downtimeModel) {
+    public void endDowntime(TimeModel downtimeModel) {
         LOG.debug("endDowntime DownTimeModel {}", downtimeModel);
         User user = retrieveUserFromToken(downtimeModel);
         LOG.debug("endDowntime User {}", user);

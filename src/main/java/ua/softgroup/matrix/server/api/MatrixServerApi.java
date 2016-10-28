@@ -1,7 +1,6 @@
 package ua.softgroup.matrix.server.api;
 
 import ua.softgroup.matrix.server.model.ClientSettingsModel;
-import ua.softgroup.matrix.server.model.DownTimeModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
@@ -66,9 +65,9 @@ public interface MatrixServerApi {
 
     void endWork(TimeModel timeModel);
 
-    void startDowntime(DownTimeModel downTimeModel);
+    void startDowntime(TimeModel downTimeModel);
 
-    void endDowntime(DownTimeModel downTimeModel);
+    void endDowntime(TimeModel downTimeModel);
 
     void sync(SynchronizedModel synchronizedModel);
 

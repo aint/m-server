@@ -7,7 +7,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.ServerCommands;
-import ua.softgroup.matrix.server.model.DownTimeModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
@@ -167,10 +166,10 @@ public class SocketServerRunner implements CommandLineRunner {
             TimeModel token = (TimeModel) objectInputStream.readObject();
             matrixServerApi.endWork(token);
         } else if (ServerCommands.START_DOWNTIME == command) {
-            DownTimeModel timeModel = (DownTimeModel) objectInputStream.readObject();
+            TimeModel timeModel = (TimeModel) objectInputStream.readObject();
             matrixServerApi.startDowntime(timeModel);
         } else if (ServerCommands.STOP_DOWNTIME == command) {
-            DownTimeModel token = (DownTimeModel) objectInputStream.readObject();
+            TimeModel token = (TimeModel) objectInputStream.readObject();
             matrixServerApi.endDowntime(token);
         } else if (ServerCommands.SYNCHRONIZED == command) {
             matrixServerApi.sync((SynchronizedModel) objectInputStream.readObject());
