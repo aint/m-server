@@ -291,13 +291,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         }
     }
 
-    private boolean checkIsSyncModelTheSame(SynchronizedModel synchronizedModel) {
-        SynchronizedModel syncFile = null;
+    private boolean checkIsSyncModelTheSame(Set<SynchronizedModel> synchronizedModel) {
+        Set<SynchronizedModel> syncFile;
         final String fileName = "sync.ser";
         try {
             FileInputStream fileIn = new FileInputStream(fileName);
             ObjectInputStream in = new ObjectInputStream(fileIn);
-            syncFile = (SynchronizedModel) in.readObject();
+            syncFile = (Set<SynchronizedModel>) in.readObject();
             if (synchronizedModel.equals(syncFile)) {
                 return true;
             }
@@ -313,7 +313,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         return false;
     }
 
-    private void serializableFile(SynchronizedModel synchronizedModel) {
+    private void serializableFile(Set<SynchronizedModel> synchronizedModel) {
         final String fileName = "sync.ser";
         try {
             FileOutputStream fileOut = new FileOutputStream(fileName);
@@ -321,35 +321,37 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             out.writeObject(synchronizedModel);
             out.close();
             fileOut.close();
-            LOG.debug("Serialized sync model {}", synchronizedModel);
+            LOG.debug("Serialized {}", synchronizedModel);
         }catch(IOException e) {
             LOG.error("checkIsSyncModelExist", e);
         }
     }
 
     @Override
-    public void sync(SynchronizedModel synchronizedModel) {
-        LOG.warn("Sync {}", synchronizedModel);
+    public void sync(Set<SynchronizedModel> synchronizedModels) {
+        LOG.warn("Sync {}", synchronizedModels);
 
-        if (checkIsSyncModelTheSame(synchronizedModel)) {
+        if (checkIsSyncModelTheSame(synchronizedModels)) {
             return;
         }
 
-        ReportModel reportModel = synchronizedModel.getReportModel();
-        if (reportModel != null) {
-            saveReport(reportModel);
-        }
-        TimeModel timeModel = synchronizedModel.getTimeModel();
-        if (timeModel != null) {
-            User user = retrieveUserFromToken(timeModel);
-            Project project = projectService.getById(timeModel.getProjectId());
-            WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-            LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
-            if (userWorkTime == null) {
-                userWorkTime = new WorkTime(null, project, user);
+        for (SynchronizedModel synchronizedModel : synchronizedModels) {
+
+            ReportModel reportModel = synchronizedModel.getReportModel();
+            if (reportModel != null) {
+                saveReport(reportModel);
             }
-            userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
-            workTimeService.save(userWorkTime);
+            TimeModel timeModel = synchronizedModel.getTimeModel();
+            if (timeModel != null) {
+                User user = retrieveUserFromToken(timeModel);
+                Project project = projectService.getById(timeModel.getProjectId());
+                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+                LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
+                if (userWorkTime == null) {
+                    userWorkTime = new WorkTime(null, project, user);
+                }
+                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
+                workTimeService.save(userWorkTime);
             }
             TimeModel downtimeModel = synchronizedModel.getDowntimeModel();
             LOG.warn("Offline Downtime {}", downtimeModel);
