@@ -183,7 +183,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 //        return userService.getByUsername(username);
         User user = userService.getByTrackerToken(tokenModel.getToken());
         if (user == null) {
-            throw new RuntimeException("User can't be null");
+            throw new RuntimeException("User is null because token not valid");
         }
         return user;
     }
@@ -202,7 +202,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public void saveScreenshot(ScreenshotModel file) {
         try {
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(file.getFile()));
-            File outputFile = new File("image.png");
+            File outputFile = new File(System.currentTimeMillis() + ".png");
             ImageIO.write(img, "png", outputFile);
         } catch (IOException e) {
             LOG.error("Failed to save screenshot", e);
@@ -271,18 +271,22 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public void endDowntime(TimeModel downtimeModel) {
         LOG.debug("endDowntime DownTimeModel {}", downtimeModel);
         User user = retrieveUserFromToken(downtimeModel);
-        LOG.debug("endDowntime User {}", user);
+        LOG.debug("endDowntime username {}", user.getUsername());
         Project project = projectService.getById(downtimeModel.getProjectId());
         WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        LOG.debug("endDowntime WorkTime {}", userWorkTime);
         if (userWorkTime != null) {
             Downtime downtime = userWorkTime.getDowntime();
             if (downtime != null) {
-                Duration duration = Duration.between(downtime.getStartTime(), LocalDateTime.now());
-                LOG.debug("Downtime in minutes {}", duration.toMinutes());
-                LOG.debug("Downtime in millis {}", duration.toMillis());
-                downtime.setMinutes(downtime.getMinutes() + duration.toMinutes());
-                downtime.setStartTime(null);
-                downtimeService.save(downtime);
+                LocalDateTime startTime = downtime.getStartTime();
+                if (startTime != null) {
+                    Duration duration = Duration.between(startTime, LocalDateTime.now());
+                    LOG.debug("Downtime in minutes {}", duration.toMinutes());
+                    LOG.debug("Downtime in millis {}", duration.toMillis());
+                    downtime.setMinutes(downtime.getMinutes() + duration.toMillis() / 1000);
+                    downtime.setStartTime(null);
+                    downtimeService.save(downtime);
+                }
             }
         }
     }
@@ -346,6 +350,31 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             }
             userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
             workTimeService.save(userWorkTime);
+            }
+            TimeModel downtimeModel = synchronizedModel.getDowntimeModel();
+            LOG.warn("Offline Downtime {}", downtimeModel);
+            if (downtimeModel != null) {
+                User user = retrieveUserFromToken(downtimeModel);
+                Project project = projectService.getById(downtimeModel.getProjectId());
+                LOG.warn("User id {}, Project id {}", user.getId(), project.getId());
+                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+                LOG.debug("WorkTime {}", userWorkTime);
+                if (userWorkTime != null) {
+                    Downtime downtime = userWorkTime.getDowntime();
+                    LOG.debug("Downtime {}", downtime);
+                    if (downtime == null) {
+                        downtime = new Downtime(userWorkTime);
+                    }
+                    downtime.setStartTime(null);
+                    long diff = downtimeModel.getHours() - downtimeModel.getMinute();
+                    LOG.warn("Downtime diff {}", diff);
+                    downtime.setMinutes(diff);
+                    downtimeService.save(downtime);
+                    workTimeService.save(userWorkTime);
+                } else {
+                    LOG.warn("User WorkTime is NULL");
+                }
+            }
         }
     }
 
