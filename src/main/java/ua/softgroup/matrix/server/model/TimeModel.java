@@ -13,6 +13,11 @@ public class TimeModel extends TokenModel implements Serializable {
         super(tokenModel.getToken());
     }
 
+    public TimeModel(long hours, long minute) {
+        this.hours = hours;
+        this.minute = minute;
+    }
+
     public TimeModel(TokenModel token, long minute, long hours, boolean foreignRate) {
         super(token.getToken());
         this.minute = minute;

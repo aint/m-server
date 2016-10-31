@@ -75,4 +75,6 @@ public interface MatrixServerApi {
 
     ClientSettingsModel getClientSettings();
 
+    TimeModel getWorkTime(TimeModel timeModel);
+
 }

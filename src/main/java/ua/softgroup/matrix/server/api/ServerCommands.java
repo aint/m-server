@@ -22,6 +22,8 @@ public enum ServerCommands {
 
     END_WORK,
 
+    GET_TOTAL_TIME,
+
     CHECK_UPDATE_SETTING,
 
     UPDATE_SETTING,

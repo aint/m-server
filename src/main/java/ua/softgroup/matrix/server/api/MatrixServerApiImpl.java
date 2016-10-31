@@ -399,6 +399,24 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 .orElseThrow(NoSuchElementException::new); //TODO set default settings
     }
 
+    @Override
+    public TimeModel getWorkTime(TimeModel timeModel) {
+        LOG.debug("getWorkTime: {}", timeModel);
+        User user = retrieveUserFromToken(timeModel);
+        LOG.debug("getWorkTime: username {}", user.getUsername());
+        Project project = projectService.getById(timeModel.getProjectId());
+        LOG.debug("getWorkTime: projectID {}", project.getId());
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        if (userWorkTime == null) {
+            return new TimeModel(0, 0);
+        }
+        int totalMinutes = userWorkTime.getTotalMinutes();
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes - hours * 60;
+        LOG.debug("getWorkTime: hours {}, minutes {}", hours, minutes);
+        return new TimeModel(hours, minutes);
+    }
+
     private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {
         return new ClientSettingsModel(
                 settings.getSettingsVersion(),
