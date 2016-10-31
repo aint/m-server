@@ -31,12 +31,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -291,49 +286,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         }
     }
 
-    private boolean checkIsSyncModelTheSame(Set<SynchronizedModel> synchronizedModel) {
-        Set<SynchronizedModel> syncFile;
-        final String fileName = "sync.ser";
-        try {
-            FileInputStream fileIn = new FileInputStream(fileName);
-            ObjectInputStream in = new ObjectInputStream(fileIn);
-            syncFile = (Set<SynchronizedModel>) in.readObject();
-            if (synchronizedModel.equals(syncFile)) {
-                return true;
-            }
-            serializableFile(synchronizedModel);
-            in.close();
-            fileIn.close();
-        } catch (FileNotFoundException fnfe) {
-            serializableFile(synchronizedModel);
-        } catch(Exception e) {
-            LOG.error("checkIsSyncModelExist", e);
-            return true;
-        }
-        return false;
-    }
-
-    private void serializableFile(Set<SynchronizedModel> synchronizedModel) {
-        final String fileName = "sync.ser";
-        try {
-            FileOutputStream fileOut = new FileOutputStream(fileName);
-            ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            out.writeObject(synchronizedModel);
-            out.close();
-            fileOut.close();
-            LOG.debug("Serialized {}", synchronizedModel);
-        }catch(IOException e) {
-            LOG.error("checkIsSyncModelExist", e);
-        }
-    }
-
     @Override
-    public void sync(Set<SynchronizedModel> synchronizedModels) {
+    public boolean sync(Set<SynchronizedModel> synchronizedModels) {
         LOG.warn("Sync {}", synchronizedModels);
-
-        if (checkIsSyncModelTheSame(synchronizedModels)) {
-            return;
-        }
 
         for (SynchronizedModel synchronizedModel : synchronizedModels) {
 
@@ -378,6 +333,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 }
             }
         }
+
+        return true;
     }
 
     @Override

@@ -69,7 +69,7 @@ public interface MatrixServerApi {
 
     void endDowntime(TimeModel downTimeModel);
 
-    void sync(Set<SynchronizedModel> synchronizedModels);
+    boolean sync(Set<SynchronizedModel> synchronizedModels);
 
     boolean isClientSettingsUpdated(long settingsVersion);
 
