@@ -18,7 +18,7 @@ public class Project implements RetrofitModel, Serializable {
     @Id
     private long id;
     @SerializedName("title")
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String title;
     @SerializedName("description_text")
     @Column
