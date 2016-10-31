@@ -233,12 +233,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 LOG.debug("Work period in minutes {}", duration.toMinutes());
                 LOG.debug("Work period in millis {}", duration.toMillis());
                 userWorkTime.setStartedWork(null);
-                // TODO perefer server time
-                if (timeModel.getMinute() != duration.toMinutes()) {
-                    userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
-                } else {
-                    userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) duration.toMinutes());
-                }
+                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) duration.toMinutes());
                 workTimeService.save(userWorkTime);
                 timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), userWorkTime));
             }
