@@ -362,7 +362,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         if (userWorkTime == null) {
             return new TimeModel(0, 0);
         }
+        LocalDateTime startedWork = userWorkTime.getStartedWork();
         int totalMinutes = userWorkTime.getTotalMinutes();
+        if (startedWork != null) {
+            Duration duration = Duration.between(startedWork, LocalDateTime.now());
+            LOG.debug("Current work time in minutes {}", duration.toMinutes());
+            totalMinutes = (int) duration.toMinutes();
+        }
         int hours = totalMinutes / 60;
         int minutes = totalMinutes - hours * 60;
         LOG.debug("getWorkTime: hours {}, minutes {}", hours, minutes);
