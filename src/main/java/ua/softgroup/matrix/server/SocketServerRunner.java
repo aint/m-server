@@ -176,8 +176,11 @@ public class SocketServerRunner implements CommandLineRunner {
             boolean syncFlag = matrixServerApi.sync((Set<SynchronizedModel>) objectInputStream.readObject());
             dataOutputStream.writeBoolean(syncFlag);
             dataOutputStream.flush();
+        } else if (ServerCommands.GET_TODAY_TIME == command) {
+            TimeModel workTime = matrixServerApi.getTodayWorkTime((TimeModel) objectInputStream.readObject());
+            sendAllObjectsToClient(workTime);
         } else if (ServerCommands.GET_TOTAL_TIME == command) {
-            TimeModel workTime = matrixServerApi.getWorkTime((TimeModel) objectInputStream.readObject());
+            TimeModel workTime = matrixServerApi.getTotalWorkTime((TimeModel) objectInputStream.readObject());
             sendAllObjectsToClient(workTime);
         } else if (ServerCommands.CHECK_UPDATE_SETTING == command) {
             long version = dataInputStream.readLong();

@@ -231,10 +231,12 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             LocalDateTime startedWork = userWorkTime.getStartedWork();
             if (startedWork != null) {
                 Duration duration = Duration.between(startedWork, LocalDateTime.now());
-                LOG.debug("Work period in minutes {}", duration.toMinutes());
+                long minutes = duration.toMinutes();
+                LOG.debug("Work period in minutes {}", minutes);
                 LOG.debug("Work period in millis {}", duration.toMillis());
                 userWorkTime.setStartedWork(null);
-                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) duration.toMinutes());
+                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) minutes);
+                userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) minutes);
                 workTimeService.save(userWorkTime);
                 timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), userWorkTime));
             }
@@ -353,26 +355,50 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public TimeModel getWorkTime(TimeModel timeModel) {
-        LOG.debug("getWorkTime: {}", timeModel);
+    public TimeModel getTodayWorkTime(TimeModel timeModel) {
+        LOG.debug("getTodayWorkTime: {}", timeModel);
         User user = retrieveUserFromToken(timeModel);
-        LOG.debug("getWorkTime: username {}", user.getUsername());
+        LOG.debug("getTodayWorkTime: username {}", user.getUsername());
         Project project = projectService.getById(timeModel.getProjectId());
-        LOG.debug("getWorkTime: projectID {}", project.getId());
+        LOG.debug("getTodayWorkTime: projectID {}", project.getId());
         WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
         if (userWorkTime == null) {
             return new TimeModel(0, 0);
         }
+//        long time = userWorkTime.getTimePeriods().stream()
+//                .filter(timePeriod -> timePeriod.getStart().isAfter(LocalDate.now().atStartOfDay())
+//                        && timePeriod.getEnd().isBefore(LocalDate.now().plusDays(1).atStartOfDay()))
+//                .mapToLong(timePeriod -> Duration.between(timePeriod.getStart(), timePeriod.getEnd()).toMinutes())
+//                .sum();
+//        LOG.warn("getTodayWorkTime: time {}", time);
+
         LocalDateTime startedWork = userWorkTime.getStartedWork();
-        int totalMinutes = userWorkTime.getTotalMinutes();
+        int todayMinutes = userWorkTime.getTodayMinutes();
         if (startedWork != null) {
             Duration duration = Duration.between(startedWork, LocalDateTime.now());
-            LOG.debug("Current work time in minutes {}", duration.toMinutes());
-            totalMinutes = (int) duration.toMinutes();
+            LOG.debug("getTodayWorkTime: Current work time in minutes {}", todayMinutes + duration.toMinutes());
         }
+        int hours = todayMinutes / 60;
+        int minutes = todayMinutes - hours * 60;
+        LOG.debug("getTodayWorkTime: hours {}, minutes {}", hours, minutes);
+        return new TimeModel(hours, minutes);
+    }
+
+    @Override
+    public TimeModel getTotalWorkTime(TimeModel timeModel) {
+        LOG.debug("getTotalWorkTime: {}", timeModel);
+        User user = retrieveUserFromToken(timeModel);
+        LOG.debug("getTotalWorkTime: username {}", user.getUsername());
+        Project project = projectService.getById(timeModel.getProjectId());
+        LOG.debug("getTotalWorkTime: projectID {}", project.getId());
+        WorkTime totalWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        if (totalWorkTime == null) {
+            return new TimeModel(0, 0);
+        }
+        Integer totalMinutes = totalWorkTime.getTotalMinutes();
         int hours = totalMinutes / 60;
         int minutes = totalMinutes - hours * 60;
-        LOG.debug("getWorkTime: hours {}, minutes {}", hours, minutes);
+        LOG.debug("getTotalWorkTime: hours {}, minutes {}", hours, minutes);
         return new TimeModel(hours, minutes);
     }
 

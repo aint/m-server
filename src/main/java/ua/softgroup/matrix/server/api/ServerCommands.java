@@ -24,6 +24,8 @@ public enum ServerCommands {
 
     GET_TOTAL_TIME,
 
+    GET_TODAY_TIME,
+
     CHECK_UPDATE_SETTING,
 
     UPDATE_SETTING,

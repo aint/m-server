@@ -27,7 +27,7 @@ public class WorkTime implements Serializable {
     private LocalDateTime startedWork;
 
     @Column
-    private Double todayHours = 0D;
+    private Integer todayMinutes = 0;
 
     @Column
     private Integer totalMinutes = 0;
@@ -53,14 +53,14 @@ public class WorkTime implements Serializable {
         this.user = user;
     }
 
-    public WorkTime(User user, Project project, Double todayHours) {
+    public WorkTime(User user, Project project, Integer todayMinutes) {
         this.user = user;
         this.project = project;
-        this.todayHours = todayHours;
+        this.todayMinutes = todayMinutes;
     }
 
-    public WorkTime(Double todayHours, Integer totalMinutes, Project project, User user) {
-        this.todayHours = todayHours;
+    public WorkTime(Integer todayMinutes, Integer totalMinutes, Project project, User user) {
+        this.todayMinutes = todayMinutes;
         this.totalMinutes = totalMinutes;
         this.project = project;
         this.user = user;
@@ -82,12 +82,12 @@ public class WorkTime implements Serializable {
         this.startedWork = startedWork;
     }
 
-    public Double getTodayHours() {
-        return todayHours;
+    public Integer getTodayMinutes() {
+        return todayMinutes;
     }
 
-    public void setTodayHours(Double todayHours) {
-        this.todayHours = todayHours;
+    public void setTodayMinutes(Integer todayHours) {
+        this.todayMinutes = todayHours;
     }
 
     public Integer getTotalMinutes() {

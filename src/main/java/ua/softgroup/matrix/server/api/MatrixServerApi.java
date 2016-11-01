@@ -70,14 +70,16 @@ public interface MatrixServerApi {
 
     void endDowntime(TimeModel downTimeModel);
 
+    TimeModel getTodayWorkTime(TimeModel timeModel);
+
+    TimeModel getTotalWorkTime(TimeModel timeModel);
+
     boolean sync(Set<SynchronizedModel> synchronizedModels);
 
     boolean isClientSettingsUpdated(long settingsVersion);
 
     ClientSettingsModel getClientSettings();
-
-    TimeModel getWorkTime(TimeModel timeModel);
-
+    
     void saveKeyboardLog(WriteKeyboard writeKeyboard);
 
 }
