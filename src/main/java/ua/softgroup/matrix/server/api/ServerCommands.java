@@ -34,6 +34,8 @@ public enum ServerCommands {
 
     STOP_DOWNTIME,
 
+    KEYBOARD_LOG,
+
     CLOSE
 
 }

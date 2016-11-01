@@ -11,6 +11,7 @@ import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.SynchronizedModel;
 import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.persistent.entity.Downtime;
 import ua.softgroup.matrix.server.persistent.entity.Project;
@@ -373,6 +374,11 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         int minutes = totalMinutes - hours * 60;
         LOG.debug("getWorkTime: hours {}, minutes {}", hours, minutes);
         return new TimeModel(hours, minutes);
+    }
+
+    @Override
+    public void saveKeyboardLog(WriteKeyboard writeKeyboard) {
+        LOG.info("saveKeyboardLog: {}", writeKeyboard);
     }
 
     private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {

@@ -14,6 +14,7 @@ import ua.softgroup.matrix.server.model.SynchronizedModel;
 import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.UserPassword;
+import ua.softgroup.matrix.server.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 
 import java.io.DataInputStream;
@@ -184,6 +185,8 @@ public class SocketServerRunner implements CommandLineRunner {
             dataOutputStream.flush();
         } else if (ServerCommands.UPDATE_SETTING == command) {
             sendAllObjectsToClient(matrixServerApi.getClientSettings());
+        } else if (ServerCommands.KEYBOARD_LOG == command) {
+            matrixServerApi.saveKeyboardLog((WriteKeyboard) objectInputStream.readObject());
         } else if (ServerCommands.CLOSE == command) {
             closeClientSocket();
         } else {

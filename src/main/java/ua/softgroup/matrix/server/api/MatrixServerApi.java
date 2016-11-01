@@ -7,6 +7,7 @@ import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.SynchronizedModel;
 import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 
 import java.util.Set;
@@ -76,5 +77,7 @@ public interface MatrixServerApi {
     ClientSettingsModel getClientSettings();
 
     TimeModel getWorkTime(TimeModel timeModel);
+
+    void saveKeyboardLog(WriteKeyboard writeKeyboard);
 
 }
