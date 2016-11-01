@@ -38,6 +38,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -276,7 +277,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                     Duration duration = Duration.between(startTime, LocalDateTime.now());
                     LOG.debug("Downtime in minutes {}", duration.toMinutes());
                     LOG.debug("Downtime in millis {}", duration.toMillis());
-                    downtime.setMinutes(downtime.getMinutes() + duration.toMillis() / 1000);
+                    downtime.setMinutes(downtime.getMinutes() + duration.toMinutes());
                     downtime.setStartTime(null);
                     downtimeService.save(downtime);
                 }
@@ -321,7 +322,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                         downtime = new Downtime(userWorkTime);
                     }
                     downtime.setStartTime(null);
-                    long diff = downtimeModel.getHours() - downtimeModel.getMinute();
+                    long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getMinute() - downtimeModel.getHours());
                     LOG.warn("Downtime diff {}", diff);
                     downtime.setMinutes(diff);
                     downtimeService.save(downtime);

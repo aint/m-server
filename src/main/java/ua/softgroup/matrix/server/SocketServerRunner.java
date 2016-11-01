@@ -132,8 +132,8 @@ public class SocketServerRunner implements CommandLineRunner {
                 LOG.warn("PROJECT {}", project);
                 ProjectModel projectModel = new ProjectModel();
                 projectModel.setAuthorName(project.getAuthorName());
-                projectModel.setTitle(project.getAuthorName());
-                projectModel.setDescription(project.getAuthorName());
+                projectModel.setTitle(project.getTitle());
+                projectModel.setDescription(project.getDescription());
                 projectModel.setEndDate(project.getEndDate());
                 projectModel.setId(project.getId());
                 projectModel.setRate(project.getRate());
