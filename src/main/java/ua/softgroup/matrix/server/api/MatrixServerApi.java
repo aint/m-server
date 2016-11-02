@@ -56,8 +56,6 @@ public interface MatrixServerApi {
      */
     Constants saveReport(ReportModel reportModel);
 
-    void saveScreenshot(ScreenshotModel file);
-
     Set<ReportModel> getAllReports(TokenModel tokenModel);
 
     Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId);
@@ -79,7 +77,9 @@ public interface MatrixServerApi {
     boolean isClientSettingsUpdated(long settingsVersion);
 
     ClientSettingsModel getClientSettings();
-    
+
     void saveKeyboardLog(WriteKeyboard writeKeyboard);
+
+    void saveScreenshot(ScreenshotModel file);
 
 }

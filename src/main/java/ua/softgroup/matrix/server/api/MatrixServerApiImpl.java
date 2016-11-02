@@ -14,14 +14,17 @@ import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.persistent.entity.Downtime;
+import ua.softgroup.matrix.server.persistent.entity.Keyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
+import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.TimePeriod;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.security.TokenAuthService;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.DowntimeService;
+import ua.softgroup.matrix.server.service.MetricsService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.TimePeriodService;
@@ -29,10 +32,8 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -46,6 +47,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
 
     private static final int REPORT_EDIT_MAX_PERIOD_DAYS = 5;
+    private static final String CWD = System.getProperty("user.dir");
+    private static final String FILE_EXTENSION = "png";
 
     @Autowired
     private TokenAuthService tokenAuthService;
@@ -63,6 +66,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private TimePeriodService timePeriodService;
     @Autowired
     private DowntimeService downtimeService;
+    @Autowired
+    private MetricsService metricsService;
 
     @Override
     public String authenticate(String login, String password) {
@@ -193,17 +198,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public void setCurrentProject(Long projectId) {
 
-    }
-
-    @Override
-    public void saveScreenshot(ScreenshotModel file) {
-        try {
-            BufferedImage img = ImageIO.read(new ByteArrayInputStream(file.getFile()));
-            File outputFile = new File(System.currentTimeMillis() + ".png");
-            ImageIO.write(img, "png", outputFile);
-        } catch (IOException e) {
-            LOG.error("Failed to save screenshot", e);
-        }
     }
 
     @Override
@@ -405,7 +399,36 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public void saveKeyboardLog(WriteKeyboard writeKeyboard) {
-        LOG.info("saveKeyboardLog: {}", writeKeyboard);
+        LOG.debug("saveKeyboardLog: {}", writeKeyboard);
+        User user = retrieveUserFromToken(new TokenModel(writeKeyboard.getToken()));
+        LOG.debug("saveKeyboardLog: username {}", user.getUsername());
+        Project project = projectService.getById(writeKeyboard.getProjectID());
+        LOG.debug("saveKeyboardLog: projectID {}", project.getId());
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        LOG.info("saveKeyboardLog: {}", workTime);
+        if (workTime != null) {
+            metricsService.save(new Keyboard(writeKeyboard.getWords(), workTime));
+        }
+    }
+
+    @Override
+    public void saveScreenshot(ScreenshotModel file) {
+        LOG.debug("saveScreenshot: {}", file);
+        User user = retrieveUserFromToken(new TokenModel(file.getToken()));
+        LOG.debug("saveScreenshot: username {}", user.getUsername());
+        Project project = projectService.getById(file.getProjectID());
+        LOG.debug("saveScreenshot: projectID {}", project.getId());
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        LOG.info("saveScreenshot: {}", workTime);
+        if (workTime != null) {
+            try {
+                String fileName = String.valueOf(System.currentTimeMillis()) + "." + FILE_EXTENSION;
+                ImageIO.write(ImageIO.read(new ByteArrayInputStream(file.getFile())), FILE_EXTENSION, new File(fileName));
+                metricsService.save(new Screenshot(CWD + "/" + fileName, workTime));
+            } catch (Exception e) {
+                LOG.error("Failed to save screenshot", e);
+            }
+        }
     }
 
     private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {

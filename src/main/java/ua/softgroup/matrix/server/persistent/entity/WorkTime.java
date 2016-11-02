@@ -12,6 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -43,6 +44,12 @@ public class WorkTime implements Serializable {
 
     @OneToOne(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
     private Downtime downtime;
+
+    @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Keyboard> keyboardLogs;
+
+    @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Screenshot> screenshots;
 
     public WorkTime() {
     }
@@ -128,5 +135,21 @@ public class WorkTime implements Serializable {
 
     public void setDowntime(Downtime downtime) {
         this.downtime = downtime;
+    }
+
+    public List<Keyboard> getKeyboardLogs() {
+        return keyboardLogs;
+    }
+
+    public void setKeyboardLogs(List<Keyboard> keyboardLogs) {
+        this.keyboardLogs = keyboardLogs;
+    }
+
+    public List<Screenshot> getScreenshots() {
+        return screenshots;
+    }
+
+    public void setScreenshots(List<Screenshot> screenshots) {
+        this.screenshots = screenshots;
     }
 }

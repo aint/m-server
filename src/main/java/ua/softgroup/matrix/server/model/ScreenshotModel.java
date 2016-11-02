@@ -1,15 +1,19 @@
 package ua.softgroup.matrix.server.model;
 
-public class ScreenshotModel extends TokenModel {
+public class ScreenshotModel extends TokenModel{
     private static final long serialVersionUID = 1L;
     private byte[] file;
+    private long projectID;
 
-    public ScreenshotModel(String token) {
-        super(token);
+    public ScreenshotModel() {
     }
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
+    public long getProjectID() {
+        return projectID;
+    }
+
+    public void setProjectID(long projectID) {
+        this.projectID = projectID;
     }
 
     public byte[] getFile() {
