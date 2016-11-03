@@ -5,6 +5,7 @@ import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 public interface ReportRepository extends CrudRepository<Report, Long> {
@@ -12,4 +13,6 @@ public interface ReportRepository extends CrudRepository<Report, Long> {
     Set<Report> findByAuthor(User author);
 
     Set<Report> findByAuthorAndProject(User author, Project project);
+
+    Set<Report> findByAuthorAndProjectAndCreationDateBetween(User author, Project project, LocalDateTime start, LocalDateTime end);
 }

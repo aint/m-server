@@ -5,5 +5,6 @@ public enum Constants {
     INVALID_USERNAME,
     TOKEN_EXPIRED,
     TOKEN_VALIDATED,
-    REPORT_EXPIRED
+    REPORT_EXPIRED,
+    REPORT_EXISTS
 }

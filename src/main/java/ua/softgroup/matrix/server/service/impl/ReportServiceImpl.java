@@ -8,6 +8,7 @@ import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.ReportRepository;
 import ua.softgroup.matrix.server.service.ReportService;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Service
@@ -26,6 +27,13 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
     @Override
     public Set<Report> getAllReportsOf(User user, Project project) {
         return getRepository().findByAuthorAndProject(user, project);
+    }
+
+    @Override
+    public Set<Report> getTodayReportsOf(User author, Project project) {
+        LocalDateTime start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime end = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
+        return getRepository().findByAuthorAndProjectAndCreationDateBetween(author, project, start, end);
     }
 
     @Override

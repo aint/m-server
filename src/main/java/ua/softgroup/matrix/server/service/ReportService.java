@@ -12,4 +12,6 @@ public interface ReportService extends GeneralEntityService<Report> {
 
     Set<Report> getAllReportsOf(User user, Project project);
 
+    Set<Report> getTodayReportsOf(User author, Project project);
+
 }

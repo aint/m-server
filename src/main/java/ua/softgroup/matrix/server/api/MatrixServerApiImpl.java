@@ -83,6 +83,22 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             return Constants.TOKEN_EXPIRED;
         }
 
+        if (reportModel.getId() == 0) {
+            // save new
+            //TODO reportService.getTodayReportsOf()
+            User user = retrieveUserFromToken(reportModel);
+            Project project = projectService.getById(reportModel.getProjectId());
+            for (Report report : reportService.getAllReportsOf(user, project)) {
+                LocalDateTime creationDate = report.getCreationDate();
+                LOG.warn("saveReport: creation date {}", creationDate);
+                if (creationDate.isAfter(LocalDateTime.now().withHour(0).withMinute(0).withSecond(0))
+                        && creationDate.isBefore(LocalDateTime.now().withHour(23).withMinute(59).withSecond(59))) {
+                    LOG.warn("saveReport: exists");
+                    return Constants.REPORT_EXISTS;
+                }
+            }
+        }
+
         Report report = reportService.getById(reportModel.getId());
         if (report != null) {
             return updateReport(report, reportModel);
