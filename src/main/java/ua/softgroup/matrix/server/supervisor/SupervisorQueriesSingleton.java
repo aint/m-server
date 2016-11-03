@@ -6,7 +6,7 @@ import ua.softgroup.matrix.server.supervisor.endpoint.SupervisorQueries;
 
 public class SupervisorQueriesSingleton {
 
-    private static final String BASE_URL = "http://test.core.softgroup.ua/backend/web/api/";
+    private static final String BASE_URL = "http://test2.core.softgroup.ua/backend/web/api/";
 
     private static SupervisorQueriesSingleton instance;
     private SupervisorQueries supervisorQueries;
