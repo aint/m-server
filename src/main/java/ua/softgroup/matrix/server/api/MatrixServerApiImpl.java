@@ -355,7 +355,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 .orElseThrow(NoSuchElementException::new); //TODO set default settings
         int dbSettingsVersion = clientSettings.getSettingsVersion();
         LOG.debug("DB settings version {}", dbSettingsVersion);
-        return dbSettingsVersion > settingsVersion;
+        return dbSettingsVersion != settingsVersion;
     }
 
     @Override
