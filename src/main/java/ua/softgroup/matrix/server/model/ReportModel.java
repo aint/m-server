@@ -1,5 +1,7 @@
 package ua.softgroup.matrix.server.model;
 
+import java.time.LocalDate;
+
 public class ReportModel extends TokenModel {
     private static final long serialVersionUID = 1L;
 
@@ -14,6 +16,8 @@ public class ReportModel extends TokenModel {
     private int status;
 
     private boolean checked;
+
+    private LocalDate date;
 
     public ReportModel() {
     }
@@ -85,6 +89,14 @@ public class ReportModel extends TokenModel {
 
     public void setChecked(boolean checked) {
         this.checked = checked;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     @Override

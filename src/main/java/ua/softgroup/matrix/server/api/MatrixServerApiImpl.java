@@ -142,6 +142,16 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
+    @Override
+    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
+        LOG.debug("Requested project id {}", projectId);
+        User user = retrieveUserFromToken(tokenModel);
+        Project project = projectService.getById(projectId);
+        return reportService.getAllReportsOf(user, project).stream()
+                .map(report -> convertReportEntityToModel(report, tokenModel.getToken()))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
     private ReportModel convertReportEntityToModel(Report report, String token) {
         ReportModel reportModel = new ReportModel();
         reportModel.setToken(token);
@@ -150,6 +160,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         reportModel.setDescription(report.getDescription());
         reportModel.setProjectId(report.getProject().getId());
         reportModel.setChecked(report.isChecked());
+        reportModel.setDate(report.getCreationDate().toLocalDate());
         return reportModel;
     }
 
@@ -168,16 +179,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 //        return projectService.getUserActiveProjects(tokenModel.getToken()).stream()
 //                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
 //                .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    @Override
-    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
-        LOG.debug("Requested project id {}", projectId);
-        User user = retrieveUserFromToken(tokenModel);
-        Project project = projectService.getById(projectId);
-        return reportService.getAllReportsOf(user, project).stream()
-                .map(report -> new ReportModel(report.getId(), tokenModel.getToken(), report.getTitle(), report.getDescription(), projectId))
-                .collect(Collectors.toCollection(HashSet::new));
     }
 
     private User retrieveUserFromToken(TokenModel tokenModel) {
