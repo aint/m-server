@@ -192,9 +192,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public Set<Project> getUserActiveProjects(TokenModel tokenModel) {
         return projectService.getUserActiveProjects(tokenModel.getToken());
-//        return projectService.getUserActiveProjects(tokenModel.getToken()).stream()
-//                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
-//                .collect(Collectors.toCollection(HashSet::new));
     }
 
     private User retrieveUserFromToken(TokenModel tokenModel) {
