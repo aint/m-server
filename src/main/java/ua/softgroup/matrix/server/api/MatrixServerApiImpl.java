@@ -21,7 +21,6 @@ import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.TimePeriod;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
-import ua.softgroup.matrix.server.security.TokenAuthService;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.DowntimeService;
 import ua.softgroup.matrix.server.service.MetricsService;
@@ -51,8 +50,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private static final String FILE_EXTENSION = "png";
 
     @Autowired
-    private TokenAuthService tokenAuthService;
-    @Autowired
     private UserService userService;
     @Autowired
     private ReportService reportService;
@@ -70,9 +67,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private MetricsService metricsService;
 
     @Override
-    public String authenticate(String login, String password) {
-        LOG.debug("authenticate: {}, {}", login, password);
-        return tokenAuthService.authenticate(login, password);
+    public String authenticate(String username, String password) {
+        LOG.info("Authenticate {}, {}", username, password);
+        return userService.authenticate(username, password);
     }
 
     @Override
