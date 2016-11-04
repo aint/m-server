@@ -1,13 +1,13 @@
 package ua.softgroup.matrix.server.supervisor.models;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by Vadim on 24.10.2016.
  */
 public class LogoutResponseModel implements RetrofitModel {
 
-    @SerializedName("success") private boolean success;
+    @JsonProperty("success") private boolean success;
 
     public boolean isSuccess() {
         return success;

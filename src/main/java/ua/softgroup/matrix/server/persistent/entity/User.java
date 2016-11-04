@@ -1,7 +1,5 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
-import com.google.gson.annotations.SerializedName;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;

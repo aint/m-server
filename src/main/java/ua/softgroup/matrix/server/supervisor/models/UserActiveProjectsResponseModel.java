@@ -1,6 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.models;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 
 import java.util.List;
@@ -10,8 +10,8 @@ import java.util.List;
  */
 public class UserActiveProjectsResponseModel implements RetrofitModel {
 
-    @SerializedName("success") private boolean success;
-    @SerializedName("list") private List<Project> projectModelList;
+    @JsonProperty("success") private boolean success;
+    @JsonProperty("list") private List<Project> projectModelList;
 
     public boolean isSuccess() {
         return success;

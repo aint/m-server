@@ -1,17 +1,17 @@
 package ua.softgroup.matrix.server.supervisor.models;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by Vadim on 24.10.2016.
  */
 public class UserModel implements RetrofitModel {
 
-    @SerializedName("id") private long id;
-    @SerializedName("email") private String email;
-    @SerializedName("username") private String username;
-    @SerializedName("tracker_token") private String trackerToken;
-    @SerializedName("profile") private ProfileModel profileModel;
+    @JsonProperty("id") private long id;
+    @JsonProperty("email") private String email;
+    @JsonProperty("username") private String username;
+    @JsonProperty("tracker_token") private String trackerToken;
+    @JsonProperty("profile") private ProfileModel profileModel;
 
     public long getId() {
         return id;

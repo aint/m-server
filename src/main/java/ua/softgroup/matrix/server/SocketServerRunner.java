@@ -25,6 +25,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -134,11 +136,11 @@ public class SocketServerRunner implements CommandLineRunner {
                 projectModel.setAuthorName(project.getAuthorName());
                 projectModel.setTitle(project.getTitle());
                 projectModel.setDescription(project.getDescription());
-                projectModel.setEndDate(project.getEndDate());
+                projectModel.setStartDate(Date.from(project.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                projectModel.setEndDate(Date.from(project.getEndDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 projectModel.setId(project.getId());
                 projectModel.setRate(project.getRate());
                 projectModel.setRateCurrencyId(project.getRateCurrencyId());
-                projectModel.setStartDate(project.getStartDate());
                 set.add(projectModel);
             }
             sendAllObjectsToClient(set);

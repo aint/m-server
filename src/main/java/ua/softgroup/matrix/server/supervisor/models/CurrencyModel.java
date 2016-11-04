@@ -1,14 +1,14 @@
 package ua.softgroup.matrix.server.supervisor.models;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by Vadim on 24.10.2016.
  */
 public class CurrencyModel implements RetrofitModel {
 
-    @SerializedName("id") private int id;
-    @SerializedName("name") private String name;
+    @JsonProperty("id") private int id;
+    @JsonProperty("name") private String name;
 
     public int getId() {
         return id;

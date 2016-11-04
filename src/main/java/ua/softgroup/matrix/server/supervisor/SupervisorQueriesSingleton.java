@@ -1,7 +1,8 @@
 package ua.softgroup.matrix.server.supervisor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 import ua.softgroup.matrix.server.supervisor.endpoint.SupervisorQueries;
 
 public class SupervisorQueriesSingleton {
@@ -14,7 +15,7 @@ public class SupervisorQueriesSingleton {
     private SupervisorQueriesSingleton() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(JacksonConverterFactory.create(new ObjectMapper().findAndRegisterModules()))
                 .build();
         supervisorQueries = retrofit.create(SupervisorQueries.class);
 

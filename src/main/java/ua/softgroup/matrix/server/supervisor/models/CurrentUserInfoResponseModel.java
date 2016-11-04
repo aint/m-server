@@ -1,13 +1,13 @@
 package ua.softgroup.matrix.server.supervisor.models;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by Vadim on 24.10.2016.
  */
 public class CurrentUserInfoResponseModel implements RetrofitModel {
 
-    @SerializedName("user") private UserModel userModel;
+    @JsonProperty("user") private UserModel userModel;
 
     public UserModel getUserModel() {
         return userModel;

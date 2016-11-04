@@ -1,6 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.models;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -9,8 +9,8 @@ import java.util.List;
  */
 public class CurrenciesResponseModel implements RetrofitModel {
 
-    @SerializedName("success") private boolean success;
-    @SerializedName("list") private List<CurrencyModel> currencyModelList;
+    @JsonProperty("success") private boolean success;
+    @JsonProperty("list") private List<CurrencyModel> currencyModelList;
 
     public boolean isSuccess() {
         return success;

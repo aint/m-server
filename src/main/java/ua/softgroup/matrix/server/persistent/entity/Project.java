@@ -1,11 +1,17 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import ua.softgroup.matrix.server.supervisor.models.RetrofitModel;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,28 +20,28 @@ import java.util.Set;
 public class Project implements RetrofitModel, Serializable {
     private static final long serialVersionUID = 1L;
 
-    @SerializedName("id")
+    @JsonProperty("id")
     @Id
     private long id;
-    @SerializedName("title")
+    @JsonProperty("title")
     @Column(columnDefinition = "TEXT")
     private String title;
-    @SerializedName("description_text")
+    @JsonProperty("description_text")
     @Column
     private String description;
-    @SerializedName("author_name")
+    @JsonProperty("author_name")
     @Column
     private String authorName;
-    @SerializedName("start_date")
+    @JsonProperty("start_date")
     @Column
-    private Date startDate;
-    @SerializedName("end_date")
+    private LocalDate startDate;
+    @JsonProperty("end_date")
     @Column
-    private Date endDate;
-    @SerializedName("rate")
+    private LocalDate endDate;
+    @JsonProperty("rate")
     @Column
     private int rate;
-    @SerializedName("rate_currency_id")
+    @JsonProperty("rate_currency_id")
     @Column
     private int rateCurrencyId;
 
@@ -75,19 +81,19 @@ public class Project implements RetrofitModel, Serializable {
         this.authorName = authorName;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
