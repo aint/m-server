@@ -25,8 +25,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -126,6 +124,7 @@ public class SocketServerRunner implements CommandLineRunner {
             String token = matrixServerApi.authenticate(auth.getUsername(), auth.getPassword());
             sendStringResponse(token);
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
+            //TODO cleanup
             TokenModel token = (TokenModel) objectInputStream.readObject();
 //            sendAllObjectsToClient(matrixServerApi.getAllProjects(token));
             Set<Project> userActiveProjects = matrixServerApi.getUserActiveProjects(token);
@@ -136,8 +135,8 @@ public class SocketServerRunner implements CommandLineRunner {
                 projectModel.setAuthorName(project.getAuthorName());
                 projectModel.setTitle(project.getTitle());
                 projectModel.setDescription(project.getDescription());
-                projectModel.setStartDate(Date.from(project.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-                projectModel.setEndDate(Date.from(project.getEndDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                projectModel.setStartDate(project.getStartDate());
+                projectModel.setEndDate(project.getEndDate());
                 projectModel.setId(project.getId());
                 projectModel.setRate(project.getRate());
                 projectModel.setRateCurrencyId(project.getRateCurrencyId());
