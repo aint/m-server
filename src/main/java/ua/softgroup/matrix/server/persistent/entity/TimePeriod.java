@@ -19,6 +19,9 @@ public class TimePeriod implements Serializable {
     @Column
     private LocalDateTime end;
 
+    @Column
+    private boolean externalHourlyRate = false;
+
     @ManyToOne
     private WorkTime workTime;
 
@@ -33,6 +36,13 @@ public class TimePeriod implements Serializable {
     public TimePeriod(LocalDateTime start, LocalDateTime end, WorkTime workTime) {
         this.start = start;
         this.end = end;
+        this.workTime = workTime;
+    }
+
+    public TimePeriod(LocalDateTime start, LocalDateTime end, boolean externalHourlyRate, WorkTime workTime) {
+        this.start = start;
+        this.end = end;
+        this.externalHourlyRate = externalHourlyRate;
         this.workTime = workTime;
     }
 
@@ -58,6 +68,14 @@ public class TimePeriod implements Serializable {
 
     public void setEnd(LocalDateTime end) {
         this.end = end;
+    }
+
+    public boolean isExternalHourlyRate() {
+        return externalHourlyRate;
+    }
+
+    public void setExternalHourlyRate(boolean externalHourlyRate) {
+        this.externalHourlyRate = externalHourlyRate;
     }
 
     public WorkTime getWorkTime() {

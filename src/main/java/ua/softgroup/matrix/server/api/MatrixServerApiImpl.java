@@ -206,11 +206,10 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("User {} start work", user);
         Project project = projectService.getById(timeModel.getProjectId());
         WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-        if (userWorkTime != null) {
-            userWorkTime.setStartedWork(LocalDateTime.now());
-        } else {
+        if (userWorkTime == null) {
             userWorkTime = new WorkTime(LocalDateTime.now(), projectService.getById(timeModel.getProjectId()), user);
         }
+        userWorkTime.setStartedWork(LocalDateTime.now());
         workTimeService.save(userWorkTime);
     }
 
@@ -232,7 +231,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) minutes);
                 userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) minutes);
                 workTimeService.save(userWorkTime);
-                timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), userWorkTime));
+                timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
             }
         }
     }
