@@ -76,10 +76,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public Constants saveReport(ReportModel reportModel) {
         LOG.debug("saveReport: {}", reportModel);
 
-        if (!isTokenValidated(reportModel.getToken())) {
-            return Constants.TOKEN_EXPIRED;
-        }
-
         if (reportModel.getId() == 0) {
             // save new
             //TODO reportService.getTodayReportsOf()
@@ -142,7 +138,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         reportModel.setId(report.getId());
         reportModel.setTitle(report.getTitle());
         reportModel.setDescription(report.getDescription());
-        reportModel.setStatus(isTokenValidated(reportModel.getToken()) ? 0 : -1);
+        reportModel.setStatus(0);
         reportModel.setChecked(report.isChecked());
         return reportModel;
     }
@@ -179,7 +175,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
-//        User user = retrieveUserFromToken(downtimeModel);
         return null;
 //                projectService.getAll().stream()
 //                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
@@ -192,18 +187,11 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     private User retrieveUserFromToken(TokenModel tokenModel) {
-//        String username = tokenAuthService.extractUsername(downtimeModel);
-//        return userService.getByUsername(username);
         User user = userService.getByTrackerToken(tokenModel.getToken());
         if (user == null) {
             throw new RuntimeException("User is null because token not valid");
         }
         return user;
-    }
-
-    private boolean isTokenValidated(String token) {
-        return true;
-//        return tokenAuthService.validateToken(token) == Constants.TOKEN_VALIDATED;
     }
 
     @Override
@@ -371,13 +359,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         if (userWorkTime == null) {
             return new TimeModel(0, 0);
         }
-//        long time = userWorkTime.getTimePeriods().stream()
-//                .filter(timePeriod -> timePeriod.getStart().isAfter(LocalDate.now().atStartOfDay())
-//                        && timePeriod.getEnd().isBefore(LocalDate.now().plusDays(1).atStartOfDay()))
-//                .mapToLong(timePeriod -> Duration.between(timePeriod.getStart(), timePeriod.getEnd()).toMinutes())
-//                .sum();
-//        LOG.warn("getTodayWorkTime: time {}", time);
-
         LocalDateTime startedWork = userWorkTime.getStartedWork();
         int todayMinutes = userWorkTime.getTodayMinutes();
         if (startedWork != null) {

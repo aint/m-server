@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 import ua.softgroup.matrix.server.persistent.entity.Project;
-import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
@@ -64,17 +63,6 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
                 .filter(project -> LocalDate.now().isBefore(project.getEndDate()))
                 .peek(project -> LOG.warn("pick: {}", project))
                 .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    public static void main(String[] args) {
-        LocalDate end = LocalDate.of(2016, 1, 30);
-        System.out.println(end.isBefore(LocalDate.now()));
-    }
-
-    @Override
-    public Set<Report> getAllReports() {
-//        getRepository.find
-        return null;
     }
 
     @Override
