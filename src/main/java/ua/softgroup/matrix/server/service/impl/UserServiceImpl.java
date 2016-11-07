@@ -32,21 +32,24 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
         } catch (IOException e) {
             // TODO return invalid credentials
             // TODO read date from db
-            LOG.error("Authenticate error {}", e);
+            LOG.error("Authentication error: {}", e);
             return Constants.INVALID_USERNAME.name();
         }
     }
 
     private String tryToAuthenticate(String username, String password) throws IOException {
-        Response<LoginResponseModel> loginResponse = executeLoginQuery(username, password);
-        LoginResponseModel loginResponseModel = loginResponse.body();
+        LoginResponseModel loginResponseModel = executeLoginQuery(username, password).body();
         if (loginResponseModel.getSuccess()) {
             saveUser(loginResponseModel.getUserModel(), password);
             String token = loginResponseModel.getTrackerToken();
             LOG.info("Given token {}", token);
             return token;
         }
-        return Constants.INVALID_USERNAME.name();
+        String message = loginResponseModel.getMessage();
+        LOG.info("Authentication failed: {}", message);
+        return message.contains("password")
+                ? Constants.INVALID_PASSWORD.name()
+                : Constants.INVALID_USERNAME.name();
     }
 
     private Response<LoginResponseModel> executeLoginQuery(String username, String password) throws IOException {

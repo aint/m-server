@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LoginResponseModel implements RetrofitModel {
 
     @JsonProperty("success") private Boolean success;
+    @JsonProperty("message") private String message;
     @JsonProperty("tracker-token") private String trackerToken;
     @JsonProperty("user") private UserModel userModel;
 
@@ -17,6 +18,14 @@ public class LoginResponseModel implements RetrofitModel {
 
     public void setSuccess(Boolean success) {
         this.success = success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getTrackerToken() {
