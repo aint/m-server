@@ -37,6 +37,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -278,52 +280,58 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public boolean sync(Set<SynchronizedModel> synchronizedModels) {
-        LOG.warn("Sync {}", synchronizedModels);
+    public boolean sync(SynchronizedModel synchronizedModel) {
+        LOG.warn("Sync {}", synchronizedModel);
 
-        for (SynchronizedModel synchronizedModel : synchronizedModels) {
+        Optional.ofNullable(synchronizedModel.getReportModel())
+                .ifPresent(reportModels -> reportModels.stream()
+                        .filter(Objects::nonNull)
+                        .forEach(this::saveReport));
 
-            ReportModel reportModel = synchronizedModel.getReportModel();
-            if (reportModel != null) {
-                saveReport(reportModel);
-            }
-            TimeModel timeModel = synchronizedModel.getTimeModel();
-            if (timeModel != null) {
-                User user = retrieveUserFromToken(timeModel);
-                Project project = projectService.getById(timeModel.getProjectId());
-                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-                LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
-                if (userWorkTime == null) {
-                    userWorkTime = new WorkTime(null, project, user);
-                }
-                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
-                workTimeService.save(userWorkTime);
-            }
-            TimeModel downtimeModel = synchronizedModel.getDowntimeModel();
-            LOG.warn("Offline Downtime {}", downtimeModel);
-            if (downtimeModel != null) {
-                User user = retrieveUserFromToken(downtimeModel);
-                Project project = projectService.getById(downtimeModel.getProjectId());
-                LOG.warn("User id {}, Project id {}", user.getId(), project.getId());
-                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-                LOG.debug("WorkTime {}", userWorkTime);
-                if (userWorkTime != null) {
-                    Downtime downtime = userWorkTime.getDowntime();
-                    LOG.debug("Downtime {}", downtime);
-                    if (downtime == null) {
-                        downtime = new Downtime(userWorkTime);
-                    }
-                    downtime.setStartTime(null);
-                    long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getMinute() - downtimeModel.getHours());
-                    LOG.warn("Downtime diff {}", diff);
-                    downtime.setMinutes(diff);
-                    downtimeService.save(downtime);
-                    workTimeService.save(userWorkTime);
-                } else {
-                    LOG.warn("User WorkTime is NULL");
-                }
-            }
-        }
+        Optional.ofNullable(synchronizedModel.getTimeModel())
+                .ifPresent(timeModels -> timeModels.stream()
+                        .filter(Objects::nonNull)
+                        .forEach(timeModel -> {
+                            LOG.warn("Offline Timemodel {}", timeModel);
+                            User user = retrieveUserFromToken(timeModel);
+                            Project project = projectService.getById(timeModel.getProjectId());
+                            WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+                            LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
+                            if (userWorkTime == null) {
+                                userWorkTime = new WorkTime(null, project, user);
+                            }
+                            userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
+                            workTimeService.save(userWorkTime);
+                        }));
+
+        Optional.ofNullable(synchronizedModel.getDowntimeModel())
+                .ifPresent(downtimeModels -> downtimeModels.stream()
+                        .filter(Objects::nonNull)
+                        .forEach(downtimeModel -> {
+                            LOG.warn("Offline Downtime {}", downtimeModel);
+                            if (downtimeModel != null) {
+                                User user = retrieveUserFromToken(downtimeModel);
+                                Project project = projectService.getById(downtimeModel.getProjectId());
+                                LOG.warn("User id {}, Project id {}", user.getId(), project.getId());
+                                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+                                LOG.debug("WorkTime {}", userWorkTime);
+                                if (userWorkTime != null) {
+                                    Downtime downtime = userWorkTime.getDowntime();
+                                    LOG.debug("Downtime {}", downtime);
+                                    if (downtime == null) {
+                                        downtime = new Downtime(userWorkTime);
+                                    }
+                                    downtime.setStartTime(null);
+                                    long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getHours() - downtimeModel.getMinute());
+                                    LOG.warn("Downtime diff {}", diff);
+                                    downtime.setMinutes(diff);
+                                    downtimeService.save(downtime);
+                                    workTimeService.save(userWorkTime);
+                                } else {
+                                    LOG.warn("User WorkTime is NULL");
+                                }
+                            }
+                        }));
 
         return true;
     }

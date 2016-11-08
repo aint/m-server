@@ -72,7 +72,7 @@ public interface MatrixServerApi {
 
     TimeModel getTotalWorkTime(TimeModel timeModel);
 
-    boolean sync(Set<SynchronizedModel> synchronizedModels);
+    boolean sync(SynchronizedModel synchronizedModel);
 
     boolean isClientSettingsUpdated(long settingsVersion);
 

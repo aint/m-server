@@ -1,49 +1,61 @@
 package ua.softgroup.matrix.server.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
 public class SynchronizedModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private ReportModel reportModel;
-    private TimeModel timeModel;
-    private TimeModel downtimeModel;
+    private HashSet<ReportModel> reportModel;
+    private HashSet<TimeModel> timeModel;
+    private HashSet<TimeModel> downtimeModel;
 
-    public ReportModel getReportModel() {
+    public SynchronizedModel(HashSet<ReportModel> reportModel, HashSet<TimeModel> timeModel, HashSet<TimeModel> downTimeModel) {
+        this.reportModel = reportModel;
+        this.timeModel = timeModel;
+        this.downtimeModel = downTimeModel;
+    }
+
+    public HashSet<ReportModel> getReportModel() {
         return reportModel;
     }
 
-    public void setReportModel(ReportModel reportModel) {
+    public void setReportModel(HashSet<ReportModel> reportModel) {
         this.reportModel = reportModel;
     }
 
-    public TimeModel getTimeModel() {
+    public HashSet<TimeModel> getTimeModel() {
         return timeModel;
     }
 
-    public void setTimeModel(TimeModel timeModel) {
+    public void setTimeModel(HashSet<TimeModel> timeModel) {
         this.timeModel = timeModel;
     }
 
-    public TimeModel getDowntimeModel() {
+    public HashSet<TimeModel> getDowntimeModel() {
         return downtimeModel;
     }
 
-    public void setDowntimeModel(TimeModel downtimeModel) {
+    public void setDowntimeModel(HashSet<TimeModel> downtimeModel) {
         this.downtimeModel = downtimeModel;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SynchronizedModel that = (SynchronizedModel) o;
-
-        if (reportModel != null ? !reportModel.equals(that.reportModel) : that.reportModel != null) return false;
-        if (timeModel != null ? !timeModel.equals(that.timeModel) : that.timeModel != null) return false;
+        if (reportModel != null ? !reportModel.equals(that.reportModel) : that.reportModel != null) {
+            return false;
+        }
+        if (timeModel != null ? !timeModel.equals(that.timeModel) : that.timeModel != null) {
+            return false;
+        }
         return downtimeModel != null ? downtimeModel.equals(that.downtimeModel) : that.downtimeModel == null;
-
     }
 
     @Override
