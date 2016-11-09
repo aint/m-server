@@ -325,7 +325,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("getTodayWorkTime: username {}", user.getUsername());
         Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTodayWorkTime: projectID {}", project.getId());
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime());
         LocalDateTime startedWork = userWorkTime.getStartedWork();
         int todayMinutes = userWorkTime.getTodayMinutes();
         if (startedWork != null) {
@@ -345,11 +345,12 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("getTotalWorkTime: username {}", user.getUsername());
         Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTotalWorkTime: projectID {}", project.getId());
-        WorkTime totalWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
+        WorkTime totalWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime());
         Integer totalMinutes = totalWorkTime.getTotalMinutes();
         int hours = totalMinutes / 60;
         int minutes = totalMinutes - hours * 60;
-        double downtimePercent = totalWorkTime.getDowntime().getMinutes() * 100 / Double.valueOf(totalMinutes);
+        Long downtime = Optional.ofNullable(totalWorkTime.getDowntime()).orElse(new Downtime()).getMinutes();
+        double downtimePercent = Math.floor(downtime * 100 / Double.valueOf(totalMinutes) * 100) / 100;
         LOG.debug("getTotalWorkTime: hours {}, minutes {}, downtime {}%", hours, minutes, downtimePercent);
         return new TimeModel(hours, minutes, downtimePercent);
     }
