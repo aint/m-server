@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="TimePeriod")
 public class TimePeriod implements Serializable {
     private static final long serialVersionUID = 1L;
 

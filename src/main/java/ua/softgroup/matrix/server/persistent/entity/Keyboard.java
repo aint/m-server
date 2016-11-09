@@ -2,10 +2,8 @@ package ua.softgroup.matrix.server.persistent.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Entity
-@Table
 public class Keyboard extends Metrics {
     private static final long serialVersionUID = 8580060699707698353L;
 

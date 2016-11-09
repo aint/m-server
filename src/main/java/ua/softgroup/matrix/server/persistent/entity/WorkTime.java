@@ -9,14 +9,12 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name="WorkTime")
 public class WorkTime implements Serializable {
     private static final long serialVersionUID = 1L;
 
