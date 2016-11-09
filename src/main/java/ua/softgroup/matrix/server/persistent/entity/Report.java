@@ -1,6 +1,15 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
-import javax.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -14,7 +23,12 @@ public class Report implements Serializable {
     private Long id;
 
     @Column
-    private LocalDateTime creationDate = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime creationDate;
+
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime updateDate;
 
     @Column
     private String title;
@@ -71,6 +85,14 @@ public class Report implements Serializable {
         this.creationDate = creationDate;
     }
 
+    public LocalDateTime getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(LocalDateTime updateDate) {
+        this.updateDate = updateDate;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -123,8 +145,11 @@ public class Report implements Serializable {
     public String toString() {
         return "Report{" +
                 "id=" + id +
+                ", creationDate=" + creationDate +
+                ", updateDate=" + updateDate +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
+                ", checked=" + checked +
                 '}';
     }
 }

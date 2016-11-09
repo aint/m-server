@@ -13,6 +13,7 @@ import ua.softgroup.matrix.server.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -49,7 +50,12 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
     public Report save(ReportModel rm) throws NoSuchElementException {
         User user = userService.getByTrackerToken(rm.getToken()).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(rm.getProjectId()).orElseThrow(NoSuchElementException::new);
-        return getRepository().save(new Report(rm.getId(), rm.getTitle(), rm.getDescription(), user, project));
+        Report report = Optional.ofNullable(getRepository().findOne(rm.getId())).orElse(new Report(rm.getId()));
+        report.setAuthor(user);
+        report.setProject(project);
+        report.setTitle(rm.getTitle());
+        report.setDescription(rm.getDescription());
+        return getRepository().save(report);
     }
 
     @Override
