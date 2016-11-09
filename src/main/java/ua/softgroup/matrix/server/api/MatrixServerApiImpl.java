@@ -349,8 +349,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         Integer totalMinutes = totalWorkTime.getTotalMinutes();
         int hours = totalMinutes / 60;
         int minutes = totalMinutes - hours * 60;
-        LOG.debug("getTotalWorkTime: hours {}, minutes {}", hours, minutes);
-        return new TimeModel(hours, minutes);
+        double downtimePercent = totalWorkTime.getDowntime().getMinutes() * 100 / Double.valueOf(totalMinutes);
+        LOG.debug("getTotalWorkTime: hours {}, minutes {}, downtime {}%", hours, minutes, downtimePercent);
+        return new TimeModel(hours, minutes, downtimePercent);
     }
 
     @Override
