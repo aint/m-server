@@ -7,7 +7,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.ServerCommands;
-import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.SynchronizedModel;
@@ -15,7 +14,6 @@ import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
-import ua.softgroup.matrix.server.persistent.entity.Project;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -25,9 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 
 @Component
 public class SocketServerRunner implements CommandLineRunner {
@@ -129,31 +125,12 @@ public class SocketServerRunner implements CommandLineRunner {
 
     private void processClientInput(ServerCommands command) throws IOException, ClassNotFoundException {
         if (ServerCommands.AUTHENTICATE == command) {
-//            Object obj = objectInputStream.readObject();
-//            LOG.warn("Object {}", obj);
             UserPassword auth = (UserPassword) objectInputStream.readObject();
             String token = matrixServerApi.authenticate(auth.getUsername(), auth.getPassword());
             sendStringResponse(token);
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
-            //TODO cleanup
             TokenModel token = (TokenModel) objectInputStream.readObject();
-//            sendAllObjectsToClient(matrixServerApi.getAllProjects(token));
-            Set<Project> userActiveProjects = matrixServerApi.getUserActiveProjects(token);
-            Set<ProjectModel> set = new HashSet<>();
-            for (Project project : userActiveProjects) {
-                LOG.warn("PROJECT {}", project);
-                ProjectModel projectModel = new ProjectModel();
-                projectModel.setAuthorName(project.getAuthorName());
-                projectModel.setTitle(project.getTitle());
-                projectModel.setDescription(project.getDescription());
-                projectModel.setStartDate(project.getStartDate());
-                projectModel.setEndDate(project.getEndDate());
-                projectModel.setId(project.getId());
-                projectModel.setRate(project.getRate());
-                projectModel.setRateCurrencyId(project.getRateCurrencyId());
-                set.add(projectModel);
-            }
-            sendAllObjectsToClient(set);
+            sendAllObjectsToClient(matrixServerApi.getUserActiveProjects(token));
         } else if (ServerCommands.SET_CURRENT_PROJECT == command) {
             matrixServerApi.setCurrentProject(0L);
         } else if (ServerCommands.GET_REPORT == command) {

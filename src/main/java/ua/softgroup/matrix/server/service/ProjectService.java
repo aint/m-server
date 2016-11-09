@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.service;
 
+import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 
@@ -9,6 +10,6 @@ public interface ProjectService extends GeneralEntityService<Project> {
 
     Set<Project> getAllProjectsOf(User user);
 
-    Set<Project> getUserActiveProjects(String token);
+    Set<ProjectModel> getUserActiveProjects(String token);
 
 }

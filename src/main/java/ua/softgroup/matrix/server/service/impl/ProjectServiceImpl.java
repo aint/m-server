@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
+import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
@@ -48,7 +49,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     @Override
-    public Set<Project> getUserActiveProjects(String token) {
+    public Set<ProjectModel> getUserActiveProjects(String token) {
         UserActiveProjectsResponseModel userActiveProjectsResponseModel = null;
         try {
             userActiveProjectsResponseModel = queryUserActiveProjects(token);
@@ -61,8 +62,21 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         return userActiveProjectsResponseModel.getProjectModelList().stream()
                 .map(project -> getRepository().save(project))
                 .filter(project -> LocalDate.now().isBefore(project.getEndDate()))
-                .peek(project -> LOG.warn("pick: {}", project))
+                .map(this::convertProjectEntityToModel)
                 .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    private ProjectModel convertProjectEntityToModel(Project project) {
+        ProjectModel projectModel = new ProjectModel();
+        projectModel.setId(project.getId());
+        projectModel.setTitle(project.getTitle());
+        projectModel.setDescription(project.getDescription());
+        projectModel.setAuthorName(project.getAuthorName());
+        projectModel.setStartDate(project.getStartDate());
+        projectModel.setEndDate(project.getEndDate());
+        projectModel.setRate(project.getRate());
+        projectModel.setRateCurrencyId(project.getRateCurrencyId());
+        return projectModel;
     }
 
     @Override

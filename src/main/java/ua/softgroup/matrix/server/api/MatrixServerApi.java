@@ -8,7 +8,6 @@ import ua.softgroup.matrix.server.model.SynchronizedModel;
 import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
-import ua.softgroup.matrix.server.persistent.entity.Project;
 
 import java.util.Set;
 
@@ -30,7 +29,7 @@ public interface MatrixServerApi {
      */
     Set<ProjectModel> getAllProjects(TokenModel tokenModel);
 
-    Set<Project> getUserActiveProjects(TokenModel tokenModel);
+    Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel);
 
     /**
      * Sets project as current for the authenticated user

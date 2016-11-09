@@ -173,7 +173,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public Set<Project> getUserActiveProjects(TokenModel tokenModel) {
+    public Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel) {
         return projectService.getUserActiveProjects(tokenModel.getToken());
     }
 
