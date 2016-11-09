@@ -2,21 +2,30 @@ package ua.softgroup.matrix.server.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.ReportRepository;
+import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
+import ua.softgroup.matrix.server.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 @Service
 public class ReportServiceImpl extends AbstractEntityTransactionalService<Report> implements ReportService {
 
+    private final ProjectService projectService;
+    private final UserService userService;
+
     @Autowired
-    public ReportServiceImpl(ReportRepository repository) {
+    public ReportServiceImpl(ReportRepository repository, ProjectService projectService, UserService userService) {
         super(repository);
+        this.projectService = projectService;
+        this.userService = userService;
     }
 
     @Override
@@ -34,6 +43,13 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
         LocalDateTime start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         LocalDateTime end = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
         return getRepository().findByAuthorAndProjectAndCreationDateBetween(author, project, start, end);
+    }
+
+    @Override
+    public Report save(ReportModel rm) throws NoSuchElementException {
+        User user = userService.getByTrackerToken(rm.getToken()).orElseThrow(NoSuchElementException::new);
+        Project project = projectService.getById(rm.getProjectId()).orElseThrow(NoSuchElementException::new);
+        return getRepository().save(new Report(rm.getId(), rm.getTitle(), rm.getDescription(), user, project));
     }
 
     @Override

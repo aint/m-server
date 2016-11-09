@@ -75,14 +75,14 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public Constants saveReport(ReportModel reportModel) {
+    public Constants saveReport(ReportModel reportModel) throws NoSuchElementException {
         LOG.debug("saveReport: {}", reportModel);
 
         if (reportModel.getId() == 0) {
             // save new
             //TODO reportService.getTodayReportsOf()
-            User user = retrieveUserFromToken(reportModel);
-            Project project = projectService.getById(reportModel.getProjectId());
+            User user = userService.getByTrackerToken(reportModel.getToken()).orElseThrow(NoSuchElementException::new);
+            Project project = projectService.getById(reportModel.getProjectId()).orElseThrow(NoSuchElementException::new);
             for (Report report : reportService.getAllReportsOf(user, project)) {
                 LocalDateTime creationDate = report.getCreationDate();
                 LOG.warn("saveReport: creation date {}", creationDate);
@@ -94,12 +94,12 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             }
         }
 
-        Report report = reportService.getById(reportModel.getId());
-        if (report != null) {
+        if (reportService.getById(reportModel.getId()).isPresent()) {
+            Report report = reportService.getById(reportModel.getId()).get();
             return updateReport(report, reportModel);
         }
 
-        persistReport(new Report(reportModel.getId()), reportModel);
+        reportService.save(reportModel);
 
         return Constants.TOKEN_VALIDATED;
     }
@@ -113,28 +113,17 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             LOG.debug("Report expired");
             return Constants.REPORT_EXPIRED;
         }
-        persistReport(report, reportModel);
+        reportService.save(reportModel);
 
         return Constants.TOKEN_VALIDATED;
     }
 
-    private void persistReport(Report report, ReportModel reportModel) {
-        report.setTitle(reportModel.getTitle());
-        report.setDescription(reportModel.getDescription());
-        report.setAuthor(retrieveUserFromToken(reportModel));
-        Project proj = projectService.getById(reportModel.getProjectId());
-        LOG.warn("proj id {}", reportModel.getProjectId());
-        LOG.warn("proj {}", proj);
-        report.setProject(proj);
-        reportService.save(report);
-    }
-
     @Deprecated
     @Override
-    public ReportModel getReport(ReportModel reportModel) {
+    public ReportModel getReport(ReportModel reportModel) throws NoSuchElementException {
         LOG.debug("getReport: {}", reportModel);
 
-        Report report = reportService.getById(reportModel.getId());
+        Report report = reportService.getById(reportModel.getId()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getReport: {}", report);
 
         reportModel.setId(report.getId());
@@ -147,17 +136,17 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public Set<ReportModel> getAllReports(TokenModel tokenModel) {
-        String token = tokenModel.getToken();
-        return reportService.getAllReportsOf(retrieveUserFromToken(tokenModel)).stream()
+        User user = userService.getByTrackerToken(tokenModel.getToken()).orElseThrow(NoSuchElementException::new);
+        return reportService.getAllReportsOf(user).stream()
                 .map(report -> convertReportEntityToModel(report, tokenModel.getToken()))
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
-    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
+    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) throws NoSuchElementException {
         LOG.debug("Requested project id {}", projectId);
-        User user = retrieveUserFromToken(tokenModel);
-        Project project = projectService.getById(projectId);
+        User user = userService.getByTrackerToken(tokenModel.getToken()).orElseThrow(NoSuchElementException::new);
+        Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
         return reportService.getAllReportsOf(user, project).stream()
                 .map(report -> convertReportEntityToModel(report, tokenModel.getToken()))
                 .collect(Collectors.toCollection(HashSet::new));
@@ -188,99 +177,82 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         return projectService.getUserActiveProjects(tokenModel.getToken());
     }
 
-    private User retrieveUserFromToken(TokenModel tokenModel) {
-        User user = userService.getByTrackerToken(tokenModel.getToken());
-        if (user == null) {
-            throw new RuntimeException("User is null because token not valid");
-        }
-        return user;
-    }
-
     @Override
     public void setCurrentProject(Long projectId) {
 
     }
 
     @Override
-    public void startWork(TimeModel timeModel) {
+    public void startWork(TimeModel timeModel) throws NoSuchElementException {
         LOG.debug("TimeModel {} ", timeModel);
-        User user = retrieveUserFromToken(timeModel);
+        User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("User {} start work", user);
-        Project project = projectService.getById(timeModel.getProjectId());
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-        if (userWorkTime == null) {
-            userWorkTime = new WorkTime(LocalDateTime.now(), projectService.getById(timeModel.getProjectId()), user);
-        }
+        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
         userWorkTime.setStartedWork(LocalDateTime.now());
         workTimeService.save(userWorkTime);
     }
 
     @Override
-    public void endWork(TimeModel timeModel) {
+    public void endWork(TimeModel timeModel) throws NoSuchElementException {
         LOG.debug("TimeModel {}", timeModel);
-        User user = retrieveUserFromToken(timeModel);
+        User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("User {} end work", user);
-        Project project = projectService.getById(timeModel.getProjectId());
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-        if (userWorkTime != null) {
-            LocalDateTime startedWork = userWorkTime.getStartedWork();
-            if (startedWork != null) {
-                Duration duration = Duration.between(startedWork, LocalDateTime.now());
-                long minutes = duration.toMinutes();
-                LOG.debug("Work period in minutes {}", minutes);
-                LOG.debug("Work period in millis {}", duration.toMillis());
-                userWorkTime.setStartedWork(null);
-                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) minutes);
-                userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) minutes);
-                workTimeService.save(userWorkTime);
-                timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
-            }
+        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
+        LocalDateTime startedWork = userWorkTime.getStartedWork();
+        if (startedWork != null) {
+            Duration duration = Duration.between(startedWork, LocalDateTime.now());
+            long minutes = duration.toMinutes();
+            LOG.debug("Work period in minutes {}", minutes);
+            LOG.debug("Work period in millis {}", duration.toMillis());
+            userWorkTime.setStartedWork(null);
+            userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) minutes);
+            userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) minutes);
+            workTimeService.save(userWorkTime);
+            timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
         }
     }
 
     @Override
-    public void startDowntime(TimeModel downtimeModel) {
+    public void startDowntime(TimeModel downtimeModel) throws NoSuchElementException {
         LOG.debug("startDowntime DownTimeModel {}", downtimeModel);
-        User user = retrieveUserFromToken(downtimeModel);
+        User user = userService.getByTrackerToken(downtimeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("startDowntime User {}", user);
-        Project project = projectService.getById(downtimeModel.getProjectId());
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-        if (userWorkTime != null) {
-            Downtime downtime = userWorkTime.getDowntime();
-            if (downtime == null) {
-                downtime = new Downtime(userWorkTime);
-            }
-            downtime.setStartTime(LocalDateTime.now());
+        Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
+        Downtime downtime = userWorkTime.getDowntime();
+        if (downtime == null) {
+            downtime = new Downtime(userWorkTime);
+        }
+        downtime.setStartTime(LocalDateTime.now());
+        downtimeService.save(downtime);
+
+    }
+
+    @Override
+    public void endDowntime(TimeModel downtimeModel) throws NoSuchElementException {
+        LOG.debug("endDowntime DownTimeModel {}", downtimeModel);
+        User user = userService.getByTrackerToken(downtimeModel.getToken()).orElseThrow(NoSuchElementException::new);
+        LOG.debug("endDowntime username {}", user.getUsername());
+        Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
+        LOG.debug("endDowntime WorkTime {}", userWorkTime);
+        Downtime downtime = Optional.ofNullable(userWorkTime.getDowntime()).orElse(new Downtime(userWorkTime));
+        LocalDateTime startTime = downtime.getStartTime();
+        if (startTime != null) {
+            Duration duration = Duration.between(startTime, LocalDateTime.now());
+            LOG.debug("Downtime in minutes {}", duration.toMinutes());
+            LOG.debug("Downtime in millis {}", duration.toMillis());
+            downtime.setMinutes(downtime.getMinutes() + duration.toMinutes());
+            downtime.setStartTime(null);
             downtimeService.save(downtime);
         }
+
     }
 
     @Override
-    public void endDowntime(TimeModel downtimeModel) {
-        LOG.debug("endDowntime DownTimeModel {}", downtimeModel);
-        User user = retrieveUserFromToken(downtimeModel);
-        LOG.debug("endDowntime username {}", user.getUsername());
-        Project project = projectService.getById(downtimeModel.getProjectId());
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-        LOG.debug("endDowntime WorkTime {}", userWorkTime);
-        if (userWorkTime != null) {
-            Downtime downtime = userWorkTime.getDowntime();
-            if (downtime != null) {
-                LocalDateTime startTime = downtime.getStartTime();
-                if (startTime != null) {
-                    Duration duration = Duration.between(startTime, LocalDateTime.now());
-                    LOG.debug("Downtime in minutes {}", duration.toMinutes());
-                    LOG.debug("Downtime in millis {}", duration.toMillis());
-                    downtime.setMinutes(downtime.getMinutes() + duration.toMinutes());
-                    downtime.setStartTime(null);
-                    downtimeService.save(downtime);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean sync(SynchronizedModel synchronizedModel) {
+    public boolean sync(SynchronizedModel synchronizedModel) throws NoSuchElementException {
         LOG.warn("Sync {}", synchronizedModel);
 
         Optional.ofNullable(synchronizedModel.getReportModel())
@@ -292,45 +264,36 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 .ifPresent(timeModels -> timeModels.stream()
                         .filter(Objects::nonNull)
                         .forEach(timeModel -> {
-                            LOG.warn("Offline Timemodel {}", timeModel);
-                            User user = retrieveUserFromToken(timeModel);
-                            Project project = projectService.getById(timeModel.getProjectId());
-                            WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-                            LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
-                            if (userWorkTime == null) {
-                                userWorkTime = new WorkTime(null, project, user);
-                            }
-                            userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
-                            workTimeService.save(userWorkTime);
+                                LOG.warn("OFFLINE Timemodel {}", timeModel);
+                                User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
+                                Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+                                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
+                                LOG.warn("OFFLINE {}", userWorkTime);
+                                LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
+                                userWorkTime.setStartedWork(null);
+                                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
+                                userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) timeModel.getMinute());
+                                workTimeService.save(userWorkTime);
+                                timePeriodService.save(new TimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
                         }));
 
         Optional.ofNullable(synchronizedModel.getDowntimeModel())
                 .ifPresent(downtimeModels -> downtimeModels.stream()
                         .filter(Objects::nonNull)
                         .forEach(downtimeModel -> {
-                            LOG.warn("Offline Downtime {}", downtimeModel);
-                            if (downtimeModel != null) {
-                                User user = retrieveUserFromToken(downtimeModel);
-                                Project project = projectService.getById(downtimeModel.getProjectId());
+                                LOG.warn("Offline Downtime {}", downtimeModel);
+                                User user = userService.getByTrackerToken(downtimeModel.getToken()).orElseThrow(NoSuchElementException::new);
+                                Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
                                 LOG.warn("User id {}, Project id {}", user.getId(), project.getId());
-                                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+                                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
                                 LOG.debug("WorkTime {}", userWorkTime);
-                                if (userWorkTime != null) {
-                                    Downtime downtime = userWorkTime.getDowntime();
-                                    LOG.debug("Downtime {}", downtime);
-                                    if (downtime == null) {
-                                        downtime = new Downtime(userWorkTime);
-                                    }
-                                    downtime.setStartTime(null);
-                                    long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getHours() - downtimeModel.getMinute());
-                                    LOG.warn("Downtime diff {}", diff);
-                                    downtime.setMinutes(diff);
-                                    downtimeService.save(downtime);
-                                    workTimeService.save(userWorkTime);
-                                } else {
-                                    LOG.warn("User WorkTime is NULL");
-                                }
-                            }
+                                Downtime downtime = Optional.ofNullable(userWorkTime.getDowntime()).orElse(new Downtime(userWorkTime));
+                                LOG.debug("Downtime {}", downtime);
+                                downtime.setStartTime(null);
+                                long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getHours() - downtimeModel.getMinute());
+                                LOG.warn("Downtime diff {}", diff);
+                                downtime.setMinutes(diff > 0 ? diff : downtime.getMinutes());
+                                downtimeService.save(downtime);
                         }));
 
         return true;
@@ -356,16 +319,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public TimeModel getTodayWorkTime(TimeModel timeModel) {
+    public TimeModel getTodayWorkTime(TimeModel timeModel) throws NoSuchElementException {
         LOG.debug("getTodayWorkTime: {}", timeModel);
-        User user = retrieveUserFromToken(timeModel);
+        User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTodayWorkTime: username {}", user.getUsername());
-        Project project = projectService.getById(timeModel.getProjectId());
+        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTodayWorkTime: projectID {}", project.getId());
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-        if (userWorkTime == null) {
-            return new TimeModel(0, 0);
-        }
+        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
         LocalDateTime startedWork = userWorkTime.getStartedWork();
         int todayMinutes = userWorkTime.getTodayMinutes();
         if (startedWork != null) {
@@ -379,16 +339,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public TimeModel getTotalWorkTime(TimeModel timeModel) {
+    public TimeModel getTotalWorkTime(TimeModel timeModel) throws NoSuchElementException {
         LOG.debug("getTotalWorkTime: {}", timeModel);
-        User user = retrieveUserFromToken(timeModel);
+        User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTotalWorkTime: username {}", user.getUsername());
-        Project project = projectService.getById(timeModel.getProjectId());
+        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTotalWorkTime: projectID {}", project.getId());
-        WorkTime totalWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
-        if (totalWorkTime == null) {
-            return new TimeModel(0, 0);
-        }
+        WorkTime totalWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
         Integer totalMinutes = totalWorkTime.getTotalMinutes();
         int hours = totalMinutes / 60;
         int minutes = totalMinutes - hours * 60;
@@ -397,36 +354,32 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void saveKeyboardLog(WriteKeyboard writeKeyboard) {
+    public void saveKeyboardLog(WriteKeyboard writeKeyboard) throws NoSuchElementException {
         LOG.debug("saveKeyboardLog: {}", writeKeyboard);
-        User user = retrieveUserFromToken(new TokenModel(writeKeyboard.getToken()));
+        User user = userService.getByTrackerToken(writeKeyboard.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("saveKeyboardLog: username {}", user.getUsername());
-        Project project = projectService.getById(writeKeyboard.getProjectID());
+        Project project = projectService.getById(writeKeyboard.getProjectID()).orElseThrow(NoSuchElementException::new);
         LOG.debug("saveKeyboardLog: projectID {}", project.getId());
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
         LOG.info("saveKeyboardLog: {}", workTime);
-        if (workTime != null) {
-            metricsService.save(new Keyboard(writeKeyboard.getWords(), workTime));
-        }
+        metricsService.save(new Keyboard(writeKeyboard.getWords(), workTime));
     }
 
     @Override
-    public void saveScreenshot(ScreenshotModel file) {
+    public void saveScreenshot(ScreenshotModel file) throws NoSuchElementException {
         LOG.debug("saveScreenshot: {}", file);
-        User user = retrieveUserFromToken(new TokenModel(file.getToken()));
+        User user = userService.getByTrackerToken(file.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("saveScreenshot: username {}", user.getUsername());
-        Project project = projectService.getById(file.getProjectID());
+        Project project = projectService.getById(file.getProjectID()).orElseThrow(NoSuchElementException::new);
         LOG.debug("saveScreenshot: projectID {}", project.getId());
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project);
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
         LOG.info("saveScreenshot: {}", workTime);
-        if (workTime != null) {
-            try {
-                String fileName = String.valueOf(System.currentTimeMillis()) + "." + FILE_EXTENSION;
-                ImageIO.write(ImageIO.read(new ByteArrayInputStream(file.getFile())), FILE_EXTENSION, new File(fileName));
-                metricsService.save(new Screenshot(CWD + "/" + fileName, workTime));
-            } catch (Exception e) {
-                LOG.error("Failed to save screenshot", e);
-            }
+        try {
+            String fileName = String.valueOf(System.currentTimeMillis()) + "." + FILE_EXTENSION;
+            ImageIO.write(ImageIO.read(new ByteArrayInputStream(file.getFile())), FILE_EXTENSION, new File(fileName));
+            metricsService.save(new Screenshot(CWD + "/" + fileName, workTime));
+        } catch (Exception e) {
+            LOG.error("Failed to save screenshot", e);
         }
     }
 

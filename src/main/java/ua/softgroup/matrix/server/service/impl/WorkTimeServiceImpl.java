@@ -8,6 +8,8 @@ import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.repository.WorkTimeRepository;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 
+import java.util.Optional;
+
 @Service
 public class WorkTimeServiceImpl extends AbstractEntityTransactionalService<WorkTime> implements WorkTimeService {
 
@@ -17,8 +19,8 @@ public class WorkTimeServiceImpl extends AbstractEntityTransactionalService<Work
     }
 
     @Override
-    public WorkTime getWorkTimeOfUserAndProject(User user, Project project) {
-        return getRepository().findByUserAndProject(user, project);
+    public Optional<WorkTime> getWorkTimeOfUserAndProject(User user, Project project) {
+        return Optional.ofNullable(getRepository().findByUserAndProject(user, project));
     }
 
     @Override

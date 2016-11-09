@@ -47,7 +47,7 @@ public class SocketServerRunner implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) throws IOException {
         createServerSocket();
         LOG.info("Waiting for a client...");
 
@@ -58,12 +58,16 @@ public class SocketServerRunner implements CommandLineRunner {
             openObjectInputStream();
             openDataOutputStream();
             openDataInputStream();
-
+            
             ServerCommands command;
             while (!clientRequestClose(command = readServerCommand())) {
                 LOG.info("Client entered command {}", command.name());
 
-                processClientInput(command);
+                try {
+                    processClientInput(command);
+                } catch (Exception e) {
+                    LOG.error("Error1", e);
+                }
             }
         }
     }
@@ -98,8 +102,13 @@ public class SocketServerRunner implements CommandLineRunner {
 //        out.close();
     }
 
-    private ServerCommands readServerCommand() throws IOException, ClassNotFoundException {
-        return (ServerCommands) objectInputStream.readObject();
+    private ServerCommands readServerCommand() {
+        try {
+            return (ServerCommands) objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            LOG.error("readServerCommand", e);
+        }
+        return ServerCommands.CLOSE;
     }
 
     private boolean clientRequestClose(ServerCommands command) throws IOException {
@@ -120,6 +129,8 @@ public class SocketServerRunner implements CommandLineRunner {
 
     private void processClientInput(ServerCommands command) throws IOException, ClassNotFoundException {
         if (ServerCommands.AUTHENTICATE == command) {
+//            Object obj = objectInputStream.readObject();
+//            LOG.warn("Object {}", obj);
             UserPassword auth = (UserPassword) objectInputStream.readObject();
             String token = matrixServerApi.authenticate(auth.getUsername(), auth.getPassword());
             sendStringResponse(token);

@@ -1,6 +1,7 @@
 package ua.softgroup.matrix.server.service;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface GeneralEntityService<T> {
 
@@ -10,7 +11,7 @@ public interface GeneralEntityService<T> {
      * @param id entity's primary key
      * @return the entity with the given {@code id}
      */
-    T getById(Long id);
+    Optional<T> getById(Long id);
 
     /**
      * Saves or update an entity in a data source.

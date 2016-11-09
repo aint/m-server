@@ -5,6 +5,7 @@ import ua.softgroup.matrix.server.service.GeneralEntityService;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class AbstractEntityTransactionalService<T> implements GeneralEntityService<T> {
@@ -18,8 +19,8 @@ public abstract class AbstractEntityTransactionalService<T> implements GeneralEn
     protected abstract CrudRepository<T, Long> getRepository();
 
     @Override
-    public T getById(Long id) {
-        return repository.findOne(id);
+    public Optional<T> getById(Long id) {
+        return Optional.ofNullable(repository.findOne(id));
     }
 
     @Override

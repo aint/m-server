@@ -14,6 +14,7 @@ import ua.softgroup.matrix.server.supervisor.models.LoginResponseModel;
 import ua.softgroup.matrix.server.supervisor.models.UserModel;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl extends AbstractEntityTransactionalService<User> implements UserService {
@@ -96,8 +97,8 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     }
 
     @Override
-    public User getByTrackerToken(String token) {
-        return getRepository().findByTrackerToken(token);
+    public Optional<User> getByTrackerToken(String token) {
+        return Optional.ofNullable(getRepository().findByTrackerToken(token));
     }
 
     @Override

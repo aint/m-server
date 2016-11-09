@@ -152,4 +152,14 @@ public class WorkTime implements Serializable {
     public void setScreenshots(List<Screenshot> screenshots) {
         this.screenshots = screenshots;
     }
+
+    @Override
+    public String toString() {
+        return "WorkTime{" +
+                "id=" + id +
+                ", startedWork=" + startedWork +
+                ", todayMinutes=" + todayMinutes +
+                ", totalMinutes=" + totalMinutes +
+                '}';
+    }
 }

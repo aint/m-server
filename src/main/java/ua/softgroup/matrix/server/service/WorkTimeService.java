@@ -4,8 +4,10 @@ import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 
+import java.util.Optional;
+
 public interface WorkTimeService extends GeneralEntityService<WorkTime> {
 
-    WorkTime getWorkTimeOfUserAndProject(User user, Project project);
+    Optional<WorkTime> getWorkTimeOfUserAndProject(User user, Project project);
 
 }
