@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -42,6 +43,8 @@ public class Project implements RetrofitModel, Serializable {
     @JsonProperty("rate_currency_id")
     @Column
     private int rateCurrencyId;
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<User> users = new HashSet<>();
 
     //TODO FIX THIS
     @OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -117,6 +120,14 @@ public class Project implements RetrofitModel, Serializable {
 
     public void setReports(Set<Report> reports) {
         this.reports = reports;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 
     @Override
