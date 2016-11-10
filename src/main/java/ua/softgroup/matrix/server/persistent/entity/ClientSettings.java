@@ -15,15 +15,30 @@ public class ClientSettings implements Serializable {
     private int settingsVersion;
 
     @Column
-    private int screenshotUpdateFrequently;
+    private int screenshotUpdateFrequentlyInMinutes;
 
     @Column
-    private int keyboardUpdateFrequently;
+    private int keyboardUpdateFrequentlyInMinutes;
 
     @Column
-    private int startDowntimeAfter;
+    private int startDowntimeAfterInMinutes;
+
+    @Column
+    private int reportEditablePeriodInDays;
 
     public ClientSettings() {
+    }
+
+    public ClientSettings(int settingsVersion,
+                          int screenshotUpdateFrequentlyInMinutes,
+                          int keyboardUpdateFrequentlyInMinutes,
+                          int startDowntimeAfterInMinutes,
+                          int reportEditablePeriodInDays) {
+        this.settingsVersion = settingsVersion;
+        this.screenshotUpdateFrequentlyInMinutes = screenshotUpdateFrequentlyInMinutes;
+        this.keyboardUpdateFrequentlyInMinutes = keyboardUpdateFrequentlyInMinutes;
+        this.startDowntimeAfterInMinutes = startDowntimeAfterInMinutes;
+        this.reportEditablePeriodInDays = reportEditablePeriodInDays;
     }
 
     public Long getId() {
@@ -34,10 +49,6 @@ public class ClientSettings implements Serializable {
         this.id = id;
     }
 
-    public ClientSettings(int screenshotUpdateFrequently, int keyboardUpdateFrequently) {
-        this.screenshotUpdateFrequently = screenshotUpdateFrequently;
-        this.keyboardUpdateFrequently = keyboardUpdateFrequently;
-    }
 
     public int getSettingsVersion() {
         return settingsVersion;
@@ -47,27 +58,47 @@ public class ClientSettings implements Serializable {
         this.settingsVersion = settingsVersion;
     }
 
-    public int getScreenshotUpdateFrequently() {
-        return screenshotUpdateFrequently;
+    public int getScreenshotUpdateFrequentlyInMinutes() {
+        return screenshotUpdateFrequentlyInMinutes;
     }
 
-    public void setScreenshotUpdateFrequently(int screenshotUpdateFrequently) {
-        this.screenshotUpdateFrequently = screenshotUpdateFrequently;
+    public void setScreenshotUpdateFrequentlyInMinutes(int screenshotUpdateFrequentlyInMinutes) {
+        this.screenshotUpdateFrequentlyInMinutes = screenshotUpdateFrequentlyInMinutes;
     }
 
-    public int getKeyboardUpdateFrequently() {
-        return keyboardUpdateFrequently;
+    public int getKeyboardUpdateFrequentlyInMinutes() {
+        return keyboardUpdateFrequentlyInMinutes;
     }
 
-    public void setKeyboardUpdateFrequently(int keyboardUpdateFrequently) {
-        this.keyboardUpdateFrequently = keyboardUpdateFrequently;
+    public void setKeyboardUpdateFrequentlyInMinutes(int keyboardUpdateFrequentlyInMinutes) {
+        this.keyboardUpdateFrequentlyInMinutes = keyboardUpdateFrequentlyInMinutes;
     }
 
-    public int getStartDowntimeAfter() {
-        return startDowntimeAfter;
+    public int getStartDowntimeAfterInMinutes() {
+        return startDowntimeAfterInMinutes;
     }
 
-    public void setStartDowntimeAfter(int startDowntimeAfter) {
-        this.startDowntimeAfter = startDowntimeAfter;
+    public void setStartDowntimeAfterInMinutes(int startDowntimeAfterInMinutes) {
+        this.startDowntimeAfterInMinutes = startDowntimeAfterInMinutes;
+    }
+
+    public int getReportEditablePeriodInDays() {
+        return reportEditablePeriodInDays;
+    }
+
+    public void setReportEditablePeriodInDays(int reportEditablePeriodInDays) {
+        this.reportEditablePeriodInDays = reportEditablePeriodInDays;
+    }
+
+    @Override
+    public String toString() {
+        return "ClientSettings{" +
+                "id=" + id +
+                ", settingsVersion=" + settingsVersion +
+                ", screenshotUpdateFrequentlyInMinutes=" + screenshotUpdateFrequentlyInMinutes +
+                ", keyboardUpdateFrequentlyInMinutes=" + keyboardUpdateFrequentlyInMinutes +
+                ", startDowntimeAfterInMinutes=" + startDowntimeAfterInMinutes +
+                ", reportEditablePeriodInDays=" + reportEditablePeriodInDays +
+                '}';
     }
 }

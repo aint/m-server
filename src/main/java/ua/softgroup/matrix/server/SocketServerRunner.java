@@ -8,6 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.ServerCommands;
+import ua.softgroup.matrix.server.config.LoadDefaultConfig;
 import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.SynchronizedModel;
@@ -15,22 +16,23 @@ import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
+import ua.softgroup.matrix.server.service.ClientSettingsService;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Properties;
 
 @SpringBootApplication
 public class SocketServerRunner implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SocketServerRunner.class);
 
     private final MatrixServerApi matrixServerApi;
+    private final ClientSettingsService clientSettingsService;
+    private final LoadDefaultConfig defaultConfig;
 
     private ServerSocket serverSocket;
     private Socket clientSocket;
@@ -39,8 +41,10 @@ public class SocketServerRunner implements CommandLineRunner {
     private DataInputStream dataInputStream;
 
     @Autowired
-    public SocketServerRunner(MatrixServerApi matrixServerApi) {
+    public SocketServerRunner(MatrixServerApi matrixServerApi, ClientSettingsService clientSettingsService, LoadDefaultConfig defaultConfig) {
         this.matrixServerApi = matrixServerApi;
+        this.clientSettingsService = clientSettingsService;
+        this.defaultConfig = defaultConfig;
     }
 
     public static void main(String[] args) {
@@ -50,6 +54,8 @@ public class SocketServerRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws IOException {
         createServerSocket();
+        processClientSettings();
+
         LOG.info("Waiting for a client...");
 
         while (true) {
@@ -73,16 +79,14 @@ public class SocketServerRunner implements CommandLineRunner {
         }
     }
 
-    private int readServerPortFromConfig() throws IOException {
-        InputStream in = SocketServerRunner.class.getClassLoader().getResourceAsStream("server.properties");
-        Properties prop = new Properties();
-        prop.load(in);
-        return Integer.valueOf(prop.getProperty("port"));
-
+    private void processClientSettings(){
+        if(clientSettingsService.getAll().isEmpty()){
+            clientSettingsService.save(defaultConfig.getClientSettings());
+        }
     }
 
     private void createServerSocket() throws IOException {
-        serverSocket = new ServerSocket(readServerPortFromConfig());
+        serverSocket = new ServerSocket(defaultConfig.getServerPort());
     }
 
     private void acceptClientSocket() throws IOException {
