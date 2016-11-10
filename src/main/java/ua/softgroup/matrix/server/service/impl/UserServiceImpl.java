@@ -31,11 +31,21 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
         try {
             return tryToAuthenticate(username, password);
         } catch (IOException e) {
-            // TODO return invalid credentials
-            // TODO read date from db
-            LOG.error("Authentication error: {}", e);
-            return Constants.INVALID_USERNAME.name();
+            LOG.warn("Authentication error: {}", e);
+            return authenticateFromDb(username, password);
         }
+    }
+
+    private String authenticateFromDb(String username, String password) {
+        User user = getRepository().findByUsername(username);
+        if (user != null) {
+            if (user.getPassword().equals(password)) {
+                LOG.info("Offline authentication. Given token {}", user.getTrackerToken());
+                return user.getTrackerToken();
+            }
+            return Constants.INVALID_PASSWORD.name();
+        }
+        return Constants.INVALID_USERNAME.name();
     }
 
     private String tryToAuthenticate(String username, String password) throws IOException {
