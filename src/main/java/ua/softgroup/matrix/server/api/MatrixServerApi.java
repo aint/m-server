@@ -7,6 +7,7 @@ import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.SynchronizedModel;
 import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
 
 import java.util.Set;
@@ -16,11 +17,10 @@ public interface MatrixServerApi {
     /**
      * Tries to authenticate a user using the given credentials
      *
-     * @param login encrypted login
-     * @param password encrypted password
+     * @param userPassword DTO with username and password
      * @return a token in the case of successful authentication, 'invalid credentials' otherwise
      */
-    String authenticate(String login, String password);
+    String authenticate(UserPassword userPassword);
 
     /**
      * Returns all projects of the authenticated user

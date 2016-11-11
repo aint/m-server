@@ -134,8 +134,7 @@ public class SocketServerRunner implements CommandLineRunner {
 
     private void processClientInput(ServerCommands command) throws IOException, ClassNotFoundException {
         if (ServerCommands.AUTHENTICATE == command) {
-            UserPassword auth = (UserPassword) objectInputStream.readObject();
-            String token = matrixServerApi.authenticate(auth.getUsername(), auth.getPassword());
+            String token = matrixServerApi.authenticate((UserPassword) objectInputStream.readObject());
             sendStringResponse(token);
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();

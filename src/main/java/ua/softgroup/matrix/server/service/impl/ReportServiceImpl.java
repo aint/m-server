@@ -11,6 +11,7 @@ import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
 
+import javax.validation.Validator;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -21,12 +22,14 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
 
     private final ProjectService projectService;
     private final UserService userService;
+    private final Validator validator;
 
     @Autowired
-    public ReportServiceImpl(ReportRepository repository, ProjectService projectService, UserService userService) {
+    public ReportServiceImpl(ReportRepository repository, ProjectService projectService, UserService userService, Validator validator) {
         super(repository);
         this.projectService = projectService;
         this.userService = userService;
+        this.validator = validator;
     }
 
     @Override
@@ -48,6 +51,7 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
 
     @Override
     public Report save(ReportModel rm) throws NoSuchElementException {
+        if (!validator.validate(rm).isEmpty()) return null;
         User user = userService.getByTrackerToken(rm.getToken()).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(rm.getProjectId()).orElseThrow(NoSuchElementException::new);
         Report report = Optional.ofNullable(getRepository().findOne(rm.getId())).orElse(new Report(rm.getId()));

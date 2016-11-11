@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 import ua.softgroup.matrix.server.api.Constants;
+import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 import ua.softgroup.matrix.server.service.UserService;
@@ -13,6 +14,7 @@ import ua.softgroup.matrix.server.supervisor.SupervisorQueriesSingleton;
 import ua.softgroup.matrix.server.supervisor.models.LoginResponseModel;
 import ua.softgroup.matrix.server.supervisor.models.UserModel;
 
+import javax.validation.Validator;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -21,18 +23,22 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
 
     private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
+    private final Validator validator;
+
     @Autowired
-    public UserServiceImpl(UserRepository repository) {
+    public UserServiceImpl(UserRepository repository, Validator validator) {
         super(repository);
+        this.validator = validator;
     }
 
     @Override
-    public String authenticate(String username, String password) {
+    public String authenticate(UserPassword up) {
+        if (!validator.validate(up).isEmpty()) return Constants.INVALID_USERNAME.toString();
         try {
-            return tryToAuthenticate(username, password);
+            return tryToAuthenticate(up.getUsername(), up.getPassword());
         } catch (IOException e) {
             LOG.warn("Authentication error: {}", e);
-            return authenticateFromDb(username, password);
+            return authenticateFromDb(up.getUsername(), up.getPassword());
         }
     }
 

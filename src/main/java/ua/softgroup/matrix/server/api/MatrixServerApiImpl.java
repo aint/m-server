@@ -11,6 +11,7 @@ import ua.softgroup.matrix.server.model.ScreenshotModel;
 import ua.softgroup.matrix.server.model.SynchronizedModel;
 import ua.softgroup.matrix.server.model.TimeModel;
 import ua.softgroup.matrix.server.model.TokenModel;
+import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.persistent.entity.Downtime;
@@ -69,9 +70,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private MetricsService metricsService;
 
     @Override
-    public String authenticate(String username, String password) {
-        LOG.info("Authenticate {}, {}", username, password);
-        return userService.authenticate(username, password);
+    public String authenticate(UserPassword userPassword) {
+        LOG.info("Authenticate {}, {}", userPassword);
+        return userService.authenticate(userPassword);
     }
 
     @Override
