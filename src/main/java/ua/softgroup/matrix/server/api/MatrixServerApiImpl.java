@@ -15,6 +15,7 @@ import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.persistent.entity.Downtime;
+import ua.softgroup.matrix.server.persistent.entity.DowntimePeriod;
 import ua.softgroup.matrix.server.persistent.entity.Keyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
@@ -248,6 +249,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             downtime.setMinutes(downtime.getMinutes() + duration.toMinutes());
             downtime.setStartTime(null);
             downtimeService.save(downtime);
+            periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), userWorkTime));
         }
 
     }
