@@ -20,7 +20,7 @@ public class ProjectModel implements Serializable {
 
     private int rate;
 
-    private int rateCurrencyId;
+    private String rateCurrency;
 
 
     public long getId() {
@@ -79,12 +79,12 @@ public class ProjectModel implements Serializable {
         this.rate = rate;
     }
 
-    public int getRateCurrencyId() {
-        return rateCurrencyId;
+    public String getRateCurrency() {
+        return rateCurrency;
     }
 
-    public void setRateCurrencyId(int rateCurrencyId) {
-        this.rateCurrencyId = rateCurrencyId;
+    public void setRateCurrency(String rateCurrency) {
+        this.rateCurrency = rateCurrency;
     }
 
     @Override
@@ -97,7 +97,7 @@ public class ProjectModel implements Serializable {
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", rate=" + rate +
-                ", rateCurrencyId=" + rateCurrencyId +
+                ", rateCurrency=" + rateCurrency +
                 '}';
     }
 }

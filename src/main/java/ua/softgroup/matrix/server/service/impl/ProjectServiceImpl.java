@@ -13,11 +13,14 @@ import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.supervisor.SupervisorQueriesSingleton;
+import ua.softgroup.matrix.server.supervisor.models.CurrenciesResponseModel;
+import ua.softgroup.matrix.server.supervisor.models.CurrencyModel;
 import ua.softgroup.matrix.server.supervisor.models.UserActiveProjectsResponseModel;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,6 +32,8 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     private static final Logger LOG = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
     private final UserService userService;
+
+    private Map<Integer, String> currencyMap;
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository repository, UserService userService) {
@@ -42,6 +47,18 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         Set<Project> entities = new HashSet<>();
 //        getRepository().findAll().forEach(entities::add);
         return entities;
+    }
+
+    private void queryCurrencies(String token) throws IOException {
+        Response<CurrenciesResponseModel> response = SupervisorQueriesSingleton.getInstance()
+                .getSupervisorQueries()
+                .getCurrencies(token)
+                .execute();
+        if (!response.isSuccessful()) {
+            throw new IOException("Oops... Something goes wrong. " + response.errorBody().string());
+        }
+        currencyMap = response.body().getCurrencyModelList().stream()
+                .collect(Collectors.toMap(CurrencyModel::getId, CurrencyModel::getName));
     }
 
     private UserActiveProjectsResponseModel queryUserActiveProjects(String token) throws IOException {
@@ -61,6 +78,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         User user = userService.getByTrackerToken(token).orElseThrow(NoSuchElementException::new);
         Stream<Project> projectStream;
         try {
+            queryCurrencies(token);
             projectStream = queryUserActiveProjects(token).getProjectModelList().stream()
                     .map(project -> addUserAndSaveProject(project, user));
         } catch (IOException e) {
@@ -88,7 +106,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         projectModel.setStartDate(project.getStartDate());
         projectModel.setEndDate(project.getEndDate());
         projectModel.setRate(project.getRate());
-        projectModel.setRateCurrencyId(project.getRateCurrencyId());
+        projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId()));
         return projectModel;
     }
 
