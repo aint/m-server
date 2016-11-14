@@ -19,7 +19,7 @@ import ua.softgroup.matrix.server.persistent.entity.Keyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
-import ua.softgroup.matrix.server.persistent.entity.TimePeriod;
+import ua.softgroup.matrix.server.persistent.entity.WorktimePeriod;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
@@ -27,7 +27,7 @@ import ua.softgroup.matrix.server.service.DowntimeService;
 import ua.softgroup.matrix.server.service.MetricsService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
-import ua.softgroup.matrix.server.service.TimePeriodService;
+import ua.softgroup.matrix.server.service.PeriodService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 
@@ -63,7 +63,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Autowired
     private WorkTimeService workTimeService ;
     @Autowired
-    private TimePeriodService timePeriodService;
+    private PeriodService periodService;
     @Autowired
     private DowntimeService downtimeService;
     @Autowired
@@ -211,7 +211,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) minutes);
             userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) minutes);
             workTimeService.save(userWorkTime);
-            timePeriodService.save(new TimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
+            periodService.save(new WorktimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
         }
     }
 
@@ -275,7 +275,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
                                 userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) timeModel.getMinute());
                                 workTimeService.save(userWorkTime);
-                                timePeriodService.save(new TimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
+                                periodService.save(new WorktimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
                         }));
 
         Optional.ofNullable(synchronizedModel.getDowntimeModel())

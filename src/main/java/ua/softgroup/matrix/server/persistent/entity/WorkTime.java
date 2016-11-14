@@ -38,7 +38,7 @@ public class WorkTime implements Serializable {
     private User user;
 
     @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<TimePeriod> timePeriods;
+    private Set<WorktimePeriod> worktimePeriods;
 
     @OneToOne(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
     private Downtime downtime;
@@ -119,12 +119,12 @@ public class WorkTime implements Serializable {
         this.user = user;
     }
 
-    public Set<TimePeriod> getTimePeriods() {
-        return timePeriods;
+    public Set<WorktimePeriod> getWorktimePeriods() {
+        return worktimePeriods;
     }
 
-    public void setTimePeriods(Set<TimePeriod> timePeriods) {
-        this.timePeriods = timePeriods;
+    public void setWorktimePeriods(Set<WorktimePeriod> worktimePeriods) {
+        this.worktimePeriods = worktimePeriods;
     }
 
     public Downtime getDowntime() {

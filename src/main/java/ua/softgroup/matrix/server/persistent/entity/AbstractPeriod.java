@@ -1,11 +1,16 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-@Entity
-public class TimePeriod implements Serializable {
+@MappedSuperclass
+public class AbstractPeriod implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -18,31 +23,10 @@ public class TimePeriod implements Serializable {
     @Column
     private LocalDateTime end;
 
-    @Column
-    private boolean externalHourlyRate = false;
-
     @ManyToOne
     private WorkTime workTime;
 
-    public TimePeriod() {
-    }
-
-    public TimePeriod(LocalDateTime start, LocalDateTime end) {
-        this.start = start;
-        this.end = end;
-    }
-
-    public TimePeriod(LocalDateTime start, LocalDateTime end, WorkTime workTime) {
-        this.start = start;
-        this.end = end;
-        this.workTime = workTime;
-    }
-
-    public TimePeriod(LocalDateTime start, LocalDateTime end, boolean externalHourlyRate, WorkTime workTime) {
-        this.start = start;
-        this.end = end;
-        this.externalHourlyRate = externalHourlyRate;
-        this.workTime = workTime;
+    public AbstractPeriod() {
     }
 
     public Long getId() {
@@ -69,19 +53,20 @@ public class TimePeriod implements Serializable {
         this.end = end;
     }
 
-    public boolean isExternalHourlyRate() {
-        return externalHourlyRate;
-    }
-
-    public void setExternalHourlyRate(boolean externalHourlyRate) {
-        this.externalHourlyRate = externalHourlyRate;
-    }
-
     public WorkTime getWorkTime() {
         return workTime;
     }
 
     public void setWorkTime(WorkTime workTime) {
         this.workTime = workTime;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractPeriod{" +
+                "start=" + start +
+                ", end=" + end +
+                ", id=" + id +
+                '}';
     }
 }
