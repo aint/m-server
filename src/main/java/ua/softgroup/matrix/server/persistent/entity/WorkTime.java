@@ -31,6 +31,13 @@ public class WorkTime implements Serializable {
     @Column
     private Integer totalMinutes = 0;
 
+    @Column
+    private Integer rateCurrencyId = 0;
+
+    @Column
+    private Integer rate = 0;
+
+
     @ManyToOne
     private Project project;
 
@@ -50,6 +57,11 @@ public class WorkTime implements Serializable {
     private List<Screenshot> screenshots;
 
     public WorkTime() {
+    }
+
+    public WorkTime(Project project, User user) {
+        this.project = project;
+        this.user = user;
     }
 
     public WorkTime(LocalDateTime startedWork, Project project, User user) {
@@ -151,6 +163,22 @@ public class WorkTime implements Serializable {
         this.screenshots = screenshots;
     }
 
+    public Integer getRateCurrencyId() {
+        return rateCurrencyId;
+    }
+
+    public void setRateCurrencyId(Integer rateCurrencyId) {
+        this.rateCurrencyId = rateCurrencyId;
+    }
+
+    public Integer getRate() {
+        return rate;
+    }
+
+    public void setRate(Integer rate) {
+        this.rate = rate;
+    }
+
     @Override
     public String toString() {
         return "WorkTime{" +
@@ -158,6 +186,8 @@ public class WorkTime implements Serializable {
                 ", startedWork=" + startedWork +
                 ", todayMinutes=" + todayMinutes +
                 ", totalMinutes=" + totalMinutes +
+                ", rateCurrencyId=" + rateCurrencyId +
+                ", rate=" + rate +
                 '}';
     }
 }

@@ -9,9 +9,11 @@ import retrofit2.Response;
 import ua.softgroup.matrix.server.model.ProjectModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.SupervisorQueriesSingleton;
 import ua.softgroup.matrix.server.supervisor.models.CurrenciesResponseModel;
 import ua.softgroup.matrix.server.supervisor.models.CurrencyModel;
@@ -19,6 +21,7 @@ import ua.softgroup.matrix.server.supervisor.models.UserActiveProjectsResponseMo
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -32,13 +35,15 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     private static final Logger LOG = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
     private final UserService userService;
+    private final WorkTimeService workTimeService;
 
-    private Map<Integer, String> currencyMap;
+    private Map<Integer, String> currencyMap = new HashMap<>();
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepository repository, UserService userService) {
+    public ProjectServiceImpl(ProjectRepository repository, UserService userService, WorkTimeService workTimeService) {
         super(repository);
         this.userService = userService;
+        this.workTimeService = workTimeService;
     }
 
     @Override
@@ -84,10 +89,12 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         } catch (IOException e) {
             LOG.warn("Failed to query get-user-active-projects {}", e);
             projectStream = user.getProjects().stream();
+                    .map(project -> updateProjectRateFromWorkTime(user, project));
         }
         return projectStream
                 .filter(project -> LocalDate.now().isBefore(project.getEndDate()))
                 .peek(project ->  LOG.debug("User {}, {}", user.getUsername(), project))
+                .map(project -> setWorkTimeRateFromProject(user, project))
                 .map(this::convertProjectEntityToModel)
                 .collect(Collectors.toCollection(HashSet::new));
     }
@@ -108,6 +115,21 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         projectModel.setRate(project.getRate());
         projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId()));
         return projectModel;
+    }
+
+    private Project setWorkTimeRateFromProject(User user, Project project) {
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(project, user));
+        workTime.setRate(project.getRate());
+        workTime.setRateCurrencyId(project.getRateCurrencyId());
+        workTimeService.save(workTime);
+        return project;
+    }
+
+    private Project updateProjectRateFromWorkTime(User user, Project project) {
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(project, user));
+        project.setRate(workTime.getRate());
+        project.setRateCurrencyId(workTime.getRateCurrencyId());
+        return project;
     }
 
     @Override

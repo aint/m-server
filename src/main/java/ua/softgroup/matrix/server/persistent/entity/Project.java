@@ -22,27 +22,35 @@ public class Project implements RetrofitModel, Serializable {
     @JsonProperty("id")
     @Id
     private long id;
+
     @JsonProperty("title")
     @Column(columnDefinition = "TEXT")
     private String title;
+
     @JsonProperty("description_text")
     @Column
     private String description;
+
     @JsonProperty("author_name")
     @Column
     private String authorName;
+
     @JsonProperty("start_date")
     @Column
     private LocalDate startDate;
+
     @JsonProperty("end_date")
     @Column
     private LocalDate endDate;
+
     @JsonProperty("rate")
-    @Column
+//    @Transient
     private int rate;
+
     @JsonProperty("rate_currency_id")
-    @Column
+//    @Transient
     private int rateCurrencyId;
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<User> users = new HashSet<>();
 
