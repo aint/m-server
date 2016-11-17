@@ -87,12 +87,12 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
             projectStream = queryUserActiveProjects(token).getProjectModelList().stream()
                     .map(project -> addUserAndSaveProject(project, user));
         } catch (IOException e) {
-            LOG.warn("Failed to query get-user-active-projects {}", e);
-            projectStream = user.getProjects().stream();
+            LOG.info("Failed to query get-user-active-projects {}", e);
+            projectStream = user.getProjects().stream()
                     .map(project -> updateProjectRateFromWorkTime(user, project));
         }
         return projectStream
-                .filter(project -> LocalDate.now().isBefore(project.getEndDate()))
+                .filter(project -> project.getEndDate() == null || LocalDate.now().isBefore(project.getEndDate()))
                 .peek(project ->  LOG.debug("User {}, {}", user.getUsername(), project))
                 .map(project -> setWorkTimeRateFromProject(user, project))
                 .map(this::convertProjectEntityToModel)
