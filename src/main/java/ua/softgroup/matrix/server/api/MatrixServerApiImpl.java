@@ -14,21 +14,19 @@ import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
-import ua.softgroup.matrix.server.persistent.entity.Downtime;
 import ua.softgroup.matrix.server.persistent.entity.DowntimePeriod;
 import ua.softgroup.matrix.server.persistent.entity.Keyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
-import ua.softgroup.matrix.server.persistent.entity.WorktimePeriod;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
+import ua.softgroup.matrix.server.persistent.entity.WorktimePeriod;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
-import ua.softgroup.matrix.server.service.DowntimeService;
 import ua.softgroup.matrix.server.service.MetricsService;
+import ua.softgroup.matrix.server.service.PeriodService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
-import ua.softgroup.matrix.server.service.PeriodService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 
@@ -65,8 +63,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private WorkTimeService workTimeService ;
     @Autowired
     private PeriodService periodService;
-    @Autowired
-    private DowntimeService downtimeService;
     @Autowired
     private MetricsService metricsService;
 
@@ -223,13 +219,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("startDowntime User {}", user);
         Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
         WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
-        Downtime downtime = userWorkTime.getDowntime();
-        if (downtime == null) {
-            downtime = new Downtime(userWorkTime);
-        }
-        downtime.setStartTime(LocalDateTime.now());
-        downtimeService.save(downtime);
-
+        userWorkTime.setStartDowntime(LocalDateTime.now());
+        workTimeService.save(userWorkTime);
     }
 
     @Override
@@ -240,15 +231,14 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
         WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
         LOG.debug("endDowntime WorkTime {}", userWorkTime);
-        Downtime downtime = Optional.ofNullable(userWorkTime.getDowntime()).orElse(new Downtime(userWorkTime));
-        LocalDateTime startTime = downtime.getStartTime();
+        LocalDateTime startTime = userWorkTime.getStartDowntime();
         if (startTime != null) {
             Duration duration = Duration.between(startTime, LocalDateTime.now());
             LOG.debug("Downtime in minutes {}", duration.toMinutes());
             LOG.debug("Downtime in millis {}", duration.toMillis());
-            downtime.setMinutes(downtime.getMinutes() + duration.toMinutes());
-            downtime.setStartTime(null);
-            downtimeService.save(downtime);
+            userWorkTime.setDowntimeMinutes(userWorkTime.getDowntimeMinutes() + duration.toMinutes());
+            userWorkTime.setStartDowntime(null);
+            workTimeService.save(userWorkTime);
             periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), userWorkTime));
         }
 
@@ -290,13 +280,11 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 LOG.warn("User id {}, Project id {}", user.getId(), project.getId());
                                 WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
                                 LOG.debug("WorkTime {}", userWorkTime);
-                                Downtime downtime = Optional.ofNullable(userWorkTime.getDowntime()).orElse(new Downtime(userWorkTime));
-                                LOG.debug("Downtime {}", downtime);
-                                downtime.setStartTime(null);
+                                userWorkTime.setStartDowntime(null);
                                 long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getHours() - downtimeModel.getMinute());
                                 LOG.warn("Downtime diff {}", diff);
-                                downtime.setMinutes(diff > 0 ? diff : downtime.getMinutes());
-                                downtimeService.save(downtime);
+                                userWorkTime.setDowntimeMinutes(diff > 0 ? diff : userWorkTime.getDowntimeMinutes());
+                                workTimeService.save(userWorkTime);
                         }));
 
         return true;
@@ -352,7 +340,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         Integer totalMinutes = totalWorkTime.getTotalMinutes();
         int hours = totalMinutes / 60;
         int minutes = totalMinutes - hours * 60;
-        Long downtime = Optional.ofNullable(totalWorkTime.getDowntime()).orElse(new Downtime()).getMinutes();
+        Long downtime = totalWorkTime.getDowntimeMinutes();
         double downtimePercent = Math.floor(downtime * 100 / Double.valueOf(totalMinutes) * 100) / 100;
         LOG.debug("getTotalWorkTime: hours {}, minutes {}, downtime {}%", hours, minutes, downtimePercent);
         return new TimeModel(hours, minutes, downtimePercent);

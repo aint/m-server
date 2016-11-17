@@ -8,7 +8,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,11 +31,16 @@ public class WorkTime implements Serializable {
     private Integer totalMinutes = 0;
 
     @Column
-    private Integer rateCurrencyId = 0;
+    private Long downtimeMinutes = 0L;
+
+    @Column
+    private LocalDateTime startDowntime;
 
     @Column
     private Integer rate = 0;
 
+    @Column
+    private Integer rateCurrencyId = 0;
 
     @ManyToOne
     private Project project;
@@ -47,8 +51,8 @@ public class WorkTime implements Serializable {
     @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorktimePeriod> worktimePeriods;
 
-    @OneToOne(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Downtime downtime;
+    @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DowntimePeriod> downtimePeriods;
 
     @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Keyboard> keyboardLogs;
@@ -115,6 +119,22 @@ public class WorkTime implements Serializable {
         this.totalMinutes = totalMinutes;
     }
 
+    public Long getDowntimeMinutes() {
+        return downtimeMinutes;
+    }
+
+    public void setDowntimeMinutes(Long downtimeMinutes) {
+        this.downtimeMinutes = downtimeMinutes;
+    }
+
+    public LocalDateTime getStartDowntime() {
+        return startDowntime;
+    }
+
+    public void setStartDowntime(LocalDateTime startTime) {
+        this.startDowntime = startTime;
+    }
+
     public Project getProject() {
         return project;
     }
@@ -139,12 +159,12 @@ public class WorkTime implements Serializable {
         this.worktimePeriods = worktimePeriods;
     }
 
-    public Downtime getDowntime() {
-        return downtime;
+    public Set<DowntimePeriod> getDowntimePeriods() {
+        return downtimePeriods;
     }
 
-    public void setDowntime(Downtime downtime) {
-        this.downtime = downtime;
+    public void setDowntimePeriods(Set<DowntimePeriod> downtimePeriods) {
+        this.downtimePeriods = downtimePeriods;
     }
 
     public List<Keyboard> getKeyboardLogs() {
@@ -186,8 +206,10 @@ public class WorkTime implements Serializable {
                 ", startedWork=" + startedWork +
                 ", todayMinutes=" + todayMinutes +
                 ", totalMinutes=" + totalMinutes +
-                ", rateCurrencyId=" + rateCurrencyId +
+                ", downtimeMinutes=" + downtimeMinutes +
+                ", startDowntime=" + startDowntime +
                 ", rate=" + rate +
+                ", rateCurrencyId=" + rateCurrencyId +
                 '}';
     }
 }
