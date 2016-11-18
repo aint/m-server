@@ -163,14 +163,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public Set<ProjectModel> getAllProjects(TokenModel tokenModel) {
-        return null;
-//                projectService.getAll().stream()
-//                .map(p -> new ProjectModel(p.getId(), p.getTitle(), p.getDescription(), p.getRate()))
-//                .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    @Override
     public Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel) {
         return projectService.getUserActiveProjects(tokenModel.getToken());
     }
@@ -295,7 +287,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("Client settings version {}", settingsVersion);
         ClientSettings clientSettings = clientSettingsService.getAll().stream()
                 .findFirst()
-                .orElseThrow(NoSuchElementException::new); //TODO set default settings
+                .orElseThrow(NoSuchElementException::new);
         int dbSettingsVersion = clientSettings.getSettingsVersion();
         LOG.debug("DB settings version {}", dbSettingsVersion);
         return dbSettingsVersion != settingsVersion;
@@ -306,7 +298,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         return clientSettingsService.getAll().stream()
                 .findFirst()
                 .map(this::convertClientSettingsToModel)
-                .orElseThrow(NoSuchElementException::new); //TODO set default settings
+                .orElseThrow(NoSuchElementException::new);
     }
 
     @Override

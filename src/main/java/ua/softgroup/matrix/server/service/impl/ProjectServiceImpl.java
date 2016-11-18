@@ -46,14 +46,6 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         this.workTimeService = workTimeService;
     }
 
-    @Override
-    public Set<Project> getAllProjectsOf(User user) {
-        //TODO update or delete this
-        Set<Project> entities = new HashSet<>();
-//        getRepository().findAll().forEach(entities::add);
-        return entities;
-    }
-
     private void queryCurrencies(String token) throws IOException {
         Response<CurrenciesResponseModel> response = SupervisorQueriesSingleton.getInstance()
                 .getSupervisorQueries()

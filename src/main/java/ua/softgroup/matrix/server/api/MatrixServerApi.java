@@ -22,13 +22,6 @@ public interface MatrixServerApi {
      */
     String authenticate(UserPassword userPassword);
 
-    /**
-     * Returns all projects of the authenticated user
-     *
-     * @return a list of projects
-     */
-    Set<ProjectModel> getAllProjects(TokenModel tokenModel);
-
     Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel);
 
     /**
