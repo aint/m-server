@@ -35,7 +35,7 @@ public class Report implements Serializable {
     private String description;
 
     @Column
-    private boolean checked;
+    private boolean checked = false;
 
     @ManyToOne
     private User checker;
