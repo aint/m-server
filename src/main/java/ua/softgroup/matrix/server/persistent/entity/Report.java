@@ -1,7 +1,10 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ua.softgroup.matrix.server.supervisor.jersey.View;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,33 +19,42 @@ import java.time.LocalDateTime;
 public class Report implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @JsonView(View.OUT.class)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonView(View.OUT.class)
     @Column
     @CreationTimestamp
     private LocalDateTime creationDate;
 
+    @JsonView(View.OUT.class)
     @Column
     @UpdateTimestamp
     private LocalDateTime updateDate;
 
+    @JsonView({ View.OUT.class, View.IN.class })
     @Column
     private String title;
 
+    @JsonView({ View.OUT.class, View.IN.class })
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @JsonView({ View.OUT.class, View.IN.class })
     @Column
     private boolean checked = false;
 
+    @JsonIgnore
     @ManyToOne
     private User checker;
 
+    @JsonIgnore
     @ManyToOne
     private User author;
 
+    @JsonIgnore
     @ManyToOne
     private Project project;
 
