@@ -1,5 +1,7 @@
 package ua.softgroup.matrix.server.supervisor.jersey;
 
+import io.jsonwebtoken.JwtException;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -27,6 +29,6 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
     private Response.StatusType getStatusType(Throwable ex) {
         return (ex instanceof WebApplicationException)
                 ? ((WebApplicationException) ex).getResponse().getStatusInfo()
-                : Response.Status.INTERNAL_SERVER_ERROR;
+                : (ex instanceof JwtException ? Response.Status.FORBIDDEN : Response.Status.INTERNAL_SERVER_ERROR);
     }
 }

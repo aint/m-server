@@ -1,12 +1,16 @@
 package ua.softgroup.matrix.server.supervisor.jersey;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 public class ErrorJson {
 
+    @JsonView(View.OUT.class)
     private int code;
 
+    @JsonView(View.OUT.class)
     private String message;
 
     public ErrorJson() {
