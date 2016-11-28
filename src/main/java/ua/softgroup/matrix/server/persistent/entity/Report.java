@@ -43,7 +43,7 @@ public class Report implements Serializable {
     private String description;
 
     @JsonView({ View.OUT.class, View.IN.class })
-    @Column
+    @Column(nullable = false)
     private boolean checked = false;
 
     @JsonIgnore
