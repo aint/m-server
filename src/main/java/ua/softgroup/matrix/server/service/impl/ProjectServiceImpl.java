@@ -1,8 +1,11 @@
 package ua.softgroup.matrix.server.service.impl;
 
+import net.sf.ehcache.Ehcache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import retrofit2.Response;
@@ -19,6 +22,7 @@ import ua.softgroup.matrix.server.supervisor.models.CurrenciesResponseModel;
 import ua.softgroup.matrix.server.supervisor.models.CurrencyModel;
 import ua.softgroup.matrix.server.supervisor.models.UserActiveProjectsResponseModel;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -36,14 +40,22 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
 
     private final UserService userService;
     private final WorkTimeService workTimeService;
+    private final CacheManager cacheManager;
 
     private Map<Integer, String> currencyMap = new HashMap<>();
+    private Cache currencyCache;
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepository repository, UserService userService, WorkTimeService workTimeService) {
+    public ProjectServiceImpl(ProjectRepository repository, UserService userService, WorkTimeService workTimeService, CacheManager cacheManager) {
         super(repository);
         this.userService = userService;
         this.workTimeService = workTimeService;
+        this.cacheManager = cacheManager;
+    }
+
+    @PostConstruct
+    public void initialize() {
+        currencyCache = cacheManager.getCache("currency");
     }
 
     private void queryCurrencies(String token) throws IOException {
@@ -54,7 +66,9 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         if (!response.isSuccessful()) {
             throw new IOException("Oops... Something goes wrong. " + response.errorBody().string());
         }
+
         currencyMap = response.body().getCurrencyModelList().stream()
+                .map(currencyModel -> {currencyCache.put(currencyModel.getId(), currencyModel.getName()); return currencyModel; })
                 .collect(Collectors.toMap(CurrencyModel::getId, CurrencyModel::getName));
     }
 
@@ -80,6 +94,11 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
                     .map(project -> addUserAndSaveProject(project, user));
         } catch (IOException e) {
             LOG.info("Failed to query get-user-active-projects {}", e);
+
+            Ehcache nativeCache = (Ehcache) currencyCache.getNativeCache();
+            LOG.warn("NativeCache size {}", nativeCache.getSize());
+            LOG.warn("NativeCache get {}", nativeCache.getKeys());
+
             projectStream = user.getProjects().stream()
                     .map(project -> updateProjectRateFromWorkTime(user, project));
         }
