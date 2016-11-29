@@ -12,7 +12,6 @@ import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.supervisor.jersey.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.jersey.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.jersey.token.TokenHelper;
 
@@ -73,8 +72,6 @@ public class SupervisorEndpoint {
     @JsonView(JsonViewType.OUT.class)
     public Response getReportsOf(@HeaderParam("token") String token,
                                  @FormParam("project_id") String projectId) throws GeneralSecurityException, JOSEException, ParseException, IOException {
-
-        if (!TokenHelper.validateToken(token)) return Response.status(403).entity(new ErrorJson("Token is not valid")).build();
 
         Project project = projectService.getById(Long.valueOf(projectId)).orElseThrow(NotFoundException::new);
         User user = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);

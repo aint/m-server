@@ -3,6 +3,7 @@ package ua.softgroup.matrix.server.supervisor.jersey.config;
 import com.nimbusds.jose.JOSEException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ua.softgroup.matrix.server.supervisor.jersey.exception.JwtException;
 import ua.softgroup.matrix.server.supervisor.jersey.json.ErrorJson;
 
 import javax.ws.rs.WebApplicationException;
@@ -10,7 +11,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import java.text.ParseException;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -32,7 +32,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
     private Response.StatusType getStatusType(Throwable ex) {
         return (ex instanceof WebApplicationException)
                 ? ((WebApplicationException) ex).getResponse().getStatusInfo()
-                : (ex instanceof JOSEException || ex instanceof ParseException
+                : (ex instanceof JOSEException || ex instanceof JwtException
                         ? Response.Status.FORBIDDEN
                         : Response.Status.INTERNAL_SERVER_ERROR);
     }

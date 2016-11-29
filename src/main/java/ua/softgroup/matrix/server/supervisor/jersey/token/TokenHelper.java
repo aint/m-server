@@ -7,6 +7,7 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import ua.softgroup.matrix.server.supervisor.jersey.exception.JwtException;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,8 +57,13 @@ public class TokenHelper {
         return signedJWT.serialize();
     }
 
-    public static boolean validateToken(String token) throws GeneralSecurityException, ParseException, IOException, JOSEException {
-        return token != null && SignedJWT.parse(token).verify(new RSASSAVerifier((RSAPublicKey) TokenHelper.getPublicKey()));
+    public static boolean validateToken(String token) throws IOException, GeneralSecurityException {
+        try {
+            RSASSAVerifier verifier = new RSASSAVerifier((RSAPublicKey) TokenHelper.getPublicKey());
+            return SignedJWT.parse(token).verify(verifier);
+        } catch (JOSEException | ParseException e) {
+            throw new JwtException(e);
+        }
     }
 
     public static String extractSubjectFromToken(String token) throws ParseException {
