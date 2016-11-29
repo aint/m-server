@@ -1,4 +1,4 @@
-package ua.softgroup.matrix.server.supervisor.jersey.crypto;
+package ua.softgroup.matrix.server.supervisor.jersey.token;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -26,7 +26,7 @@ import java.util.Date;
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
-public class KeyHelper {
+public class TokenHelper {
 
     private static final String KEY_ALGORITHM = "RSA";
     private static final String ALGORITHM = "RS512";
@@ -57,11 +57,21 @@ public class KeyHelper {
     }
 
     public static boolean validateToken(String token) throws GeneralSecurityException, ParseException, IOException, JOSEException {
-        return token != null && SignedJWT.parse(token).verify(new RSASSAVerifier((RSAPublicKey) KeyHelper.getPublicKey()));
+        return token != null && SignedJWT.parse(token).verify(new RSASSAVerifier((RSAPublicKey) TokenHelper.getPublicKey()));
     }
 
     public static String extractSubjectFromToken(String token) throws ParseException {
         return SignedJWT.parse(token).getJWTClaimsSet().getSubject();
     }
-    
+
+    //    public static void main(String[] args) throws GeneralSecurityException, JOSEException, IOException, ParseException {
+//        String token = generateToken(new RSASSASigner(getPrivateKey()));
+//        System.out.println("TOKEN " + token);
+//
+//        SignedJWT signedJWT = SignedJWT.parse(token);
+//        System.out.println("Validated " + validateToken(token));
+//        System.out.println("Subject " + extractSubjectFromToken(token));
+//        System.out.println("Issuer " + signedJWT.getJWTClaimsSet().getIssuer());
+//        System.out.println(new Date().before(signedJWT.getJWTClaimsSet().getExpirationTime()));
+//    }
 }

@@ -1,6 +1,9 @@
-package ua.softgroup.matrix.server.supervisor.jersey;
+package ua.softgroup.matrix.server.supervisor.jersey.config;
 
 import com.nimbusds.jose.JOSEException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ua.softgroup.matrix.server.supervisor.jersey.json.ErrorJson;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -15,15 +18,13 @@ import java.text.ParseException;
 @Provider
 public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GenericExceptionMapper.class);
+
     @Override
     public Response toResponse(Throwable throwable) {
-        System.out.println("throwable " + throwable);
-        ErrorJson error = new ErrorJson(
-                getStatusType(throwable).getStatusCode(),
-                throwable.getLocalizedMessage());
-
-        return Response.status(error.getCode())
-                .entity(error)
+        LOG.info("Jersey module exception: {}", throwable.getLocalizedMessage());
+        return Response.status(getStatusType(throwable).getStatusCode())
+                .entity(new ErrorJson(throwable.getLocalizedMessage()))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }

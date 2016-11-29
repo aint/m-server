@@ -9,7 +9,7 @@ public interface UserService extends GeneralEntityService<User> {
 
     String authenticate(UserPassword userPassword);
 
-    User getByUsername(String username);
+    Optional<User> getByUsername(String username);
 
     Optional<User> getByTrackerToken(String token);
 

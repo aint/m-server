@@ -108,8 +108,8 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     }
 
     @Override
-    public User getByUsername(String username) {
-        return getRepository().findByUsername(username);
+    public Optional<User> getByUsername(String username) {
+        return Optional.ofNullable(getRepository().findByUsername(username));
     }
 
     @Override

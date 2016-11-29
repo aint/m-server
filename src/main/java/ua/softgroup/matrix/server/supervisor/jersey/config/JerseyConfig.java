@@ -1,7 +1,8 @@
-package ua.softgroup.matrix.server.supervisor.jersey;
+package ua.softgroup.matrix.server.supervisor.jersey.config;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
+import ua.softgroup.matrix.server.supervisor.jersey.SupervisorEndpoint;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>

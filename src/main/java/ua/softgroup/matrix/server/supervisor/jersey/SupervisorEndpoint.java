@@ -12,7 +12,9 @@ import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.supervisor.jersey.crypto.KeyHelper;
+import ua.softgroup.matrix.server.supervisor.jersey.json.ErrorJson;
+import ua.softgroup.matrix.server.supervisor.jersey.json.JsonViewType;
+import ua.softgroup.matrix.server.supervisor.jersey.token.TokenHelper;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -53,7 +55,7 @@ public class SupervisorEndpoint {
     @Path("/reports/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateReport(@JsonView(View.IN.class) Report reportJson, @PathParam("id") Long id) {
+    public Response updateReport(@JsonView(JsonViewType.IN.class) Report reportJson, @PathParam("id") Long id) {
         LOG.error("report json {}", reportJson);
         Report report = reportService.getById(id).orElseThrow(NoSuchElementException::new);
         report.setTitle(reportJson.getTitle());
@@ -68,15 +70,14 @@ public class SupervisorEndpoint {
     @Path("/reports")
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.APPLICATION_JSON)
-    @JsonView(View.OUT.class)
+    @JsonView(JsonViewType.OUT.class)
     public Response getReportsOf(@HeaderParam("token") String token,
-                                 @FormParam("user_id") String userId,
                                  @FormParam("project_id") String projectId) throws GeneralSecurityException, JOSEException, ParseException, IOException {
 
-        if (!KeyHelper.validateToken(token)) return Response.status(403).entity(new ErrorJson(403, "Token is not valid")).build();
+        if (!TokenHelper.validateToken(token)) return Response.status(403).entity(new ErrorJson("Token is not valid")).build();
 
         Project project = projectService.getById(Long.valueOf(projectId)).orElseThrow(NoSuchElementException::new);
-        User user = userService.getByUsername(KeyHelper.extractSubjectFromToken(token)); // .orElseThrow(NoSuchElementException::new);
+        User user = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NoSuchElementException::new);
         return Response
                 .status(Status.OK)
                 .header("Access-Control-Allow-Origin", "*")

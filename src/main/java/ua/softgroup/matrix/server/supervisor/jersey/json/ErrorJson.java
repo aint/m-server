@@ -1,4 +1,4 @@
-package ua.softgroup.matrix.server.supervisor.jersey;
+package ua.softgroup.matrix.server.supervisor.jersey.json;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -7,26 +7,14 @@ import com.fasterxml.jackson.annotation.JsonView;
  */
 public class ErrorJson {
 
-    @JsonView(View.OUT.class)
-    private int code;
-
-    @JsonView(View.OUT.class)
+    @JsonView(JsonViewType.OUT.class)
     private String message;
 
     public ErrorJson() {
     }
 
-    public ErrorJson(int code, String message) {
-        this.code = code;
+    public ErrorJson(String message) {
         this.message = message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
     }
 
     public String getMessage() {
@@ -35,5 +23,12 @@ public class ErrorJson {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "ErrorJson{" +
+                "message='" + message + '\'' +
+                '}';
     }
 }
