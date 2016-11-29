@@ -1,7 +1,7 @@
 package ua.softgroup.matrix.server.supervisor.jersey;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.jsonwebtoken.Jwts;
+import com.nimbusds.jose.JOSEException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.text.ParseException;
 import java.util.NoSuchElementException;
 
 /**
@@ -70,22 +71,17 @@ public class SupervisorEndpoint {
     @JsonView(View.OUT.class)
     public Response getReportsOf(@HeaderParam("token") String token,
                                  @FormParam("user_id") String userId,
-                                 @FormParam("project_id") String projectId) throws IOException, GeneralSecurityException {
+                                 @FormParam("project_id") String projectId) throws GeneralSecurityException, JOSEException, ParseException, IOException {
 
-        if (!validateJWT(token)) return Response.status(403).entity(new ErrorJson(403, "JWT secure subject not match")).build();
+        if (!KeyHelper.validateToken(token)) return Response.status(403).entity(new ErrorJson(403, "Token is not valid")).build();
 
         Project project = projectService.getById(Long.valueOf(projectId)).orElseThrow(NoSuchElementException::new);
-        User user = userService.getById(Long.valueOf(userId)).orElseThrow(NoSuchElementException::new);
+        User user = userService.getByUsername(KeyHelper.extractSubjectFromToken(token)); // .orElseThrow(NoSuchElementException::new);
         return Response
                 .status(Status.OK)
                 .header("Access-Control-Allow-Origin", "*")
                 .entity(reportService.getAllReportsOf(user, project))
                 .build();
-    }
-
-    private boolean validateJWT(String token) throws IOException, GeneralSecurityException {
-        String subject = Jwts.parser().setSigningKey(KeyHelper.getKey()).parseClaimsJws(token).getBody().getSubject();
-        return KeyHelper.SECRET_WORD.equals(subject);
     }
 
 }

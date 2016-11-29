@@ -1,44 +1,67 @@
 package ua.softgroup.matrix.server.supervisor.jersey.crypto;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.KeyStore;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.text.ParseException;
+import java.util.Date;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 public class KeyHelper {
 
-    public static final String SECRET_WORD = "Mrazish";
+    private static final String KEY_ALGORITHM = "RSA";
+    private static final String ALGORITHM = "RS512";
 
-    private static final String KEY_FILE = "keystore.jks";
-    private static final char[] PASSWORD = "password".toCharArray();
-    private static final String ALIAS = "selfsigned";
+    private static final String PUBLIC_KEY_FILE = "public_key.der";
+    private static final String PRIVATE_KEY_FILE = "private_key.der";
 
-    public static Key getKey() throws IOException, GeneralSecurityException {
-        try (InputStream readStream = new FileInputStream(KEY_FILE)) {
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(readStream, PASSWORD);
-            return keyStore.getKey(ALIAS, PASSWORD);
-        }
+    private static PublicKey getPublicKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] keyBytes = Files.readAllBytes(new File(PUBLIC_KEY_FILE).toPath());
+        return KeyFactory.getInstance(KEY_ALGORITHM).generatePublic(new X509EncodedKeySpec(keyBytes));
     }
 
-    public static String generateToken(Key key) {
-        return Jwts.builder()
-                .setSubject(SECRET_WORD)
-                .signWith(SignatureAlgorithm.RS512, key)
-                .compact();
+    private static PrivateKey getPrivateKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] keyBytes = Files.readAllBytes(new File(PRIVATE_KEY_FILE).toPath());
+        return KeyFactory.getInstance(KEY_ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
     }
 
-//    keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks -storepass password -validity 360 -keysize 2048
+    private static String generateToken(JWSSigner signer) throws JOSEException {
+        SignedJWT signedJWT = new SignedJWT(
+                new JWSHeader(JWSAlgorithm.parse(ALGORITHM)),
+                new JWTClaimsSet.Builder()
+                        .subject("vadimb")
+                        .issuer("http://example.com/")
+                        .expirationTime(new Date(new Date().getTime() + 60 * 1000))
+                        .build());
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
+    }
 
-//    OK:   eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJNcmF6aXNoIn0.Pm58O29gw9y5W59_ISHKun8wpIyCtS6Nnp7SEU8i-pDOlVfh389sHnvqDsuWgjSzomALbOe2xv7rtQm09mUfuB7po0vLCRc1CZ5VSJQFqeyp9n-7rq__2ay3TlxxmCwN_1uCt2gtvrmI5t19pbnjVWDdyHd8zDtSYeOAjLu30fNqiRe5twFJWQcrAXjJvww3hiMOi3APT2YA8leKdMTiXop6eHnfr7RjWMXidnXom9qIN7dFgD-8_dx1eEqjboxWN9TOOoUcN0vz1mFSAMVqoEwlcBMVFL06XIBZ3ySrmpam-PVEF0XfHDacfMd7lbQoslt2tdLW1F9h7__c7WK4xA
+    public static boolean validateToken(String token) throws GeneralSecurityException, ParseException, IOException, JOSEException {
+        return token != null && SignedJWT.parse(token).verify(new RSASSAVerifier((RSAPublicKey) KeyHelper.getPublicKey()));
+    }
 
-//    FAIL: eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJNcmF6aXNoODgifQ.ZzBn1GjMKFl4Z4AsxPfC1--K2REXdCD3yvFEzTVmzae8LrKTn5AsbOcTd-Y1mlW2fFJq9UI4HS8R_Fy-dtKhFYo5S7hYIpvT11mKXvrvjUGXijuz8fOL47ZIu6hc_qZCSWS7_fRIhaAJsonkSfhVFDwgHpN_iSkfgHYHVdNo2TRJt4cnsQSHS5BRBHyfcpCAM0Cp_AOuzvNzUoW6Zfye4JQwaeaKi5BlpBQkpe1aEkeuUHGgJQdulFfHvLAo9gqslIc-ya8byBiYXOppOrCPcvALinH4BPPbjkWxOhmEbNq4O--4tXcY7IrZGGTfcj1fwDWutGTb438FV2tpLhEEJg
+    public static String extractSubjectFromToken(String token) throws ParseException {
+        return SignedJWT.parse(token).getJWTClaimsSet().getSubject();
+    }
+    
 }
