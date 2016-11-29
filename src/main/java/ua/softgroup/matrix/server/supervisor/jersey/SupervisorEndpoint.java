@@ -19,6 +19,7 @@ import ua.softgroup.matrix.server.supervisor.jersey.token.TokenHelper;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -30,7 +31,6 @@ import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
-import java.util.NoSuchElementException;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -57,7 +57,7 @@ public class SupervisorEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateReport(@JsonView(JsonViewType.IN.class) Report reportJson, @PathParam("id") Long id) {
         LOG.error("report json {}", reportJson);
-        Report report = reportService.getById(id).orElseThrow(NoSuchElementException::new);
+        Report report = reportService.getById(id).orElseThrow(NotFoundException::new);
         report.setTitle(reportJson.getTitle());
         report.setDescription(reportJson.getDescription());
         reportService.save(report);
@@ -76,8 +76,8 @@ public class SupervisorEndpoint {
 
         if (!TokenHelper.validateToken(token)) return Response.status(403).entity(new ErrorJson("Token is not valid")).build();
 
-        Project project = projectService.getById(Long.valueOf(projectId)).orElseThrow(NoSuchElementException::new);
-        User user = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NoSuchElementException::new);
+        Project project = projectService.getById(Long.valueOf(projectId)).orElseThrow(NotFoundException::new);
+        User user = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);
         return Response
                 .status(Status.OK)
                 .header("Access-Control-Allow-Origin", "*")
