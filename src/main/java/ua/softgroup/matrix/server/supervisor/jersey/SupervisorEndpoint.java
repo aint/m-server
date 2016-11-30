@@ -17,6 +17,7 @@ import ua.softgroup.matrix.server.supervisor.jersey.token.TokenHelper;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -26,10 +27,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.text.ParseException;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -66,18 +63,17 @@ public class SupervisorEndpoint {
     }
 
     @PUT
-    @Path("/reports/{id}")
+    @Path("/projects/{username}/reports/{report_id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateReport(@JsonView(JsonViewType.IN.class) Report reportJson, @PathParam("id") Long id) {
-        LOG.error("report json {}", reportJson);
-        Report report = reportService.getById(id).orElseThrow(NotFoundException::new);
+    public Response updateReport(@PathParam("username") String username,
+                                 @PathParam("report_id") Long reportId,
+                                 @JsonView(JsonViewType.IN.class) Report reportJson) {
+        LOG.info("PUT JSON {}", reportJson);
+        Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
         report.setTitle(reportJson.getTitle());
         report.setDescription(reportJson.getDescription());
-        reportService.save(report);
-        return Response
-                .status(Status.OK)
-                .build();
+        return Response.ok(reportService.save(report)).build();
     }
 
     @POST

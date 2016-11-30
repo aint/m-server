@@ -42,9 +42,13 @@ public class Report implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @JsonView({ JsonViewType.OUT.class, JsonViewType.IN.class })
+    @JsonView(JsonViewType.OUT.class)
     @Column(nullable = false)
     private boolean checked = false;
+
+    @JsonView({ JsonViewType.OUT.class, JsonViewType.IN.class })
+    @Column(nullable = false, columnDefinition = "DECIMAL", scale = 2)
+    private double coefficient = 1.0;
 
     @JsonIgnore
     @ManyToOne
@@ -131,6 +135,14 @@ public class Report implements Serializable {
         return checked;
     }
 
+    public double getCoefficient() {
+        return coefficient;
+    }
+
+    public void setCoefficient(double coefficient) {
+        this.coefficient = coefficient;
+    }
+
     public void setChecked(boolean checked) {
         this.checked = checked;
     }
@@ -159,6 +171,7 @@ public class Report implements Serializable {
                 ", updateDate=" + updateDate +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
+                ", coefficient=" + coefficient +
                 ", checked=" + checked +
                 '}';
     }
