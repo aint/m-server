@@ -66,8 +66,12 @@ public class TokenHelper {
         }
     }
 
-    public static String extractSubjectFromToken(String token) throws ParseException {
-        return SignedJWT.parse(token).getJWTClaimsSet().getSubject();
+    public static String extractSubjectFromToken(String token) {
+        try {
+            return SignedJWT.parse(token).getJWTClaimsSet().getSubject();
+        } catch (ParseException e) {
+            throw new JwtException(e);
+        }
     }
 
     //    public static void main(String[] args) throws GeneralSecurityException, JOSEException, IOException, ParseException {
