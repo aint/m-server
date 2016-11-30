@@ -1,7 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.jersey;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.nimbusds.jose.JOSEException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,20 +76,22 @@ public class SupervisorEndpoint {
     }
 
     @POST
-    @Path("/reports")
+    @Path("/projects/{username}/reports/{report_id}")
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
-    public Response getReportsOf(@HeaderParam("token") String token,
-                                 @FormParam("project_id") String projectId) throws GeneralSecurityException, JOSEException, ParseException, IOException {
+    public Response checkReport(@HeaderParam("token") String token,
+                                @PathParam("username") String username,
+                                @PathParam("report_id") Long reportId,
+                                @FormParam("coefficient") Double coefficient) {
 
-        Project project = projectService.getById(Long.valueOf(projectId)).orElseThrow(NotFoundException::new);
+        Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
+        //TODO retrieve principal in token auth filter
         User user = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);
-        return Response
-                .status(Status.OK)
-                .header("Access-Control-Allow-Origin", "*")
-                .entity(reportService.getAllReportsOf(user, project))
-                .build();
+        report.setChecker(user);
+        report.setChecked(true);
+        report.setCoefficient(coefficient >= 0 ? coefficient : report.getCoefficient());
+        return Response.ok(reportService.save(report)).build();
     }
 
 }

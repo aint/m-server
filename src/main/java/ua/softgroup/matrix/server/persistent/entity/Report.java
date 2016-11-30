@@ -47,8 +47,8 @@ public class Report implements Serializable {
     private boolean checked = false;
 
     @JsonView({ JsonViewType.OUT.class, JsonViewType.IN.class })
-    @Column(nullable = false, columnDefinition = "DECIMAL", scale = 2)
-    private double coefficient = 1.0;
+    @Column(nullable = false)
+    private Double coefficient = 1.0;
 
     @JsonIgnore
     @ManyToOne
@@ -135,11 +135,11 @@ public class Report implements Serializable {
         return checked;
     }
 
-    public double getCoefficient() {
+    public Double getCoefficient() {
         return coefficient;
     }
 
-    public void setCoefficient(double coefficient) {
+    public void setCoefficient(Double coefficient) {
         this.coefficient = coefficient;
     }
 
