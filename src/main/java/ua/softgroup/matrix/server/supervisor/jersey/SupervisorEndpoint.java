@@ -50,6 +50,21 @@ public class SupervisorEndpoint {
         this.userService = userService;
     }
 
+    @GET
+    @Path("/projects/{username}/{project_id}/reports")
+    @Produces(MediaType.APPLICATION_JSON)
+    @JsonView(JsonViewType.OUT.class)
+    public Response getReportsOf(@PathParam("username") String username,
+                                 @PathParam("project_id") Long projectId) {
+
+        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
+        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        return Response
+                .ok(reportService.getAllReportsOf(user, project))
+                .header("Access-Control-Allow-Origin", "*")
+                .build();
+    }
+
     @PUT
     @Path("/reports/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
