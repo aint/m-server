@@ -5,14 +5,24 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ua.softgroup</groupId>
-  <artifactId>matrix2</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <artifactId>matrix.server</artifactId>
+  <version>0.5-SNAPSHOT</version>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>1.4.2.RELEASE</version>
   </parent>
+
+  <developers>
+    <developer>
+      <id>aint</id>
+      <name>Oleksandr Tyshkovets</name>
+      <email>sg.olexander@gmail.com</email>
+      <organization>SoftGroup</organization>
+      <organizationUrl>http://softgroup.ua</organizationUrl>
+    </developer>
+  </developers>
 
   <properties>
     <mysql.version>6.0.4</mysql.version>
