@@ -14,7 +14,10 @@ public class JerseyConfig extends ResourceConfig {
     public JerseyConfig() {
         register(SupervisorEndpoint.class);
         register(GenericExceptionMapper.class);
+        register(ValidationExceptionMapper.class);
+        register(ValidationConfigurationContextResolver.class);
         register(TokenAuthenticationFilter.class);
+
     }
 
 }
