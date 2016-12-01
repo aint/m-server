@@ -50,7 +50,7 @@ public class SupervisorEndpoint {
     }
 
     @GET
-    @Path("/projects/{username}/{project_id}/reports")
+    @Path("/users/{username}/{project_id}/reports")
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
     public Response getReportsOf(@PathParam("username") String username,
@@ -65,11 +65,10 @@ public class SupervisorEndpoint {
     }
 
     @PUT
-    @Path("/projects/{username}/reports/{report_id}")
+    @Path("/reports/{report_id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateReport(@PathParam("username") String username,
-                                 @Min(0) @PathParam("report_id") Long reportId,
+    public Response updateReport(@Min(0) @PathParam("report_id") Long reportId,
                                  @JsonView(JsonViewType.IN.class) Report reportJson) {
         LOG.info("PUT JSON {}", reportJson);
         Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
@@ -79,12 +78,11 @@ public class SupervisorEndpoint {
     }
 
     @POST
-    @Path("/projects/{username}/reports/{report_id}")
+    @Path("/reports/{report_id}/check")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
     public Response checkReport(@HeaderParam("token") String token,
-                                @PathParam("username") String username,
                                 @Min(0) @PathParam("report_id") Long reportId,
                                 @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
