@@ -14,6 +14,9 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.supervisor.jersey.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.jersey.token.TokenHelper;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -51,7 +54,7 @@ public class SupervisorEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
     public Response getReportsOf(@PathParam("username") String username,
-                                 @PathParam("project_id") Long projectId) {
+                                 @Min(0) @PathParam("project_id") Long projectId) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
@@ -66,7 +69,7 @@ public class SupervisorEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateReport(@PathParam("username") String username,
-                                 @PathParam("report_id") Long reportId,
+                                 @Min(0) @PathParam("report_id") Long reportId,
                                  @JsonView(JsonViewType.IN.class) Report reportJson) {
         LOG.info("PUT JSON {}", reportJson);
         Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
@@ -77,20 +80,20 @@ public class SupervisorEndpoint {
 
     @POST
     @Path("/projects/{username}/reports/{report_id}")
-    @Consumes("application/x-www-form-urlencoded")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
     public Response checkReport(@HeaderParam("token") String token,
                                 @PathParam("username") String username,
-                                @PathParam("report_id") Long reportId,
-                                @FormParam("coefficient") Double coefficient) {
+                                @Min(0) @PathParam("report_id") Long reportId,
+                                @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
         Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
         //TODO retrieve principal in token auth filter
         User user = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);
         report.setChecker(user);
         report.setChecked(true);
-        report.setCoefficient(coefficient >= 0 ? coefficient : report.getCoefficient());
+        report.setCoefficient(coefficient);
         return Response.ok(reportService.save(report)).build();
     }
 
