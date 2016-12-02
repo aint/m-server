@@ -14,14 +14,15 @@ import ua.softgroup.matrix.server.model.TokenModel;
 import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
-import ua.softgroup.matrix.server.persistent.entity.DowntimePeriod;
 import ua.softgroup.matrix.server.persistent.entity.Keyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.entity.WorktimePeriod;
+import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.MetricsService;
 import ua.softgroup.matrix.server.service.PeriodService;
@@ -34,6 +35,7 @@ import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
@@ -65,6 +67,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private PeriodService periodService;
     @Autowired
     private MetricsService metricsService;
+
+    @Autowired
+    private WorkDayRepository workDayRepository;
 
     @Override
     public String authenticate(UserPassword userPassword) {
@@ -200,7 +205,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) minutes);
             userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) minutes);
             workTimeService.save(userWorkTime);
-            periodService.save(new WorktimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
+
+            WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
+                    .orElse(new WorkDay(0L, 0L, userWorkTime));
+            todayWorkDay.setWorkTimeMinutes(todayWorkDay.getWorkTimeMinutes() + minutes);
+            workDayRepository.save(todayWorkDay);
+
+            periodService.save(new WorktimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), todayWorkDay));
         }
     }
 
@@ -231,7 +242,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             userWorkTime.setDowntimeMinutes(userWorkTime.getDowntimeMinutes() + duration.toMinutes());
             userWorkTime.setStartDowntime(null);
             workTimeService.save(userWorkTime);
-            periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), userWorkTime));
+
+            WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
+                    .orElse(new WorkDay(0L, 0L, userWorkTime));
+            todayWorkDay.setIdleTimeMinutes(todayWorkDay.getIdleTimeMinutes() + duration.toMinutes());
+            workDayRepository.save(todayWorkDay);
+
+//            periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), todayWorkDay));
         }
 
     }
@@ -259,7 +276,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
                                 userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) timeModel.getMinute());
                                 workTimeService.save(userWorkTime);
-                                periodService.save(new WorktimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), timeModel.isForeignRate(), userWorkTime));
+
+                                WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
+                                        .orElse(new WorkDay(0L, 0L, userWorkTime));
+                                todayWorkDay.setWorkTimeMinutes(todayWorkDay.getWorkTimeMinutes() + timeModel.getMinute());
+                                workDayRepository.save(todayWorkDay);
+
+                                periodService.save(new WorktimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), timeModel.isForeignRate(), todayWorkDay));
                         }));
 
         Optional.ofNullable(synchronizedModel.getDowntimeModel())
@@ -277,6 +300,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 LOG.warn("Downtime diff {}", diff);
                                 userWorkTime.setDowntimeMinutes(diff > 0 ? diff : userWorkTime.getDowntimeMinutes());
                                 workTimeService.save(userWorkTime);
+
+                                WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
+                                        .orElse(new WorkDay(0L, 0L, userWorkTime));
+                                todayWorkDay.setIdleTimeMinutes(diff > 0 ? diff : todayWorkDay.getIdleTimeMinutes());
+                                workDayRepository.save(todayWorkDay);
+
+//                                periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), todayWorkDay));
                         }));
 
         return true;

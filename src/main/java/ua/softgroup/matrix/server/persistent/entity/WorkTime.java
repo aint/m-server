@@ -49,10 +49,7 @@ public class WorkTime implements Serializable {
     private User user;
 
     @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<WorktimePeriod> worktimePeriods;
-
-    @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DowntimePeriod> downtimePeriods;
+    private Set<WorkDay> workDays;
 
     @OneToMany(mappedBy = "workTime", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Keyboard> keyboardLogs;
@@ -151,20 +148,12 @@ public class WorkTime implements Serializable {
         this.user = user;
     }
 
-    public Set<WorktimePeriod> getWorktimePeriods() {
-        return worktimePeriods;
+    public Set<WorkDay> getWorkDays() {
+        return workDays;
     }
 
-    public void setWorktimePeriods(Set<WorktimePeriod> worktimePeriods) {
-        this.worktimePeriods = worktimePeriods;
-    }
-
-    public Set<DowntimePeriod> getDowntimePeriods() {
-        return downtimePeriods;
-    }
-
-    public void setDowntimePeriods(Set<DowntimePeriod> downtimePeriods) {
-        this.downtimePeriods = downtimePeriods;
+    public void setWorkDays(Set<WorkDay> workDays) {
+        this.workDays = workDays;
     }
 
     public List<Keyboard> getKeyboardLogs() {

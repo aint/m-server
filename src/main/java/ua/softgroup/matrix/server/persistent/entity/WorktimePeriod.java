@@ -14,16 +14,16 @@ public class WorktimePeriod extends AbstractPeriod {
     public WorktimePeriod() {
     }
 
-    public WorktimePeriod(LocalDateTime start, LocalDateTime end, WorkTime workTime) {
+    public WorktimePeriod(LocalDateTime start, LocalDateTime end, WorkDay workDay) {
         setStart(start);
         setEnd(end);
-        setWorkTime(workTime);
+        setWorkDay(workDay);
     }
 
-    public WorktimePeriod(LocalDateTime start, LocalDateTime end, boolean externalHourlyRate, WorkTime workTime) {
+    public WorktimePeriod(LocalDateTime start, LocalDateTime end, boolean externalHourlyRate, WorkDay workDay) {
         setStart(start);
         setEnd(end);
-        setWorkTime(workTime);
+        setWorkDay(workDay);
         this.externalHourlyRate = externalHourlyRate;
     }
 

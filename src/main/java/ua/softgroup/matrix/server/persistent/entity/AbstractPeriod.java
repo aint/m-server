@@ -24,7 +24,7 @@ public class AbstractPeriod implements Serializable {
     private LocalDateTime end;
 
     @ManyToOne
-    private WorkTime workTime;
+    private WorkDay workDay;
 
     public AbstractPeriod() {
     }
@@ -53,12 +53,12 @@ public class AbstractPeriod implements Serializable {
         this.end = end;
     }
 
-    public WorkTime getWorkTime() {
-        return workTime;
+    public WorkDay getWorkDay() {
+        return workDay;
     }
 
-    public void setWorkTime(WorkTime workTime) {
-        this.workTime = workTime;
+    public void setWorkDay(WorkDay workDay) {
+        this.workDay = workDay;
     }
 
     @Override
