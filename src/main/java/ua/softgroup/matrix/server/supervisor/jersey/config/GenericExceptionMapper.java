@@ -22,7 +22,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable throwable) {
-        LOG.info("Jersey module exception: {}", throwable.getLocalizedMessage());
+        LOG.warn("Jersey module exception: ", throwable);
         return Response.status(getStatusType(throwable).getStatusCode())
                 .entity(new ErrorJson(throwable.getLocalizedMessage()))
                 .type(MediaType.APPLICATION_JSON)
