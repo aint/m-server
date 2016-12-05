@@ -5,13 +5,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import ua.softgroup.matrix.server.persistent.entity.AbstractPeriod;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.WorkTime;
+import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkTimeService;
+import ua.softgroup.matrix.server.supervisor.jersey.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.jersey.json.JsonViewType;
+import ua.softgroup.matrix.server.supervisor.jersey.json.SummaryJson;
 import ua.softgroup.matrix.server.supervisor.jersey.token.TokenHelper;
 
 import javax.validation.constraints.DecimalMin;
@@ -29,6 +36,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -41,12 +56,17 @@ public class SupervisorEndpoint {
     private final ReportService reportService;
     private final ProjectService projectService;
     private final UserService userService;
+    private final WorkTimeService workTimeService;
 
     @Autowired
-    public SupervisorEndpoint(ReportService reportService, ProjectService projectService, UserService userService) {
+    private WorkDayRepository workDayRepository;
+
+    @Autowired
+    public SupervisorEndpoint(ReportService reportService, ProjectService projectService, UserService userService, WorkTimeService workTimeService) {
         this.reportService = reportService;
         this.projectService = projectService;
         this.userService = userService;
+        this.workTimeService = workTimeService;
     }
 
     @GET
@@ -89,10 +109,54 @@ public class SupervisorEndpoint {
         Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
         //TODO retrieve principal in token auth filter
         User user = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);
-        report.setChecker(user);
-        report.setChecked(true);
-        report.setCoefficient(coefficient);
+        report.getWorkDay().setChecker(user);
+        report.getWorkDay().setChecked(true);
+        report.getWorkDay().setCoefficient(coefficient);
+        workDayRepository.save(report.getWorkDay());
         return Response.ok(reportService.save(report)).build();
+    }
+
+    @GET
+    @Path("/users/{username}/{project_id}/summary")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public Response getReportsOf(@HeaderParam("token") String token,
+                                 @PathParam("username") String username,
+                                 @Min(0) @PathParam("project_id") Long projectId) {
+
+        if (!TokenHelper.extractSubjectFromToken(token).equalsIgnoreCase(username)) {
+            Response.status(403)
+                    .entity(new ErrorJson("Token username and path username not the same"))
+                    .build();
+        }
+
+        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
+        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
+
+        LocalDate start = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        List<SummaryJson> summary = Stream.iterate(start, date -> date.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(start, LocalDate.now().plusDays(1)))
+                .map(localDate -> workDayRepository.findByDateAndWorkTime(localDate, workTime))
+                .filter(Objects::nonNull)
+                .map(workDay -> new SummaryJson(
+                        workDay.getDate(),
+                        workDay.getWorkMinutes(),
+                        workDay.getIdleMinutes(),
+                        workTime.getRate(),
+                        workTime.getRateCurrencyId(),
+                        workDay.isChecked(),
+                        workDay.getCoefficient(),
+                        workDay.getWorkTimePeriods().stream()
+                                .map(AbstractPeriod::getStart)
+                                .min(LocalDateTime::compareTo)
+                                .orElse(null),
+                        workDay.getWorkTimePeriods().stream()
+                                .map(AbstractPeriod::getEnd)
+                                .max(LocalDateTime::compareTo)
+                                .orElse(null)))
+                .collect(Collectors.toList());
+        return Response.ok(summary).build();
     }
 
 }
