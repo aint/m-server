@@ -19,6 +19,7 @@ import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.jersey.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.jersey.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.jersey.json.SummaryJson;
+import ua.softgroup.matrix.server.supervisor.jersey.json.TimeJson;
 import ua.softgroup.matrix.server.supervisor.jersey.token.TokenHelper;
 
 import javax.validation.constraints.DecimalMin;
@@ -158,5 +159,18 @@ public class SupervisorEndpoint {
                 .collect(Collectors.toList());
         return Response.ok(summary).build();
     }
+
+    @GET
+    @Path("/users/{username}/{project_id}/time")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTotalTime(@PathParam("username") String username,
+                                 @Min(0) @PathParam("project_id") Long projectId) {
+
+        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
+        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0, 0, project, user));
+        return Response.ok(new TimeJson(workTime.getTodayMinutes().longValue(), workTime.getTotalMinutes().longValue())).build();
+    }
+
 
 }
