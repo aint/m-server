@@ -168,8 +168,8 @@ public class SupervisorEndpoint {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0, 0, project, user));
-        return Response.ok(new TimeJson(workTime.getTodayMinutes().longValue(), workTime.getTotalMinutes().longValue())).build();
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
+        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes())).build();
     }
 
 

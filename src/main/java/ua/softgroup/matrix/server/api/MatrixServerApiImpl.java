@@ -190,8 +190,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             LOG.debug("Work period in minutes {}", minutes);
             LOG.debug("Work period in millis {}", duration.toMillis());
             userWorkTime.setStartedWork(null);
-            userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) minutes);
-            userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) minutes);
+            userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + minutes);
+            userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + minutes);
             workTimeService.save(userWorkTime);
 
             WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
@@ -261,8 +261,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 LOG.warn("OFFLINE {}", userWorkTime);
                                 LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
                                 userWorkTime.setStartedWork(null);
-                                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + (int) timeModel.getMinute());
-                                userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + (int) timeModel.getMinute());
+                                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + timeModel.getMinute());
+                                userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + timeModel.getMinute());
                                 workTimeService.save(userWorkTime);
 
                                 WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
@@ -328,13 +328,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("getTodayWorkTime: projectID {}", project.getId());
         WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime());
         LocalDateTime startedWork = userWorkTime.getStartedWork();
-        int todayMinutes = userWorkTime.getTodayMinutes();
+        Long todayMinutes = userWorkTime.getTodayMinutes();
         if (startedWork != null) {
             Duration duration = Duration.between(startedWork, LocalDateTime.now());
             LOG.debug("getTodayWorkTime: Current work time in minutes {}", todayMinutes + duration.toMinutes());
         }
-        int hours = todayMinutes / 60;
-        int minutes = todayMinutes - hours * 60;
+        Long hours = todayMinutes / 60;
+        Long minutes = todayMinutes - hours * 60;
         LOG.debug("getTodayWorkTime: hours {}, minutes {}", hours, minutes);
         return new TimeModel(hours, minutes);
     }
@@ -347,9 +347,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTotalWorkTime: projectID {}", project.getId());
         WorkTime totalWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime());
-        Integer totalMinutes = totalWorkTime.getTotalMinutes();
-        int hours = totalMinutes / 60;
-        int minutes = totalMinutes - hours * 60;
+        Long totalMinutes = totalWorkTime.getTotalMinutes();
+        Long hours = totalMinutes / 60;
+        Long minutes = totalMinutes - hours * 60;
         Long downtime = totalWorkTime.getDowntimeMinutes();
         double downtimePercent = Math.floor(downtime * 100 / Double.valueOf(totalMinutes) * 100) / 100;
         LOG.debug("getTotalWorkTime: hours {}, minutes {}, downtime {}%", hours, minutes, downtimePercent);
