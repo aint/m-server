@@ -17,4 +17,6 @@ public interface ReportService extends GeneralEntityService<Report> {
 
     Report save(ReportModel reportModel);
 
+    ReportModel convertEntityToDto(Report report, String token);
+
 }

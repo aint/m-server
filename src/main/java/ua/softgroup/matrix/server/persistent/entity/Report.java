@@ -8,10 +8,13 @@ import ua.softgroup.matrix.server.supervisor.jersey.json.JsonViewType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -42,17 +45,10 @@ public class Report implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @JsonView(JsonViewType.OUT.class)
-    @Column(nullable = false)
-    private boolean checked = false;
-
-    @JsonView({ JsonViewType.OUT.class, JsonViewType.IN.class })
-    @Column(nullable = false)
-    private Double coefficient = 1.0;
-
     @JsonIgnore
-    @ManyToOne
-    private User checker;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "workDay_id")
+    private WorkDay workDay;
 
     @JsonIgnore
     @ManyToOne
@@ -123,36 +119,20 @@ public class Report implements Serializable {
         this.description = description;
     }
 
+    public WorkDay getWorkDay() {
+        return workDay;
+    }
+
+    public void setWorkDay(WorkDay workDay) {
+        this.workDay = workDay;
+    }
+
     public Project getProject() {
         return project;
     }
 
     public void setProject(Project project) {
         this.project = project;
-    }
-
-    public boolean isChecked() {
-        return checked;
-    }
-
-    public Double getCoefficient() {
-        return coefficient;
-    }
-
-    public void setCoefficient(Double coefficient) {
-        this.coefficient = coefficient;
-    }
-
-    public void setChecked(boolean checked) {
-        this.checked = checked;
-    }
-
-    public User getChecker() {
-        return checker;
-    }
-
-    public void setChecker(User checker) {
-        this.checker = checker;
     }
 
     public User getAuthor() {
@@ -171,8 +151,6 @@ public class Report implements Serializable {
                 ", updateDate=" + updateDate +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", coefficient=" + coefficient +
-                ", checked=" + checked +
                 '}';
     }
 }

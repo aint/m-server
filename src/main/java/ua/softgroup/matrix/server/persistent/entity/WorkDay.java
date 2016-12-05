@@ -5,11 +5,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Set;
@@ -30,10 +32,22 @@ public class WorkDay implements Serializable {
     private LocalDate date;
 
     @Column
-    private Long workTimeMinutes = 0L;
+    private Long workMinutes = 0L;
 
     @Column
-    private Long idleTimeMinutes = 0L;
+    private Long idleMinutes = 0L;
+
+    @Column
+    private boolean checked = false;
+
+    @Column
+    private Double coefficient = 1.0;
+
+    @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Report report;
+
+    @ManyToOne
+    private User checker;
 
     @ManyToOne
     private WorkTime workTime;
@@ -41,20 +55,17 @@ public class WorkDay implements Serializable {
     @OneToMany(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorktimePeriod> workTimePeriods;
 
-    @OneToMany(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DowntimePeriod> idleTimePeriods;
-
     public WorkDay() {
     }
 
-    public WorkDay(Long workTimeMinutes, Long idleTimeMinutes) {
-        this.workTimeMinutes = workTimeMinutes;
-        this.idleTimeMinutes = idleTimeMinutes;
+    public WorkDay(Long workMinutes, Long idleMinutes) {
+        this.workMinutes = workMinutes;
+        this.idleMinutes = idleMinutes;
     }
 
-    public WorkDay(Long workTimeMinutes, Long idleTimeMinutes, WorkTime workTime) {
-        this.workTimeMinutes = workTimeMinutes;
-        this.idleTimeMinutes = idleTimeMinutes;
+    public WorkDay(Long workMinutes, Long idleMinutes, WorkTime workTime) {
+        this.workMinutes = workMinutes;
+        this.idleMinutes = idleMinutes;
         this.workTime = workTime;
     }
 
@@ -74,20 +85,52 @@ public class WorkDay implements Serializable {
         this.date = date;
     }
 
-    public Long getWorkTimeMinutes() {
-        return workTimeMinutes;
+    public Long getWorkMinutes() {
+        return workMinutes;
     }
 
-    public void setWorkTimeMinutes(Long workTimeMinutes) {
-        this.workTimeMinutes = workTimeMinutes;
+    public void setWorkMinutes(Long workTimeMinutes) {
+        this.workMinutes = workTimeMinutes;
     }
 
-    public Long getIdleTimeMinutes() {
-        return idleTimeMinutes;
+    public Long getIdleMinutes() {
+        return idleMinutes;
     }
 
-    public void setIdleTimeMinutes(Long idleTimeMinutes) {
-        this.idleTimeMinutes = idleTimeMinutes;
+    public void setIdleMinutes(Long idleTimeMinutes) {
+        this.idleMinutes = idleTimeMinutes;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
+    public Double getCoefficient() {
+        return coefficient;
+    }
+
+    public void setCoefficient(Double coefficient) {
+        this.coefficient = coefficient;
+    }
+
+    public Report getReport() {
+        return report;
+    }
+
+    public void setReport(Report report) {
+        this.report = report;
+    }
+
+    public User getChecker() {
+        return checker;
+    }
+
+    public void setChecker(User checker) {
+        this.checker = checker;
     }
 
     public WorkTime getWorkTime() {
@@ -106,21 +149,15 @@ public class WorkDay implements Serializable {
         this.workTimePeriods = workTimePeriods;
     }
 
-    public Set<DowntimePeriod> getIdleTimePeriods() {
-        return idleTimePeriods;
-    }
-
-    public void setIdleTimePeriods(Set<DowntimePeriod> idleTimePeriods) {
-        this.idleTimePeriods = idleTimePeriods;
-    }
-
     @Override
     public String toString() {
         return "WorkDay{" +
                 "id=" + id +
                 ", date=" + date +
-                ", workTimeMinutes=" + workTimeMinutes +
-                ", idleTimeMinutes=" + idleTimeMinutes +
+                ", workMinutes=" + workMinutes +
+                ", idleMinutes=" + idleMinutes +
+                ", checked=" + checked +
+                ", coefficient=" + coefficient +
                 '}';
     }
 }

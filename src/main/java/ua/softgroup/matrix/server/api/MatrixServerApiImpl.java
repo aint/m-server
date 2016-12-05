@@ -133,7 +133,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         reportModel.setTitle(report.getTitle());
         reportModel.setDescription(report.getDescription());
         reportModel.setStatus(0);
-        reportModel.setChecked(report.isChecked());
+        reportModel.setChecked(report.getWorkDay().isChecked());
         return reportModel;
     }
 
@@ -141,7 +141,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public Set<ReportModel> getAllReports(TokenModel tokenModel) {
         User user = userService.getByTrackerToken(tokenModel.getToken()).orElseThrow(NoSuchElementException::new);
         return reportService.getAllReportsOf(user).stream()
-                .map(report -> convertReportEntityToModel(report, tokenModel.getToken()))
+                .map(report -> reportService.convertEntityToDto(report, tokenModel.getToken()))
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
@@ -151,20 +151,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         User user = userService.getByTrackerToken(tokenModel.getToken()).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
         return reportService.getAllReportsOf(user, project).stream()
-                .map(report -> convertReportEntityToModel(report, tokenModel.getToken()))
+                .map(report -> reportService.convertEntityToDto(report, tokenModel.getToken()))
                 .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    private ReportModel convertReportEntityToModel(Report report, String token) {
-        ReportModel reportModel = new ReportModel();
-        reportModel.setToken(token);
-        reportModel.setId(report.getId());
-        reportModel.setTitle(report.getTitle());
-        reportModel.setDescription(report.getDescription());
-        reportModel.setProjectId(report.getProject().getId());
-        reportModel.setChecked(report.isChecked());
-        reportModel.setDate(report.getCreationDate().toLocalDate());
-        return reportModel;
     }
 
     @Override
@@ -208,7 +196,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
             WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
                     .orElse(new WorkDay(0L, 0L, userWorkTime));
-            todayWorkDay.setWorkTimeMinutes(todayWorkDay.getWorkTimeMinutes() + minutes);
+            todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + minutes);
             workDayRepository.save(todayWorkDay);
 
             periodService.save(new WorktimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), todayWorkDay));
@@ -245,7 +233,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
             WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
                     .orElse(new WorkDay(0L, 0L, userWorkTime));
-            todayWorkDay.setIdleTimeMinutes(todayWorkDay.getIdleTimeMinutes() + duration.toMinutes());
+            todayWorkDay.setIdleMinutes(todayWorkDay.getIdleMinutes() + duration.toMinutes());
             workDayRepository.save(todayWorkDay);
 
 //            periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), todayWorkDay));
@@ -279,7 +267,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
                                 WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
                                         .orElse(new WorkDay(0L, 0L, userWorkTime));
-                                todayWorkDay.setWorkTimeMinutes(todayWorkDay.getWorkTimeMinutes() + timeModel.getMinute());
+                                todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + timeModel.getMinute());
                                 workDayRepository.save(todayWorkDay);
 
                                 periodService.save(new WorktimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), timeModel.isForeignRate(), todayWorkDay));
@@ -303,7 +291,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
                                 WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
                                         .orElse(new WorkDay(0L, 0L, userWorkTime));
-                                todayWorkDay.setIdleTimeMinutes(diff > 0 ? diff : todayWorkDay.getIdleTimeMinutes());
+                                todayWorkDay.setIdleMinutes(diff > 0 ? diff : todayWorkDay.getIdleMinutes());
                                 workDayRepository.save(todayWorkDay);
 
 //                                periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), todayWorkDay));
