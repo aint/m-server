@@ -60,7 +60,7 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
     }
 
     @Override
-    public Report save(ReportModel rm) throws NoSuchElementException {
+    public Report save(ReportModel rm) {
         if (!validator.validate(rm).isEmpty()) return null;
         User user = userService.getByTrackerToken(rm.getToken()).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(rm.getProjectId()).orElseThrow(NoSuchElementException::new);

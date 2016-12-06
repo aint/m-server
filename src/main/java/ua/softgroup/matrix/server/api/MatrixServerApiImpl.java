@@ -94,7 +94,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public Constants saveReport(ReportModel reportModel) throws NoSuchElementException {
+    public Constants saveReport(ReportModel reportModel) {
         LOG.debug("saveReport: {}", reportModel);
 
         if (reportModel.getId() == 0) {
@@ -139,7 +139,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Deprecated
     @Override
-    public ReportModel getReport(ReportModel reportModel) throws NoSuchElementException {
+    public ReportModel getReport(ReportModel reportModel) {
         LOG.debug("getReport: {}", reportModel);
 
         Report report = reportService.getById(reportModel.getId()).orElseThrow(NoSuchElementException::new);
@@ -162,7 +162,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) throws NoSuchElementException {
+    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
         LOG.debug("Requested project id {}", projectId);
         User user = userService.getByTrackerToken(tokenModel.getToken()).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
@@ -182,7 +182,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void startWork(TimeModel timeModel) throws NoSuchElementException {
+    public void startWork(TimeModel timeModel) {
         LOG.debug("TimeModel {} ", timeModel);
         User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("User {} start work", user);
@@ -193,7 +193,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void endWork(TimeModel timeModel) throws NoSuchElementException {
+    public void endWork(TimeModel timeModel) {
         LOG.debug("TimeModel {}", timeModel);
         User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("User {} end work", user);
@@ -220,7 +220,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void startDowntime(TimeModel downtimeModel) throws NoSuchElementException {
+    public void startDowntime(TimeModel downtimeModel) {
         LOG.debug("startDowntime DownTimeModel {}", downtimeModel);
         User user = userService.getByTrackerToken(downtimeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("startDowntime User {}", user);
@@ -231,7 +231,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void endDowntime(TimeModel downtimeModel) throws NoSuchElementException {
+    public void endDowntime(TimeModel downtimeModel) {
         LOG.debug("endDowntime DownTimeModel {}", downtimeModel);
         User user = userService.getByTrackerToken(downtimeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("endDowntime username {}", user.getUsername());
@@ -258,7 +258,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public boolean sync(SynchronizedModel synchronizedModel) throws NoSuchElementException {
+    public boolean sync(SynchronizedModel synchronizedModel) {
         LOG.warn("Sync {}", synchronizedModel);
 
         Optional.ofNullable(synchronizedModel.getReportModel())
@@ -336,7 +336,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public TimeModel getTodayWorkTime(TimeModel timeModel) throws NoSuchElementException {
+    public TimeModel getTodayWorkTime(TimeModel timeModel) {
         LOG.debug("getTodayWorkTime: {}", timeModel);
         User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTodayWorkTime: username {}", user.getUsername());
@@ -356,7 +356,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public TimeModel getTotalWorkTime(TimeModel timeModel) throws NoSuchElementException {
+    public TimeModel getTotalWorkTime(TimeModel timeModel) {
         LOG.debug("getTotalWorkTime: {}", timeModel);
         User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("getTotalWorkTime: username {}", user.getUsername());
@@ -373,7 +373,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void saveKeyboardLog(WriteKeyboard writeKeyboard) throws NoSuchElementException {
+    public void saveKeyboardLog(WriteKeyboard writeKeyboard) {
         LOG.debug("saveKeyboardLog: {}", writeKeyboard);
         User user = userService.getByTrackerToken(writeKeyboard.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("saveKeyboardLog: username {}", user.getUsername());
@@ -385,7 +385,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     }
 
     @Override
-    public void saveScreenshot(ScreenshotModel file) throws NoSuchElementException {
+    public void saveScreenshot(ScreenshotModel file) {
         LOG.debug("saveScreenshot: {}", file);
         User user = userService.getByTrackerToken(file.getToken()).orElseThrow(NoSuchElementException::new);
         LOG.debug("saveScreenshot: username {}", user.getUsername());
