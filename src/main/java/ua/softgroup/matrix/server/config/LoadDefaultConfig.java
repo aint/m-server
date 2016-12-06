@@ -17,44 +17,21 @@ public class LoadDefaultConfig {
     private static final Logger LOG = LoggerFactory.getLogger(LoadDefaultConfig.class);
 
     private static final int DEFAULT_CLIENT_SETTINGS_VERSION = 1;
-    private final ClassLoader classLoader = LoadDefaultConfig.class.getClassLoader();
 
     private ClientSettings clientSettings;
-    private int serverPort;
-    private Properties prop;
-    private String baseUrl;
-
-    public LoadDefaultConfig(){
-        this.prop = new Properties();
-        readServerPortFromConfig();
-    }
 
     private void initClientSettings() {
-        try(InputStream in = classLoader.getResourceAsStream("clientSettings.properties")) {
+        try(InputStream in = LoadDefaultConfig.class.getClassLoader().getResourceAsStream("desktop.properties")) {
+            Properties prop = new Properties();
             prop.load(in);
             clientSettings = new ClientSettings(DEFAULT_CLIENT_SETTINGS_VERSION,
-                    Integer.parseInt(prop.getProperty("screenshotUpdateFrequentlyInMinutes")),
-                    Integer.parseInt(prop.getProperty("keyboardUpdateFrequentlyInMinutes")),
-                    Integer.parseInt(prop.getProperty("startDowntimeAfterInMinutes")),
-                    Integer.parseInt(prop.getProperty("reportEditablePeriodInDays"))
-            );
+                    Integer.parseInt(prop.getProperty("keyboard.frequently.minutes")),
+                    Integer.parseInt(prop.getProperty("screenshot.frequently.minutes")),
+                    Integer.parseInt(prop.getProperty("idle.start.minutes")),
+                    Integer.parseInt(prop.getProperty("report.editable.days")));
         } catch (IOException e) {
-            LOG.error("Error occurred while loading server settings from properties file", e);
+            LOG.error("Error occurred while loading desktop settings from properties file", e);
         }
-    }
-
-    private void readServerPortFromConfig(){
-        try(InputStream in = classLoader.getResourceAsStream("server.properties")) {
-            prop.load(in);
-            this.serverPort = Integer.valueOf(prop.getProperty("server.port"));
-            this.baseUrl = prop.getProperty("supervisor.api");
-        } catch (Exception ex){
-            LOG.error("Error occurred while loading server settings from properties file", ex);
-        }
-    }
-
-    public int getServerPort(){
-        return this.serverPort;
     }
 
     public ClientSettings getClientSettings(){
@@ -62,7 +39,4 @@ public class LoadDefaultConfig {
         return this.clientSettings;
     }
 
-    public String getBaseUrl() {
-        return baseUrl;
-    }
 }

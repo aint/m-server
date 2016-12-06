@@ -17,7 +17,7 @@ import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
-import ua.softgroup.matrix.server.supervisor.SupervisorQueriesSingleton;
+import ua.softgroup.matrix.server.supervisor.SupervisorQuerier;
 import ua.softgroup.matrix.server.supervisor.models.CurrenciesResponseModel;
 import ua.softgroup.matrix.server.supervisor.models.CurrencyModel;
 import ua.softgroup.matrix.server.supervisor.models.UserActiveProjectsResponseModel;
@@ -38,6 +38,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
 
     private static final Logger LOG = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
+    private final SupervisorQuerier supervisorQuerier;
     private final UserService userService;
     private final WorkTimeService workTimeService;
     private final CacheManager cacheManager;
@@ -46,8 +47,9 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     private Cache currencyCache;
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepository repository, UserService userService, WorkTimeService workTimeService, CacheManager cacheManager) {
+    public ProjectServiceImpl(ProjectRepository repository, SupervisorQuerier supervisorQuerier, UserService userService, WorkTimeService workTimeService, CacheManager cacheManager) {
         super(repository);
+        this.supervisorQuerier = supervisorQuerier;
         this.userService = userService;
         this.workTimeService = workTimeService;
         this.cacheManager = cacheManager;
@@ -59,7 +61,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     private void queryCurrencies(String token) throws IOException {
-        Response<CurrenciesResponseModel> response = SupervisorQueriesSingleton.getInstance()
+        Response<CurrenciesResponseModel> response = supervisorQuerier
                 .getSupervisorQueries()
                 .getCurrencies(token)
                 .execute();
@@ -73,7 +75,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     private UserActiveProjectsResponseModel queryUserActiveProjects(String token) throws IOException {
-        Response<UserActiveProjectsResponseModel> response = SupervisorQueriesSingleton.getInstance()
+        Response<UserActiveProjectsResponseModel> response = supervisorQuerier
                 .getSupervisorQueries()
                 .getUserActiveProjects(token)
                 .execute();

@@ -3,6 +3,8 @@ package ua.softgroup.matrix.server.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import ua.softgroup.matrix.server.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.model.ProjectModel;
@@ -46,30 +48,44 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
+@PropertySource("classpath:desktop.properties")
 public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
 
-    private static final int REPORT_EDIT_MAX_PERIOD_DAYS = 5;
     private static final String CWD = System.getProperty("user.dir");
     private static final String FILE_EXTENSION = "png";
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private ReportService reportService;
-    @Autowired
-    private ProjectService projectService;
-    @Autowired
-    private ClientSettingsService clientSettingsService;
-    @Autowired
-    private WorkTimeService workTimeService ;
-    @Autowired
-    private PeriodService periodService;
-    @Autowired
-    private MetricsService metricsService;
+    private final UserService userService;
+    private final ReportService reportService;
+    private final ProjectService projectService;
+    private final ClientSettingsService clientSettingsService;
+    private final WorkTimeService workTimeService ;
+    private final PeriodService periodService;
+    private final MetricsService metricsService;
+    private final WorkDayRepository workDayRepository;
+    private final Environment environment;
 
     @Autowired
-    private WorkDayRepository workDayRepository;
+    public MatrixServerApiImpl(UserService userService,
+                               ReportService reportService,
+                               ProjectService projectService,
+                               ClientSettingsService clientSettingsService,
+                               WorkTimeService workTimeService,
+                               PeriodService periodService,
+                               MetricsService metricsService,
+                               WorkDayRepository workDayRepository,
+                               Environment environment) {
+        this.userService = userService;
+        this.reportService = reportService;
+        this.projectService = projectService;
+        this.clientSettingsService = clientSettingsService;
+        this.workTimeService = workTimeService;
+        this.periodService = periodService;
+        this.metricsService = metricsService;
+        this.workDayRepository = workDayRepository;
+        this.environment = environment;
+    }
+
 
     @Override
     public String authenticate(UserPassword userPassword) {
@@ -111,8 +127,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("updateReport");
         Duration duration = Duration.between(report.getCreationDate(), LocalDateTime.now());
         LOG.debug("Report created {} hours ago", duration.toHours());
-        //TODO change to hours
-        if (duration.toMinutes() > REPORT_EDIT_MAX_PERIOD_DAYS) {
+        final long reportEditablePeriod = Long.parseLong(environment.getProperty("report.editable.days")) * 24;
+        if (duration.toHours() > reportEditablePeriod) {
             LOG.debug("Report expired");
             return Constants.REPORT_EXPIRED;
         }
@@ -378,9 +394,11 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
         LOG.info("saveScreenshot: {}", workTime);
         try {
-            String fileName = String.valueOf(System.currentTimeMillis()) + "." + FILE_EXTENSION;
-            ImageIO.write(ImageIO.read(new ByteArrayInputStream(file.getFile())), FILE_EXTENSION, new File(fileName));
-            metricsService.save(new Screenshot(CWD + "/" + fileName, workTime));
+            String filePath = CWD + environment.getProperty("screenshot.path") + System.currentTimeMillis() + "." + FILE_EXTENSION;
+            File screenshotFile = new File(filePath);
+            screenshotFile.getParentFile().mkdirs();
+            ImageIO.write(ImageIO.read(new ByteArrayInputStream(file.getFile())), FILE_EXTENSION, screenshotFile);
+            metricsService.save(new Screenshot(filePath, workTime));
         } catch (Exception e) {
             LOG.error("Failed to save screenshot", e);
         }

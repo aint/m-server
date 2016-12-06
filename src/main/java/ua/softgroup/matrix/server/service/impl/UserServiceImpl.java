@@ -10,7 +10,7 @@ import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.supervisor.SupervisorQueriesSingleton;
+import ua.softgroup.matrix.server.supervisor.SupervisorQuerier;
 import ua.softgroup.matrix.server.supervisor.models.LoginResponseModel;
 import ua.softgroup.matrix.server.supervisor.models.UserModel;
 
@@ -24,11 +24,13 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final Validator validator;
+    private final SupervisorQuerier supervisorQuerier;
 
     @Autowired
-    public UserServiceImpl(UserRepository repository, Validator validator) {
+    public UserServiceImpl(UserRepository repository, Validator validator, SupervisorQuerier supervisorQuerier) {
         super(repository);
         this.validator = validator;
+        this.supervisorQuerier = supervisorQuerier;
     }
 
     @Override
@@ -70,7 +72,7 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     }
 
     private Response<LoginResponseModel> executeLoginQuery(String username, String password) throws IOException {
-        Response<LoginResponseModel> response = SupervisorQueriesSingleton.getInstance()
+        Response<LoginResponseModel> response = supervisorQuerier
                 .getSupervisorQueries()
                 .login(username, password)
                 .execute();

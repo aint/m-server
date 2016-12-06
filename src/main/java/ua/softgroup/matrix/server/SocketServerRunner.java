@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import ua.softgroup.matrix.server.api.MatrixServerApi;
 import ua.softgroup.matrix.server.api.ServerCommands;
 import ua.softgroup.matrix.server.config.LoadDefaultConfig;
@@ -27,11 +29,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 @SpringBootApplication
+@PropertySource("classpath:server.properties")
 public class SocketServerRunner implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SocketServerRunner.class);
 
     private final MatrixServerApi matrixServerApi;
     private final ClientSettingsService clientSettingsService;
+    private final Environment environment;
     private final LoadDefaultConfig defaultConfig;
 
     private ServerSocket serverSocket;
@@ -41,9 +45,10 @@ public class SocketServerRunner implements CommandLineRunner {
     private DataInputStream dataInputStream;
 
     @Autowired
-    public SocketServerRunner(MatrixServerApi matrixServerApi, ClientSettingsService clientSettingsService, LoadDefaultConfig defaultConfig) {
+    public SocketServerRunner(MatrixServerApi matrixServerApi, ClientSettingsService clientSettingsService, Environment environment, LoadDefaultConfig defaultConfig) {
         this.matrixServerApi = matrixServerApi;
         this.clientSettingsService = clientSettingsService;
+        this.environment = environment;
         this.defaultConfig = defaultConfig;
     }
 
@@ -86,7 +91,7 @@ public class SocketServerRunner implements CommandLineRunner {
     }
 
     private void createServerSocket() throws IOException {
-        serverSocket = new ServerSocket(defaultConfig.getServerPort());
+        serverSocket = new ServerSocket(Integer.parseInt(environment.getProperty("socket.server.port")));
     }
 
     private void acceptClientSocket() throws IOException {
