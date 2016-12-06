@@ -10,13 +10,13 @@ import ua.softgroup.matrix.server.persistent.entity.AbstractPeriod;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
-import ua.softgroup.matrix.server.supervisor.jersey.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.jersey.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.jersey.json.ReportJson;
 import ua.softgroup.matrix.server.supervisor.jersey.json.SummaryJson;
@@ -55,6 +55,9 @@ import java.util.stream.Stream;
 public class SupervisorEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(SupervisorEndpoint.class);
 
+    private static final String CORS_HEADER = "Access-Control-Allow-Origin";
+    private static final String CORS_VALUE = "*";
+
     private final ReportService reportService;
     private final ProjectService projectService;
     private final UserService userService;
@@ -84,9 +87,69 @@ public class SupervisorEndpoint {
                 .map(reportService::convertEntityToJson)
                 .collect(Collectors.toList());
         return Response.ok(reports)
-                .header("Access-Control-Allow-Origin", "*")
+                .header(CORS_HEADER, CORS_VALUE)
                 .build();
     }
+
+    @GET
+    @Path("/users/{username}/{project_id}/summary")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public Response getReportsOf(@HeaderParam("token") String token,
+                                 @PathParam("username") String username,
+                                 @Min(0) @PathParam("project_id") Long projectId) {
+
+        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
+        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
+
+        LocalDate start = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        List<SummaryJson> summary = Stream.iterate(start, date -> date.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(start, LocalDate.now().plusDays(1)))
+                .map(localDate -> workDayRepository.findByDateAndWorkTime(localDate, workTime))
+                .filter(Objects::nonNull)
+                .map(workDay -> createSummaryJson(workTime, workDay))
+                .collect(Collectors.toList());
+        return Response.ok(summary)
+                .header(CORS_HEADER, CORS_VALUE)
+                .build();
+    }
+
+    private SummaryJson createSummaryJson(WorkTime workTime, WorkDay workDay) {
+        return new SummaryJson(
+                workDay.getDate(),
+                workDay.getWorkMinutes(),
+                workDay.getIdleMinutes(),
+                workTime.getRate(),
+                workTime.getRateCurrencyId(),
+                workDay.isChecked(),
+                workDay.getCoefficient(),
+                workDay.getWorkTimePeriods().stream()
+                        .map(AbstractPeriod::getStart)
+                        .min(LocalDateTime::compareTo)
+                        .orElse(null),
+                workDay.getWorkTimePeriods().stream()
+                        .map(AbstractPeriod::getEnd)
+                        .max(LocalDateTime::compareTo)
+                        .orElse(null)
+        );
+
+    }
+
+    @GET
+    @Path("/users/{username}/{project_id}/time")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTotalTime(@PathParam("username") String username,
+                                 @Min(0) @PathParam("project_id") Long projectId) {
+
+        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
+        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
+        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes()))
+                .header(CORS_HEADER, CORS_VALUE)
+                .build();
+    }
+
 
     @PUT
     @Path("/reports/{report_id}")
@@ -99,7 +162,7 @@ public class SupervisorEndpoint {
         report.setTitle(reportJson.getTitle());
         report.setDescription(reportJson.getDescription());
         return Response.ok(reportService.convertEntityToJson(reportService.save(report)))
-                .header("Access-Control-Allow-Origin", "*")
+                .header(CORS_HEADER, CORS_VALUE)
                 .build();
     }
 
@@ -119,62 +182,9 @@ public class SupervisorEndpoint {
         report.getWorkDay().setChecked(true);
         report.getWorkDay().setCoefficient(coefficient);
         workDayRepository.save(report.getWorkDay());
-        return Response.ok(reportService.convertEntityToJson(reportService.save(report))).build();
-    }
-
-    @GET
-    @Path("/users/{username}/{project_id}/summary")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Response getReportsOf(@HeaderParam("token") String token,
-                                 @PathParam("username") String username,
-                                 @Min(0) @PathParam("project_id") Long projectId) {
-
-        if (!TokenHelper.extractSubjectFromToken(token).equalsIgnoreCase(username)) {
-            Response.status(403)
-                    .entity(new ErrorJson("Token username and path username not the same"))
-                    .build();
-        }
-
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
-
-        LocalDate start = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        List<SummaryJson> summary = Stream.iterate(start, date -> date.plusDays(1))
-                .limit(ChronoUnit.DAYS.between(start, LocalDate.now().plusDays(1)))
-                .map(localDate -> workDayRepository.findByDateAndWorkTime(localDate, workTime))
-                .filter(Objects::nonNull)
-                .map(workDay -> new SummaryJson(
-                        workDay.getDate(),
-                        workDay.getWorkMinutes(),
-                        workDay.getIdleMinutes(),
-                        workTime.getRate(),
-                        workTime.getRateCurrencyId(),
-                        workDay.isChecked(),
-                        workDay.getCoefficient(),
-                        workDay.getWorkTimePeriods().stream()
-                                .map(AbstractPeriod::getStart)
-                                .min(LocalDateTime::compareTo)
-                                .orElse(null),
-                        workDay.getWorkTimePeriods().stream()
-                                .map(AbstractPeriod::getEnd)
-                                .max(LocalDateTime::compareTo)
-                                .orElse(null)))
-                .collect(Collectors.toList());
-        return Response.ok(summary).build();
-    }
-
-    @GET
-    @Path("/users/{username}/{project_id}/time")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getTotalTime(@PathParam("username") String username,
-                                 @Min(0) @PathParam("project_id") Long projectId) {
-
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
-        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes())).build();
+        return Response.ok(reportService.convertEntityToJson(reportService.save(report)))
+                .header(CORS_HEADER, CORS_VALUE)
+                .build();
     }
 
 
