@@ -18,6 +18,7 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.jersey.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.jersey.json.JsonViewType;
+import ua.softgroup.matrix.server.supervisor.jersey.json.ReportJson;
 import ua.softgroup.matrix.server.supervisor.jersey.json.SummaryJson;
 import ua.softgroup.matrix.server.supervisor.jersey.json.TimeJson;
 import ua.softgroup.matrix.server.supervisor.jersey.token.TokenHelper;
@@ -79,8 +80,10 @@ public class SupervisorEndpoint {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
-        return Response
-                .ok(reportService.getAllReportsOf(user, project))
+        List<ReportJson> reports = reportService.getAllReportsOf(user, project).stream()
+                .map(reportService::convertEntityToJson)
+                .collect(Collectors.toList());
+        return Response.ok(reports)
                 .header("Access-Control-Allow-Origin", "*")
                 .build();
     }
@@ -90,12 +93,14 @@ public class SupervisorEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateReport(@Min(0) @PathParam("report_id") Long reportId,
-                                 @JsonView(JsonViewType.IN.class) Report reportJson) {
+                                 @JsonView(JsonViewType.IN.class) ReportJson reportJson) {
         LOG.info("PUT JSON {}", reportJson);
         Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
         report.setTitle(reportJson.getTitle());
         report.setDescription(reportJson.getDescription());
-        return Response.ok(reportService.save(report)).build();
+        return Response.ok(reportService.convertEntityToJson(reportService.save(report)))
+                .header("Access-Control-Allow-Origin", "*")
+                .build();
     }
 
     @POST
@@ -114,7 +119,7 @@ public class SupervisorEndpoint {
         report.getWorkDay().setChecked(true);
         report.getWorkDay().setCoefficient(coefficient);
         workDayRepository.save(report.getWorkDay());
-        return Response.ok(reportService.save(report)).build();
+        return Response.ok(reportService.convertEntityToJson(reportService.save(report))).build();
     }
 
     @GET

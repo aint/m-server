@@ -15,6 +15,7 @@ import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
+import ua.softgroup.matrix.server.supervisor.jersey.json.ReportJson;
 
 import javax.validation.Validator;
 import java.time.LocalDate;
@@ -89,6 +90,20 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
         reportModel.setDate(report.getCreationDate().toLocalDate());
         reportModel.setChecked(report.getWorkDay().isChecked());
         return reportModel;
+    }
+
+    @Override
+    @Transactional
+    public ReportJson convertEntityToJson(Report report) {
+        return new ReportJson(
+                report.getId(),
+                report.getCreationDate(),
+                report.getUpdateDate(),
+                report.getTitle(),
+                report.getDescription(),
+                report.getWorkDay().getWorkMinutes(),
+                report.getWorkDay().isChecked()
+        );
     }
 
     @Override

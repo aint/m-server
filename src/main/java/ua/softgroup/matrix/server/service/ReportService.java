@@ -4,6 +4,7 @@ import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.supervisor.jersey.json.ReportJson;
 
 import java.util.Set;
 
@@ -18,5 +19,7 @@ public interface ReportService extends GeneralEntityService<Report> {
     Report save(ReportModel reportModel);
 
     ReportModel convertEntityToDto(Report report, String token);
+
+    ReportJson convertEntityToJson(Report report);
 
 }
