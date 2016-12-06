@@ -9,9 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.persistent.entity.AbstractPeriod;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
+import ua.softgroup.matrix.server.persistent.entity.TimeAudit;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
+import ua.softgroup.matrix.server.persistent.repository.TimeAuditRepository;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
@@ -64,6 +66,8 @@ public class SupervisorEndpoint {
     private final UserService userService;
     private final WorkTimeService workTimeService;
 
+    @Autowired
+    private TimeAuditRepository timeAuditRepository;
     @Autowired
     private WorkDayRepository workDayRepository;
 
@@ -172,6 +176,9 @@ public class SupervisorEndpoint {
                                   .orElse(new WorkDay(0L, 0L, workTime));
         workDay.setWorkMinutes(workDay.getWorkMinutes() + timeJson.getTotalMinutes());
         workDayRepository.save(workDay);
+
+        User principal = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);
+        timeAuditRepository.save(new TimeAudit(timeJson.getTotalMinutes(), timeJson.getReason(), principal, workDay));
 
         return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes()))
                 .header(CORS_HEADER, CORS_VALUE)
