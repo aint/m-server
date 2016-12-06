@@ -44,6 +44,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -150,6 +151,32 @@ public class SupervisorEndpoint {
                 .build();
     }
 
+    @POST
+    @Path("/users/{username}/{project_id}/time")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @JsonView(JsonViewType.OUT.class)
+    public Response addTime(@HeaderParam("token") String token,
+                            @PathParam("username") String username,
+                            @PathParam("project_id") @Min(0) Long projectId,
+                            @JsonView(JsonViewType.IN.class) TimeJson timeJson) {
+
+        LOG.info("POST JSON {}", timeJson);
+        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
+        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
+        workTime.setTotalMinutes(workTime.getTotalMinutes() + timeJson.getTotalMinutes());
+        workTimeService.save(workTime);
+
+        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(timeJson.getDate(), workTime))
+                                  .orElse(new WorkDay(0L, 0L, workTime));
+        workDay.setWorkMinutes(workDay.getWorkMinutes() + timeJson.getTotalMinutes());
+        workDayRepository.save(workDay);
+
+        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes()))
+                .header(CORS_HEADER, CORS_VALUE)
+                .build();
+    }
 
     @PUT
     @Path("/reports/{report_id}")
