@@ -17,7 +17,6 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 
 import javax.validation.Validator;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -70,8 +69,8 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
         report.setTitle(rm.getTitle());
         report.setDescription(rm.getDescription());
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
-        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), workTime))
-                .orElse(workDayRepository.save(new WorkDay(0L, 0L, workTime)));
+        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(report.getCreationDate().toLocalDate(), workTime))
+                .orElseGet(() ->  workDayRepository.save(new WorkDay(0L, 0L, workTime)));
         report.setWorkDay(workDay);
         return getRepository().save(report);
     }
