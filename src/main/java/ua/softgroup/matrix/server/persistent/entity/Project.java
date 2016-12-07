@@ -1,7 +1,7 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ua.softgroup.matrix.server.supervisor.models.RetrofitModel;
+import ua.softgroup.matrix.server.supervisor.consumer.json.RetrofitModel;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

@@ -4,7 +4,7 @@ import ua.softgroup.matrix.server.model.ReportModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
-import ua.softgroup.matrix.server.supervisor.jersey.json.ReportJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 
 import java.util.Set;
 

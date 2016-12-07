@@ -10,9 +10,9 @@ import ua.softgroup.matrix.server.model.UserPassword;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.supervisor.SupervisorQuerier;
-import ua.softgroup.matrix.server.supervisor.models.LoginResponseModel;
-import ua.softgroup.matrix.server.supervisor.models.UserModel;
+import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint;
+import ua.softgroup.matrix.server.supervisor.consumer.json.LoginResponseModel;
+import ua.softgroup.matrix.server.supervisor.consumer.json.UserModel;
 
 import javax.validation.Validator;
 import java.io.IOException;
@@ -24,13 +24,13 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final Validator validator;
-    private final SupervisorQuerier supervisorQuerier;
+    private final SupervisorEndpoint supervisorEndpoint;
 
     @Autowired
-    public UserServiceImpl(UserRepository repository, Validator validator, SupervisorQuerier supervisorQuerier) {
+    public UserServiceImpl(UserRepository repository, Validator validator, SupervisorEndpoint supervisorEndpoint) {
         super(repository);
         this.validator = validator;
-        this.supervisorQuerier = supervisorQuerier;
+        this.supervisorEndpoint = supervisorEndpoint;
     }
 
     @Override
@@ -72,8 +72,7 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     }
 
     private Response<LoginResponseModel> executeLoginQuery(String username, String password) throws IOException {
-        Response<LoginResponseModel> response = supervisorQuerier
-                .getSupervisorQueries()
+        Response<LoginResponseModel> response = supervisorEndpoint
                 .login(username, password)
                 .execute();
         if (!response.isSuccessful()) {

@@ -15,7 +15,7 @@ import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
-import ua.softgroup.matrix.server.supervisor.jersey.json.ReportJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 
 import javax.validation.Validator;
 import java.time.LocalDate;

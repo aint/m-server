@@ -17,10 +17,10 @@ import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
-import ua.softgroup.matrix.server.supervisor.SupervisorQuerier;
-import ua.softgroup.matrix.server.supervisor.models.CurrenciesResponseModel;
-import ua.softgroup.matrix.server.supervisor.models.CurrencyModel;
-import ua.softgroup.matrix.server.supervisor.models.UserActiveProjectsResponseModel;
+import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint;
+import ua.softgroup.matrix.server.supervisor.consumer.json.CurrenciesResponseModel;
+import ua.softgroup.matrix.server.supervisor.consumer.json.CurrencyModel;
+import ua.softgroup.matrix.server.supervisor.consumer.json.UserActiveProjectsResponseModel;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
 
     private static final Logger LOG = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
-    private final SupervisorQuerier supervisorQuerier;
+    private final SupervisorEndpoint supervisorEndpoint;
     private final UserService userService;
     private final WorkTimeService workTimeService;
     private final CacheManager cacheManager;
@@ -47,9 +47,9 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     private Cache currencyCache;
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepository repository, SupervisorQuerier supervisorQuerier, UserService userService, WorkTimeService workTimeService, CacheManager cacheManager) {
+    public ProjectServiceImpl(ProjectRepository repository, SupervisorEndpoint supervisorEndpoint, UserService userService, WorkTimeService workTimeService, CacheManager cacheManager) {
         super(repository);
-        this.supervisorQuerier = supervisorQuerier;
+        this.supervisorEndpoint = supervisorEndpoint;
         this.userService = userService;
         this.workTimeService = workTimeService;
         this.cacheManager = cacheManager;
@@ -61,8 +61,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     private void queryCurrencies(String token) throws IOException {
-        Response<CurrenciesResponseModel> response = supervisorQuerier
-                .getSupervisorQueries()
+        Response<CurrenciesResponseModel> response = supervisorEndpoint
                 .getCurrencies(token)
                 .execute();
         if (!response.isSuccessful()) {
@@ -75,8 +74,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     private UserActiveProjectsResponseModel queryUserActiveProjects(String token) throws IOException {
-        Response<UserActiveProjectsResponseModel> response = supervisorQuerier
-                .getSupervisorQueries()
+        Response<UserActiveProjectsResponseModel> response = supervisorEndpoint
                 .getUserActiveProjects(token)
                 .execute();
         if (!response.isSuccessful()) {
