@@ -137,22 +137,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         return Constants.TOKEN_VALIDATED;
     }
 
-    @Deprecated
-    @Override
-    public ReportModel getReport(ReportModel reportModel) {
-        LOG.debug("getReport: {}", reportModel);
-
-        Report report = reportService.getById(reportModel.getId()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("getReport: {}", report);
-
-        reportModel.setId(report.getId());
-        reportModel.setTitle(report.getTitle());
-        reportModel.setDescription(report.getDescription());
-        reportModel.setStatus(0);
-        reportModel.setChecked(report.getWorkDay().isChecked());
-        return reportModel;
-    }
-
     @Override
     public Set<ReportModel> getAllReports(TokenModel tokenModel) {
         User user = userService.getByTrackerToken(tokenModel.getToken()).orElseThrow(NoSuchElementException::new);
@@ -174,11 +158,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel) {
         return projectService.getUserActiveProjects(tokenModel.getToken());
-    }
-
-    @Override
-    public void setCurrentProject(Long projectId) {
-
     }
 
     @Override

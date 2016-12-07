@@ -10,12 +10,6 @@ public class SynchronizedModel implements Serializable {
     private HashSet<TimeModel> timeModel;
     private HashSet<TimeModel> downtimeModel;
 
-    public SynchronizedModel(HashSet<ReportModel> reportModel, HashSet<TimeModel> timeModel, HashSet<TimeModel> downTimeModel) {
-        this.reportModel = reportModel;
-        this.timeModel = timeModel;
-        this.downtimeModel = downTimeModel;
-    }
-
     public HashSet<ReportModel> getReportModel() {
         return reportModel;
     }

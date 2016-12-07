@@ -25,22 +25,6 @@ public interface MatrixServerApi {
     Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel);
 
     /**
-     * Sets project as current for the authenticated user
-     *
-     * @param projectId a project's id
-     */
-    void setCurrentProject(Long projectId);
-
-    /**
-     * Returns a report for the given id
-     *
-     * @param reportRequest the report' id and token
-     * @return the report's text
-     */
-    @Deprecated
-    ReportModel getReport(ReportModel reportRequest);
-
-    /**
      * Saves a report for the given date
      *
      * @param reportModel report's model

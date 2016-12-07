@@ -22,7 +22,6 @@ public class ProjectModel implements Serializable {
 
     private String rateCurrency;
 
-
     public long getId() {
         return id;
     }

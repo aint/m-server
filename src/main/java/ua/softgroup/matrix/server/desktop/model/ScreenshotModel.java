@@ -5,9 +5,6 @@ public class ScreenshotModel extends TokenModel{
     private byte[] file;
     private long projectID;
 
-    public ScreenshotModel() {
-    }
-
     public long getProjectID() {
         return projectID;
     }

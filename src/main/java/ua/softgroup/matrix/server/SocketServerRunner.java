@@ -122,7 +122,7 @@ public class SocketServerRunner implements CommandLineRunner {
     }
 
     private boolean clientRequestClose(ServerCommands command) throws IOException {
-        if ((ServerCommands.CLOSE == command)) {
+        if (ServerCommands.CLOSE == command) {
             closeClientSocket();
             LOG.info("Client closed connection");
             LOG.info("-----------------------");
@@ -144,11 +144,6 @@ public class SocketServerRunner implements CommandLineRunner {
         } else if (ServerCommands.GET_ALL_PROJECT == command) {
             TokenModel token = (TokenModel) objectInputStream.readObject();
             sendAllObjectsToClient(matrixServerApi.getUserActiveProjects(token));
-        } else if (ServerCommands.SET_CURRENT_PROJECT == command) {
-            matrixServerApi.setCurrentProject(0L);
-        } else if (ServerCommands.GET_REPORT == command) {
-            ReportModel reportRequest = (ReportModel) objectInputStream.readObject();
-            sendReportToClient(matrixServerApi.getReport(reportRequest));
         } else if (ServerCommands.SAVE_REPORT == command) {
             ReportModel report = (ReportModel) objectInputStream.readObject();
             sendConstantStatus(matrixServerApi.saveReport(report).name());
@@ -203,16 +198,9 @@ public class SocketServerRunner implements CommandLineRunner {
         dataInputStream = new DataInputStream(clientSocket.getInputStream());
     }
 
-
     private void sendAllObjectsToClient(Object reports) throws IOException {
         ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
         out.writeObject(reports);
-        out.flush();
-    }
-
-    private void sendReportToClient(ReportModel report) throws IOException {
-        ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-        out.writeObject(report);
         out.flush();
     }
 
