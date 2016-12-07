@@ -1,4 +1,4 @@
-package ua.softgroup.matrix.server.api;
+package ua.softgroup.matrix.server.desktop.api;
 
 public enum ServerCommands {
 

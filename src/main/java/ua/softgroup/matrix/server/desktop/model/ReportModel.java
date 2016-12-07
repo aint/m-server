@@ -1,4 +1,4 @@
-package ua.softgroup.matrix.server.model;
+package ua.softgroup.matrix.server.desktop.model;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;

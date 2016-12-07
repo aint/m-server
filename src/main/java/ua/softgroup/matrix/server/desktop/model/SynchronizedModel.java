@@ -1,4 +1,4 @@
-package ua.softgroup.matrix.server.model;
+package ua.softgroup.matrix.server.desktop.model;
 
 import java.io.Serializable;
 import java.util.HashSet;

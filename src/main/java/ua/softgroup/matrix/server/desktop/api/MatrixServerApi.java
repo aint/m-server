@@ -1,14 +1,14 @@
-package ua.softgroup.matrix.server.api;
+package ua.softgroup.matrix.server.desktop.api;
 
-import ua.softgroup.matrix.server.model.ClientSettingsModel;
-import ua.softgroup.matrix.server.model.ProjectModel;
-import ua.softgroup.matrix.server.model.ReportModel;
-import ua.softgroup.matrix.server.model.ScreenshotModel;
-import ua.softgroup.matrix.server.model.SynchronizedModel;
-import ua.softgroup.matrix.server.model.TimeModel;
-import ua.softgroup.matrix.server.model.TokenModel;
-import ua.softgroup.matrix.server.model.UserPassword;
-import ua.softgroup.matrix.server.model.WriteKeyboard;
+import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
+import ua.softgroup.matrix.server.desktop.model.ProjectModel;
+import ua.softgroup.matrix.server.desktop.model.ReportModel;
+import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
+import ua.softgroup.matrix.server.desktop.model.SynchronizedModel;
+import ua.softgroup.matrix.server.desktop.model.TimeModel;
+import ua.softgroup.matrix.server.desktop.model.TokenModel;
+import ua.softgroup.matrix.server.desktop.model.UserPassword;
+import ua.softgroup.matrix.server.desktop.model.WriteKeyboard;
 
 import java.util.Set;
 
