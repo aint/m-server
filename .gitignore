@@ -1,7 +1,3 @@
-### Maven Wrapper ###
-.mvn
-mvnw
-mvnw.cmd
 ### Screenshot ###
 *.png
 ### Logs ###
