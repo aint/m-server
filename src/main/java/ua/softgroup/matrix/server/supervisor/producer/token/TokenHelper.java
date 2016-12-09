@@ -49,7 +49,7 @@ public class TokenHelper {
         SignedJWT signedJWT = new SignedJWT(
                 new JWSHeader(JWSAlgorithm.parse(ALGORITHM)),
                 new JWTClaimsSet.Builder()
-                        .subject("vadimb")
+                        .subject("10")
                         .issuer("http://example.com/")
                         .expirationTime(new Date(new Date().getTime() + 60 * 1000))
                         .build());

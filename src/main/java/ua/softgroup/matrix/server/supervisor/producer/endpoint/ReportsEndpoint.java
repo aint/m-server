@@ -19,25 +19,27 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
-import ua.softgroup.matrix.server.supervisor.producer.token.TokenHelper;
 
+import javax.servlet.ServletContext;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -117,14 +119,14 @@ public class ReportsEndpoint {
     @ApiResponses({
             @ApiResponse(code = 400, message = "When report id <= 0 or coefficient <= 0", response = ErrorJson.class),
     })
-    public Response checkReport(@HeaderParam("token") String token,
+    public Response checkReport(@Context ServletContext context,
                                 @Min(0) @PathParam("report_id") Long reportId,
                                 @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
+        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
         Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
-        //TODO retrieve principal in token auth filter
-        User user = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);
-        report.getWorkDay().setChecker(user);
+        report.getWorkDay().setChecker(principal);
         report.getWorkDay().setChecked(true);
         report.getWorkDay().setCoefficient(coefficient);
         workDayRepository.save(report.getWorkDay());

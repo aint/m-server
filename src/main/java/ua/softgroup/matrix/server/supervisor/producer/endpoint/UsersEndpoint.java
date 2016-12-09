@@ -25,17 +25,17 @@ import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.SummaryJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
-import ua.softgroup.matrix.server.supervisor.producer.token.TokenHelper;
 
+import javax.servlet.ServletContext;
 import javax.validation.constraints.Min;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
@@ -47,6 +47,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -85,8 +87,7 @@ public class UsersEndpoint {
     @ApiResponses({
             @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
     })
-    public Response getReportsOf(@HeaderParam("token") String token,
-                                 @Min(0) @PathParam("user_id") Long userId,
+    public Response getReportsOf(@Min(0) @PathParam("user_id") Long userId,
                                  @Min(0) @PathParam("project_id") Long projectId) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
@@ -155,7 +156,7 @@ public class UsersEndpoint {
     @ApiResponses({
             @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
     })
-    public Response addTime(@HeaderParam("token") String token,
+    public Response addTime(@Context ServletContext context,
                             @Min(0) @PathParam("user_id") Long userId,
                             @Min(0) @PathParam("project_id") Long projectId,
                             @JsonView(JsonViewType.IN.class) TimeJson timeJson) {
@@ -172,7 +173,8 @@ public class UsersEndpoint {
         workDay.setWorkMinutes(workDay.getWorkMinutes() + timeJson.getTotalMinutes());
         workDayRepository.save(workDay);
 
-        User principal = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);
+        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
         timeAuditRepository.save(new TimeAudit(timeJson.getTotalMinutes(), timeJson.getReason(), principal, workDay));
 
         return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes())).build();
