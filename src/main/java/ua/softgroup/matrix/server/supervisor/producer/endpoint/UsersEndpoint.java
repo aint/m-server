@@ -74,7 +74,7 @@ public class UsersEndpoint {
     }
 
     @GET
-    @Path("/{username}/{project_id}/summary")
+    @Path("/{user_id}/{project_id}/summary")
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     @ApiOperation(
@@ -83,14 +83,14 @@ public class UsersEndpoint {
             responseContainer = "List"
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
     })
     public Response getReportsOf(@HeaderParam("token") String token,
-                                 @PathParam("username") String username,
+                                 @Min(0) @PathParam("user_id") Long userId,
                                  @Min(0) @PathParam("project_id") Long projectId) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
 
         LocalDate start = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
@@ -125,26 +125,26 @@ public class UsersEndpoint {
     }
 
     @GET
-    @Path("/{username}/{project_id}/time")
+    @Path("/{user_id}/{project_id}/time")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             value = "Returns a today/total work time of the user's project",
             response = TimeJson.class
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
     })
-    public Response getTotalTime(@PathParam("username") String username,
+    public Response getTotalTime(@Min(0) @PathParam("user_id") Long userId,
                                  @Min(0) @PathParam("project_id") Long projectId) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
         return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes())).build();
     }
 
     @POST
-    @Path("/{username}/{project_id}/time")
+    @Path("/{user_id}/{project_id}/time")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
@@ -153,16 +153,16 @@ public class UsersEndpoint {
             response = TimeJson.class
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
     })
     public Response addTime(@HeaderParam("token") String token,
-                            @PathParam("username") String username,
-                            @PathParam("project_id") @Min(0) Long projectId,
+                            @Min(0) @PathParam("user_id") Long userId,
+                            @Min(0) @PathParam("project_id") Long projectId,
                             @JsonView(JsonViewType.IN.class) TimeJson timeJson) {
 
         LOG.info("POST JSON {}", timeJson);
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
         workTime.setTotalMinutes(workTime.getTotalMinutes() + timeJson.getTotalMinutes());
         workTimeService.save(workTime);

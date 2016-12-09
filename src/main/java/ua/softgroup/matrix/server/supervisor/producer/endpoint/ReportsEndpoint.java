@@ -63,7 +63,7 @@ public class ReportsEndpoint {
     }
 
     @GET
-    @Path("/{username}/{project_id}")
+    @Path("/{user_id}/{project_id}")
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
     @ApiOperation(
@@ -74,11 +74,11 @@ public class ReportsEndpoint {
     @ApiResponses({
             @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
     })
-    public Response getReportsOf(@PathParam("username") String username,
+    public Response getReportsOf(@Min(0) @PathParam("user_id") Long userId,
                                  @Min(0) @PathParam("project_id") Long projectId) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
+        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         List<ReportJson> reports = reportService.getAllReportsOf(user, project).stream()
                 .map(reportService::convertEntityToJson)
                 .collect(Collectors.toList());
