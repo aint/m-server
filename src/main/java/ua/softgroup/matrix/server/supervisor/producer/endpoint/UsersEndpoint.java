@@ -87,7 +87,7 @@ public class UsersEndpoint {
     @ApiResponses({
             @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
     })
-    public Response getReportsOf(@Min(0) @PathParam("user_id") Long userId,
+    public Response getSummary(@Min(0) @PathParam("user_id") Long userId,
                                  @Min(0) @PathParam("project_id") Long projectId) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
@@ -128,6 +128,7 @@ public class UsersEndpoint {
     @GET
     @Path("/{user_id}/{project_id}/time")
     @Produces(MediaType.APPLICATION_JSON)
+    @JsonView(JsonViewType.OUT.class)
     @ApiOperation(
             value = "Returns a today/total work time of the user's project",
             response = TimeJson.class
@@ -135,8 +136,8 @@ public class UsersEndpoint {
     @ApiResponses({
             @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
     })
-    public Response getTotalTime(@Min(0) @PathParam("user_id") Long userId,
-                                 @Min(0) @PathParam("project_id") Long projectId) {
+    public Response getWorkTime(@Min(0) @PathParam("user_id") Long userId,
+                                @Min(0) @PathParam("project_id") Long projectId) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
@@ -156,7 +157,7 @@ public class UsersEndpoint {
     @ApiResponses({
             @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
     })
-    public Response addTime(@Context ServletContext context,
+    public Response addWorkTime(@Context ServletContext context,
                             @Min(0) @PathParam("user_id") Long userId,
                             @Min(0) @PathParam("project_id") Long projectId,
                             @JsonView(JsonViewType.IN.class) TimeJson timeJson) {
