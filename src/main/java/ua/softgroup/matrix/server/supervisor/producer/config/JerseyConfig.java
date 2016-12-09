@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import ua.softgroup.matrix.server.supervisor.producer.MatrixEndpoint;
+import ua.softgroup.matrix.server.supervisor.producer.endpoint.ReportsEndpoint;
+import ua.softgroup.matrix.server.supervisor.producer.endpoint.UsersEndpoint;
 import ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter;
 
 import javax.ws.rs.ApplicationPath;
@@ -23,7 +24,9 @@ import javax.ws.rs.ApplicationPath;
 public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
-        register(MatrixEndpoint.class);
+        register(ReportsEndpoint.class);
+        register(UsersEndpoint.class);
+
         register(GenericExceptionMapper.class);
         register(ValidationExceptionMapper.class);
         register(ValidationConfigurationContextResolver.class);
