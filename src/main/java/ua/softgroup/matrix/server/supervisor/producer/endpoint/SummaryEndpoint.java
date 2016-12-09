@@ -70,7 +70,8 @@ public class SummaryEndpoint {
             responseContainer = "List"
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
     })
     @Transactional
     public Response getSummary(@Min(0) @PathParam("user_id") Long userId,
@@ -94,7 +95,8 @@ public class SummaryEndpoint {
             responseContainer = "List"
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
     })
     @Transactional
     public Response getSummaryPreviousMonth(@Min(0) @PathParam("user_id") Long userId,

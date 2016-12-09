@@ -70,10 +70,12 @@ public class UsersEndpoint {
     @JsonView(JsonViewType.OUT.class)
     @ApiOperation(
             value = "Returns a today/total work time of the user's project",
+            notes = "Showing not relevant response json due to Swagger bug",
             response = TimeJson.class
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
     })
     public Response getWorkTime(@Min(0) @PathParam("user_id") Long userId,
                                 @Min(0) @PathParam("project_id") Long projectId) {
@@ -91,10 +93,12 @@ public class UsersEndpoint {
     @JsonView(JsonViewType.OUT.class)
     @ApiOperation(
             value = "Add a work time for the user's project",
+            notes = "Showing not relevant response/request json due to Swagger bug",
             response = TimeJson.class
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
     })
     public Response addWorkTime(@Context ServletContext context,
                             @Min(0) @PathParam("user_id") Long userId,

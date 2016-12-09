@@ -74,7 +74,8 @@ public class ReportsEndpoint {
             responseContainer = "List"
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
     })
     public Response getReports(@Min(0) @PathParam("user_id") Long userId,
                                @Min(0) @PathParam("project_id") Long projectId) {
@@ -93,10 +94,12 @@ public class ReportsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             value = "Update a report by id",
+            notes = "Showing not relevant request json due to Swagger bug",
             response = ReportJson.class
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When report id <= 0", response = ErrorJson.class)
+            @ApiResponse(code = 400, message = "When report id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When report not found", response = ErrorJson.class)
     })
     public Response updateReport(@Min(0) @PathParam("report_id") Long reportId,
                                  @JsonView(JsonViewType.IN.class) ReportJson reportJson) {
@@ -117,7 +120,8 @@ public class ReportsEndpoint {
             response = ReportJson.class
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When report id <= 0 or coefficient <= 0", response = ErrorJson.class),
+            @ApiResponse(code = 400, message = "When report id or coefficient < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When report or principal not found", response = ErrorJson.class)
     })
     public Response checkReport(@Context ServletContext context,
                                 @Min(0) @PathParam("report_id") Long reportId,
