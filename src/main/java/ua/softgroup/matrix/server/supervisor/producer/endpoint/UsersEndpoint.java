@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import ua.softgroup.matrix.server.persistent.entity.AbstractPeriod;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.TimeAudit;
 import ua.softgroup.matrix.server.persistent.entity.User;
@@ -23,7 +21,6 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
-import ua.softgroup.matrix.server.supervisor.producer.json.SummaryJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
 
 import javax.servlet.ServletContext;
@@ -38,15 +35,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
@@ -73,56 +62,6 @@ public class UsersEndpoint {
         this.projectService = projectService;
         this.userService = userService;
         this.workTimeService = workTimeService;
-    }
-
-    @GET
-    @Path("/{user_id}/{project_id}/summary")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    @ApiOperation(
-            value = "Returns a daily summary of current month for the user's project",
-            response = SummaryJson.class,
-            responseContainer = "List"
-    )
-    @ApiResponses({
-            @ApiResponse(code = 400, message = "When user or project ids <= 0", response = ErrorJson.class)
-    })
-    public Response getSummary(@Min(0) @PathParam("user_id") Long userId,
-                                 @Min(0) @PathParam("project_id") Long projectId) {
-
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
-
-        LocalDate start = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        List<SummaryJson> summary = Stream.iterate(start, date -> date.plusDays(1))
-                .limit(ChronoUnit.DAYS.between(start, LocalDate.now().plusDays(1)))
-                .map(localDate -> workDayRepository.findByDateAndWorkTime(localDate, workTime))
-                .filter(Objects::nonNull)
-                .map(workDay -> createSummaryJson(workTime, workDay))
-                .collect(Collectors.toList());
-        return Response.ok(summary).build();
-    }
-
-    private SummaryJson createSummaryJson(WorkTime workTime, WorkDay workDay) {
-        return new SummaryJson(
-                workDay.getDate(),
-                workDay.getWorkMinutes(),
-                workDay.getIdleMinutes(),
-                workTime.getRate(),
-                workTime.getRateCurrencyId(),
-                workDay.isChecked(),
-                workDay.getCoefficient(),
-                workDay.getWorkTimePeriods().stream()
-                        .map(AbstractPeriod::getStart)
-                        .min(LocalDateTime::compareTo)
-                        .orElse(null),
-                workDay.getWorkTimePeriods().stream()
-                        .map(AbstractPeriod::getEnd)
-                        .max(LocalDateTime::compareTo)
-                        .orElse(null)
-        );
-
     }
 
     @GET
