@@ -20,11 +20,13 @@ import java.util.Optional;
 public class TokenAuthenticationFilter implements ContainerRequestFilter {
     private static final Logger LOG = LoggerFactory.getLogger(TokenAuthenticationFilter.class);
 
-
+    private static final String SWAGGER_JSON = "swagger.json";
     private static final String TOKEN = "TOKEN";
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        if (SWAGGER_JSON.equals(requestContext.getUriInfo().getPath())) return;
+
         String token = Optional.ofNullable(requestContext.getHeaderString(TOKEN))
                                .orElseThrow(() -> new NotAuthorizedException(new ErrorJson("Authorization header must be provided")));
         try {

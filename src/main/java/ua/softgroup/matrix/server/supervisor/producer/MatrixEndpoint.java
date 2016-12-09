@@ -1,6 +1,10 @@
 package ua.softgroup.matrix.server.supervisor.producer;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,7 @@ import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkTimeService;
+import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.SummaryJson;
@@ -54,12 +59,10 @@ import java.util.stream.Stream;
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 @Component
-@Path("/v1")
+@Path("/")
+@Api("Matrix Endpoint")
 public class MatrixEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixEndpoint.class);
-
-    private static final String CORS_HEADER = "Access-Control-Allow-Origin";
-    private static final String CORS_VALUE = "*";
 
     private final ReportService reportService;
     private final ProjectService projectService;
@@ -83,6 +86,14 @@ public class MatrixEndpoint {
     @Path("/users/{username}/{project_id}/reports")
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
+    @ApiOperation(
+            value = "Returns reports of the user's project",
+            response = ReportJson.class,
+            responseContainer = "List"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
+    })
     public Response getReportsOf(@PathParam("username") String username,
                                  @Min(0) @PathParam("project_id") Long projectId) {
 
@@ -91,15 +102,21 @@ public class MatrixEndpoint {
         List<ReportJson> reports = reportService.getAllReportsOf(user, project).stream()
                 .map(reportService::convertEntityToJson)
                 .collect(Collectors.toList());
-        return Response.ok(reports)
-                .header(CORS_HEADER, CORS_VALUE)
-                .build();
+        return Response.ok(reports).build();
     }
 
     @GET
     @Path("/users/{username}/{project_id}/summary")
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
+    @ApiOperation(
+            value = "Returns a daily summary of current month for the user's project",
+            response = SummaryJson.class,
+            responseContainer = "List"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
+    })
     public Response getReportsOf(@HeaderParam("token") String token,
                                  @PathParam("username") String username,
                                  @Min(0) @PathParam("project_id") Long projectId) {
@@ -115,9 +132,7 @@ public class MatrixEndpoint {
                 .filter(Objects::nonNull)
                 .map(workDay -> createSummaryJson(workTime, workDay))
                 .collect(Collectors.toList());
-        return Response.ok(summary)
-                .header(CORS_HEADER, CORS_VALUE)
-                .build();
+        return Response.ok(summary).build();
     }
 
     private SummaryJson createSummaryJson(WorkTime workTime, WorkDay workDay) {
@@ -144,15 +159,20 @@ public class MatrixEndpoint {
     @GET
     @Path("/users/{username}/{project_id}/time")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Returns a today/total work time of the user's project",
+            response = TimeJson.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
+    })
     public Response getTotalTime(@PathParam("username") String username,
                                  @Min(0) @PathParam("project_id") Long projectId) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getByUsername(username).orElseThrow(NotFoundException::new);
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
-        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes()))
-                .header(CORS_HEADER, CORS_VALUE)
-                .build();
+        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes())).build();
     }
 
     @POST
@@ -160,6 +180,13 @@ public class MatrixEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
+    @ApiOperation(
+            value = "Add a work time for the user's project",
+            response = TimeJson.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When project id <= 0", response = ErrorJson.class)
+    })
     public Response addTime(@HeaderParam("token") String token,
                             @PathParam("username") String username,
                             @PathParam("project_id") @Min(0) Long projectId,
@@ -180,24 +207,27 @@ public class MatrixEndpoint {
         User principal = userService.getByUsername(TokenHelper.extractSubjectFromToken(token)).orElseThrow(NotFoundException::new);
         timeAuditRepository.save(new TimeAudit(timeJson.getTotalMinutes(), timeJson.getReason(), principal, workDay));
 
-        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes()))
-                .header(CORS_HEADER, CORS_VALUE)
-                .build();
+        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes())).build();
     }
 
     @PUT
     @Path("/reports/{report_id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Update a report by id",
+            response = ReportJson.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When report id <= 0", response = ErrorJson.class)
+    })
     public Response updateReport(@Min(0) @PathParam("report_id") Long reportId,
                                  @JsonView(JsonViewType.IN.class) ReportJson reportJson) {
         LOG.info("PUT JSON {}", reportJson);
         Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
         report.setTitle(reportJson.getTitle());
         report.setDescription(reportJson.getDescription());
-        return Response.ok(reportService.convertEntityToJson(reportService.save(report)))
-                .header(CORS_HEADER, CORS_VALUE)
-                .build();
+        return Response.ok(reportService.convertEntityToJson(reportService.save(report))).build();
     }
 
     @POST
@@ -205,6 +235,13 @@ public class MatrixEndpoint {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
+    @ApiOperation(
+            value = "Checks a report and set coefficient",
+            response = ReportJson.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When report id <= 0 or coefficient <= 0", response = ErrorJson.class),
+    })
     public Response checkReport(@HeaderParam("token") String token,
                                 @Min(0) @PathParam("report_id") Long reportId,
                                 @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
@@ -216,9 +253,7 @@ public class MatrixEndpoint {
         report.getWorkDay().setChecked(true);
         report.getWorkDay().setCoefficient(coefficient);
         workDayRepository.save(report.getWorkDay());
-        return Response.ok(reportService.convertEntityToJson(reportService.save(report)))
-                .header(CORS_HEADER, CORS_VALUE)
-                .build();
+        return Response.ok(reportService.convertEntityToJson(reportService.save(report))).build();
     }
 
 
