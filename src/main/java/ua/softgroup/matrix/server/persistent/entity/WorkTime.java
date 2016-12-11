@@ -60,6 +60,10 @@ public class WorkTime implements Serializable {
     public WorkTime() {
     }
 
+    public WorkTime(Long id) {
+        this.id = id;
+    }
+
     public WorkTime(Project project, User user) {
         this.project = project;
         this.user = user;

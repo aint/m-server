@@ -2,4 +2,5 @@
 *.png
 ### Logs ###
 logs/
-
+### Test DB ###
+*.db
