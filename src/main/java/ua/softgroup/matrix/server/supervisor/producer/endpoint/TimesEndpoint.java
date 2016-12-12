@@ -43,10 +43,10 @@ import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthent
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 @Component
-@Path("/users")
-@Api("users")
-public class UsersEndpoint {
-    private static final Logger LOG = LoggerFactory.getLogger(UsersEndpoint.class);
+@Path("/times")
+@Api("times")
+public class TimesEndpoint {
+    private static final Logger LOG = LoggerFactory.getLogger(TimesEndpoint.class);
 
     private final ProjectService projectService;
     private final UserService userService;
@@ -58,14 +58,14 @@ public class UsersEndpoint {
     private WorkDayRepository workDayRepository;
 
     @Autowired
-    public UsersEndpoint(ProjectService projectService, UserService userService, WorkTimeService workTimeService) {
+    public TimesEndpoint(ProjectService projectService, UserService userService, WorkTimeService workTimeService) {
         this.projectService = projectService;
         this.userService = userService;
         this.workTimeService = workTimeService;
     }
 
     @GET
-    @Path("/{user_id}/{project_id}/time")
+    @Path("/{user_id}/{project_id}")
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
     @ApiOperation(
@@ -87,7 +87,7 @@ public class UsersEndpoint {
     }
 
     @POST
-    @Path("/{user_id}/{project_id}/time")
+    @Path("/{user_id}/{project_id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @JsonView(JsonViewType.OUT.class)
@@ -101,9 +101,9 @@ public class UsersEndpoint {
             @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
     })
     public Response addWorkTime(@Context ServletContext context,
-                            @Min(0) @PathParam("user_id") Long userId,
-                            @Min(0) @PathParam("project_id") Long projectId,
-                            @JsonView(JsonViewType.IN.class) TimeJson timeJson) {
+                                @Min(0) @PathParam("user_id") Long userId,
+                                @Min(0) @PathParam("project_id") Long projectId,
+                                @JsonView(JsonViewType.IN.class) TimeJson timeJson) {
 
         LOG.info("POST JSON {}", timeJson);
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
