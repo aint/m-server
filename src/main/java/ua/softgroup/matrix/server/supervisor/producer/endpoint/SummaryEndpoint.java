@@ -111,6 +111,34 @@ public class SummaryEndpoint {
         return Response.ok(getSummaryBetween(start, end, workTime)).build();
     }
 
+    @GET
+    @Path("/{user_id}/{project_id}/days/{days_number}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Returns a daily summary for a specified number of days of the user's project",
+            response = SummaryJson.class,
+            responseContainer = "List"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When userId/projectId/days < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
+    })
+    @Transactional
+    public Response getSummaryOfDays(@Min(0) @PathParam("user_id") Long userId,
+                                     @Min(0) @PathParam("project_id") Long projectId,
+                                     @Min(0) @PathParam("days_number") Long days) {
+
+        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
+        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
+
+        LocalDate start = LocalDate.now().minusDays(days);
+        LocalDate end = (days == 0)
+                ? LocalDate.now().plusDays(1)
+                : LocalDate.now();
+        return Response.ok(getSummaryBetween(start, end, workTime)).build();
+    }
+
     private List<SummaryJson> getSummaryBetween(LocalDate start, LocalDate end, WorkTime workTime) {
         return Stream.iterate(start, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(start, end))
