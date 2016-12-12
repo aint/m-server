@@ -62,52 +62,30 @@ public class SummaryEndpoint {
     }
 
     @GET
-    @Path("/{user_id}/{project_id}/current")
+    @Path("/{user_id}/{project_id}/months/{months_number}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
-            value = "Returns a daily summary of current month for the user's project",
+            value = "Returns a daily summary for a specified number of months of user's project",
             response = SummaryJson.class,
             responseContainer = "List"
     )
     @ApiResponses({
-            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 400, message = "When userId/projectId/months < 0", response = ErrorJson.class),
             @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
     })
     @Transactional
-    public Response getSummary(@Min(0) @PathParam("user_id") Long userId,
-                               @Min(0) @PathParam("project_id") Long projectId) {
+    public Response getSummaryOfMonth(@Min(0) @PathParam("user_id") Long userId,
+                                      @Min(0) @PathParam("project_id") Long projectId,
+                                      @Min(0) @PathParam("months_number") Long months) {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
 
-        LocalDate start = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate end = LocalDate.now().plusDays(1);
-        return Response.ok(getSummaryBetween(start, end, workTime)).build();
-    }
-
-    @GET
-    @Path("/{user_id}/{project_id}/previous")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            value = "Returns a daily summary of previous month for the user's project",
-            response = SummaryJson.class,
-            responseContainer = "List"
-    )
-    @ApiResponses({
-            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
-            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
-    })
-    @Transactional
-    public Response getSummaryPreviousMonth(@Min(0) @PathParam("user_id") Long userId,
-                                            @Min(0) @PathParam("project_id") Long projectId) {
-
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
-
-        LocalDate start = LocalDate.now().minusMonths(1).with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate end = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate start = LocalDate.now().minusMonths(months).with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate end = (months == 0)
+                ? LocalDate.now().plusDays(1)
+                : LocalDate.now().minusMonths(months).with(TemporalAdjusters.lastDayOfMonth());
         return Response.ok(getSummaryBetween(start, end, workTime)).build();
     }
 
