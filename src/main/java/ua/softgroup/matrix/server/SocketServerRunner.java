@@ -116,7 +116,7 @@ public class SocketServerRunner implements CommandLineRunner {
     private ServerCommands readServerCommand() {
         try {
             return (ServerCommands) objectInputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | ClassCastException e) {
             LOG.error("readServerCommand", e);
         }
         return ServerCommands.CLOSE;
