@@ -16,6 +16,7 @@ import ua.softgroup.matrix.server.desktop.model.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.TokenModel;
 import ua.softgroup.matrix.server.desktop.model.UserPassword;
 import ua.softgroup.matrix.server.desktop.model.WriteKeyboard;
+import ua.softgroup.matrix.server.persistent.entity.ActiveWindows;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.persistent.entity.Keyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
@@ -373,6 +374,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("saveActiveWindowsLog: projectId {}", project.getId());
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
         LOG.info("saveActiveWindowsLog: {}", workTime);
+        metricsService.save(new ActiveWindows(activeWindows.getWindowTimeMap(), workTime));
     }
 
     @Override
