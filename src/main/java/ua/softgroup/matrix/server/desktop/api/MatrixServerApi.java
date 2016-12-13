@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.desktop.api;
 
+import ua.softgroup.matrix.server.desktop.model.ActiveWindowsModel;
 import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
@@ -55,6 +56,8 @@ public interface MatrixServerApi {
     ClientSettingsModel getClientSettings();
 
     void saveKeyboardLog(WriteKeyboard writeKeyboard);
+
+    void saveActiveWindowsLog(ActiveWindowsModel activeWindows);
 
     void saveScreenshot(ScreenshotModel file);
 

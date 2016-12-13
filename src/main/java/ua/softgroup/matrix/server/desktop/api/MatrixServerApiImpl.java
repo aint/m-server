@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import ua.softgroup.matrix.server.desktop.model.ActiveWindowsModel;
 import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
@@ -361,6 +362,17 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
         LOG.info("saveKeyboardLog: {}", workTime);
         metricsService.save(new Keyboard(writeKeyboard.getWords(), workTime));
+    }
+
+    @Override
+    public void saveActiveWindowsLog(ActiveWindowsModel activeWindows) {
+        LOG.debug("saveActiveWindowsLog: {}", activeWindows);
+        User user = userService.getByTrackerToken(activeWindows.getToken()).orElseThrow(NoSuchElementException::new);
+        LOG.debug("saveActiveWindowsLog: username {}", user.getUsername());
+        Project project = projectService.getById(activeWindows.getProjectId()).orElseThrow(NoSuchElementException::new);
+        LOG.debug("saveActiveWindowsLog: projectId {}", project.getId());
+        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
+        LOG.info("saveActiveWindowsLog: {}", workTime);
     }
 
     @Override

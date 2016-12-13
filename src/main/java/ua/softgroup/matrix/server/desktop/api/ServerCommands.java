@@ -34,6 +34,8 @@ public enum ServerCommands {
 
     KEYBOARD_LOG,
 
+    ACTIVE_WINDOWS_LOG,
+
     CLOSE
 
 }

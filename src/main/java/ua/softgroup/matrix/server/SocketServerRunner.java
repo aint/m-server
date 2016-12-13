@@ -11,6 +11,7 @@ import org.springframework.core.env.Environment;
 import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
 import ua.softgroup.matrix.server.desktop.api.ServerCommands;
 import ua.softgroup.matrix.server.config.LoadDefaultConfig;
+import ua.softgroup.matrix.server.desktop.model.ActiveWindowsModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
 import ua.softgroup.matrix.server.desktop.model.SynchronizedModel;
@@ -187,6 +188,8 @@ public class SocketServerRunner implements CommandLineRunner {
             sendAllObjectsToClient(matrixServerApi.getClientSettings());
         } else if (ServerCommands.KEYBOARD_LOG == command) {
             matrixServerApi.saveKeyboardLog((WriteKeyboard) objectInputStream.readObject());
+        } else if (ServerCommands.ACTIVE_WINDOWS_LOG == command) {
+            matrixServerApi.saveActiveWindowsLog((ActiveWindowsModel) objectInputStream.readObject());
         } else if (ServerCommands.CLOSE == command) {
             closeClientSocket();
         } else {
