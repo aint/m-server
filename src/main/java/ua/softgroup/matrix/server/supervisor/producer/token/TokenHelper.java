@@ -1,17 +1,20 @@
 package ua.softgroup.matrix.server.supervisor.producer.token;
 
+import com.google.common.io.ByteStreams;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.supervisor.producer.exception.JwtException;
 
-import java.io.File;
+import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -27,46 +30,60 @@ import java.util.Date;
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
+@Component
 public class TokenHelper {
 
     private static final String KEY_ALGORITHM = "RSA";
     private static final String ALGORITHM = "RS512";
 
-    private static final String PUBLIC_KEY_FILE = "src/main/resources/public_key.der";
-    private static final String PRIVATE_KEY_FILE = "src/main/resources/private_key.der";
+    private static final String PUBLIC_KEY_FILE = "public_key.der";
+    private static final String PRIVATE_KEY_FILE = "private_key.der";
 
-    private static PublicKey getPublicKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] keyBytes = Files.readAllBytes(new File(PUBLIC_KEY_FILE).toPath());
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
+
+    @PostConstruct
+    public void init() throws IOException, GeneralSecurityException {
+        publicKey = generatePublic(securityKey2Bytes(PUBLIC_KEY_FILE));
+        privateKey = generatePrivate(securityKey2Bytes(PRIVATE_KEY_FILE));
+    }
+
+    private byte[] securityKey2Bytes(String filePath) throws IOException {
+        try (InputStream is = new ClassPathResource(filePath).getInputStream()) {
+            return ByteStreams.toByteArray(is);
+        }
+    }
+
+    private PublicKey generatePublic(byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
         return KeyFactory.getInstance(KEY_ALGORITHM).generatePublic(new X509EncodedKeySpec(keyBytes));
     }
 
-    private static PrivateKey getPrivateKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] keyBytes = Files.readAllBytes(new File(PRIVATE_KEY_FILE).toPath());
+    private PrivateKey generatePrivate(byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
         return KeyFactory.getInstance(KEY_ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
     }
 
-    private static String generateToken(JWSSigner signer) throws JOSEException {
+    public String generateToken(String subject, String issuer, Date expirationTime) throws JOSEException {
         SignedJWT signedJWT = new SignedJWT(
                 new JWSHeader(JWSAlgorithm.parse(ALGORITHM)),
                 new JWTClaimsSet.Builder()
-                        .subject("10")
-                        .issuer("http://example.com/")
-                        .expirationTime(new Date(new Date().getTime() + 60 * 1000))
+                        .subject(subject)
+                        .issuer(issuer)
+                        .expirationTime(expirationTime)
                         .build());
-        signedJWT.sign(signer);
+        signedJWT.sign(new RSASSASigner(privateKey));
         return signedJWT.serialize();
     }
 
-    public static boolean validateToken(String token) throws IOException, GeneralSecurityException {
+    public boolean validateToken(String token) {
         try {
-            RSASSAVerifier verifier = new RSASSAVerifier((RSAPublicKey) TokenHelper.getPublicKey());
+            RSASSAVerifier verifier = new RSASSAVerifier((RSAPublicKey) publicKey);
             return SignedJWT.parse(token).verify(verifier);
         } catch (JOSEException | ParseException e) {
             throw new JwtException(e);
         }
     }
 
-    public static String extractSubjectFromToken(String token) {
+    public String extractSubjectFromToken(String token) {
         try {
             return SignedJWT.parse(token).getJWTClaimsSet().getSubject();
         } catch (ParseException e) {
@@ -74,14 +91,4 @@ public class TokenHelper {
         }
     }
 
-    //    public static void main(String[] args) throws GeneralSecurityException, JOSEException, IOException, ParseException {
-//        String token = generateToken(new RSASSASigner(getPrivateKey()));
-//        System.out.println("TOKEN " + token);
-//
-//        SignedJWT signedJWT = SignedJWT.parse(token);
-//        System.out.println("Validated " + validateToken(token));
-//        System.out.println("Subject " + extractSubjectFromToken(token));
-//        System.out.println("Issuer " + signedJWT.getJWTClaimsSet().getIssuer());
-//        System.out.println(new Date().before(signedJWT.getJWTClaimsSet().getExpirationTime()));
-//    }
 }
