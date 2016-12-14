@@ -32,8 +32,8 @@ public class TokenHelper {
     private static final String KEY_ALGORITHM = "RSA";
     private static final String ALGORITHM = "RS512";
 
-    private static final String PUBLIC_KEY_FILE = "public_key.der";
-    private static final String PRIVATE_KEY_FILE = "private_key.der";
+    private static final String PUBLIC_KEY_FILE = "src/main/resources/public_key.der";
+    private static final String PRIVATE_KEY_FILE = "src/main/resources/private_key.der";
 
     private static PublicKey getPublicKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] keyBytes = Files.readAllBytes(new File(PUBLIC_KEY_FILE).toPath());
