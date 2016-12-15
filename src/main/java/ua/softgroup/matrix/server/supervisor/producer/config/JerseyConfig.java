@@ -4,6 +4,8 @@ import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
+import org.springframework.boot.web.servlet.ErrorPage;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -62,6 +64,14 @@ public class JerseyConfig extends ResourceConfig {
         FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
         bean.setOrder(0);
         return bean;
+    }
+
+    /**
+     * Route all errors towards a stub for hiding Tomcat error pages
+     */
+    @Bean
+    public EmbeddedServletContainerCustomizer containerCustomizer() {
+        return container -> container.addErrorPages(new ErrorPage("/"));
     }
 
 }
