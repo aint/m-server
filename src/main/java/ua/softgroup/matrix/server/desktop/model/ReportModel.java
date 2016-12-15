@@ -25,6 +25,17 @@ public class ReportModel extends TokenModel {
 
     private LocalDate date;
 
+    public ReportModel() {
+    }
+
+    public ReportModel(long id, String token, String title, String description, long projectId) {
+        super.setToken(token);
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.projectId = projectId;
+    }
+
     public String getDescription() {
         return description;
     }
