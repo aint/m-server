@@ -164,11 +164,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public void startWork(TimeModel timeModel) {
-        LOG.debug("TimeModel {} ", timeModel);
-        User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("User {} start work", user);
-        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
+        LOG.debug("Start work. TimeModel {} ", timeModel);
+        WorkTime userWorkTime = getWorkTimeOfUserAndProject(timeModel.getToken(), timeModel.getProjectId());
         userWorkTime.setStartedWork(LocalDateTime.now());
         workTimeService.save(userWorkTime);
     }
@@ -252,11 +249,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                         .filter(Objects::nonNull)
                         .forEach(timeModel -> {
                                 LOG.warn("OFFLINE Timemodel {}", timeModel);
-                                User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
-                                Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-                                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
+                                WorkTime userWorkTime = getWorkTimeOfUserAndProject(timeModel.getToken(), timeModel.getProjectId());
                                 LOG.warn("OFFLINE {}", userWorkTime);
-                                LOG.debug("WorkTime username {}, projectId {} ", user.getUsername(), project.getId());
                                 userWorkTime.setStartedWork(null);
                                 userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + timeModel.getMinute());
                                 userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + timeModel.getMinute());
@@ -319,11 +313,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public TimeModel getTodayWorkTime(TimeModel timeModel) {
         LOG.debug("getTodayWorkTime: {}", timeModel);
-        User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("getTodayWorkTime: username {}", user.getUsername());
-        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("getTodayWorkTime: projectID {}", project.getId());
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime());
+        WorkTime userWorkTime = getWorkTimeOfUserAndProject(timeModel.getToken(), timeModel.getProjectId());
         LocalDateTime startedWork = userWorkTime.getStartedWork();
         Long todayMinutes = userWorkTime.getTodayMinutes();
         if (startedWork != null) {
@@ -339,11 +329,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public TimeModel getTotalWorkTime(TimeModel timeModel) {
         LOG.debug("getTotalWorkTime: {}", timeModel);
-        User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("getTotalWorkTime: username {}", user.getUsername());
-        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("getTotalWorkTime: projectID {}", project.getId());
-        WorkTime totalWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime());
+        WorkTime totalWorkTime = getWorkTimeOfUserAndProject(timeModel.getToken(), timeModel.getProjectId());
         Long totalMinutes = totalWorkTime.getTotalMinutes();
         Long hours = totalMinutes / 60;
         Long minutes = totalMinutes - hours * 60;
@@ -356,11 +342,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public void saveKeyboardLog(WriteKeyboard writeKeyboard) {
         LOG.debug("saveKeyboardLog: {}", writeKeyboard);
-        User user = userService.getByTrackerToken(writeKeyboard.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("saveKeyboardLog: username {}", user.getUsername());
-        Project project = projectService.getById(writeKeyboard.getProjectID()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("saveKeyboardLog: projectID {}", project.getId());
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
+        WorkTime workTime = getWorkTimeOfUserAndProject(writeKeyboard.getToken(), writeKeyboard.getProjectID());
         LOG.info("saveKeyboardLog: {}", workTime);
         metricsService.save(new Keyboard(writeKeyboard.getWords(), workTime));
     }
@@ -368,11 +350,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public void saveActiveWindowsLog(ActiveWindowsModel activeWindows) {
         LOG.debug("saveActiveWindowsLog: {}", activeWindows);
-        User user = userService.getByTrackerToken(activeWindows.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("saveActiveWindowsLog: username {}", user.getUsername());
-        Project project = projectService.getById(activeWindows.getProjectId()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("saveActiveWindowsLog: projectId {}", project.getId());
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
+        WorkTime workTime = getWorkTimeOfUserAndProject(activeWindows.getToken(), activeWindows.getProjectId());
         LOG.info("saveActiveWindowsLog: {}", workTime);
         metricsService.save(new ActiveWindows(activeWindows.getWindowTimeMap(), workTime));
     }
@@ -380,11 +358,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public void saveScreenshot(ScreenshotModel file) {
         LOG.debug("saveScreenshot: {}", file);
-        User user = userService.getByTrackerToken(file.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("saveScreenshot: username {}", user.getUsername());
-        Project project = projectService.getById(file.getProjectID()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("saveScreenshot: projectID {}", project.getId());
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
+        WorkTime workTime = getWorkTimeOfUserAndProject(file.getToken(), file.getProjectID());
         LOG.info("saveScreenshot: {}", workTime);
         try {
             String filePath = CWD + environment.getProperty("screenshot.path") + System.currentTimeMillis() + "." + FILE_EXTENSION;
@@ -395,6 +369,14 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         } catch (Exception e) {
             LOG.error("Failed to save screenshot", e);
         }
+    }
+
+    private WorkTime getWorkTimeOfUserAndProject(String token, Long projectId) {
+        User user = userService.getByTrackerToken(token).orElseThrow(NoSuchElementException::new);
+        Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
+        LOG.debug("username {}", user.getUsername());
+        LOG.debug("project Id {}", projectId);
+        return workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
     }
 
     private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {
