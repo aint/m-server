@@ -193,7 +193,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + minutes);
             workDayRepository.save(todayWorkDay);
 
-            periodService.save(new WorktimePeriod(startedWork, LocalDateTime.now(), timeModel.isForeignRate(), todayWorkDay));
+            periodService.save(new WorktimePeriod(startedWork, LocalDateTime.now(), todayWorkDay));
         }
     }
 
@@ -261,7 +261,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + timeModel.getMinute());
                                 workDayRepository.save(todayWorkDay);
 
-                                periodService.save(new WorktimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), timeModel.isForeignRate(), todayWorkDay));
+                                periodService.save(new WorktimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), todayWorkDay));
                         }));
 
         Optional.ofNullable(synchronizedModel.getDowntimeModel())
