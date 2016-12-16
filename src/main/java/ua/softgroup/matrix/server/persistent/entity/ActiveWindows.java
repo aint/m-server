@@ -14,8 +14,8 @@ public class ActiveWindows extends Metrics {
     private static final long serialVersionUID = 5299063888582451183L;
 
     @ElementCollection
-    @MapKeyColumn(name = "window")
-    @Column(name = "time")
+    @MapKeyColumn(name = "windowTitle", columnDefinition = "TEXT")
+    @Column(name = "timeSeconds")
     @CollectionTable(name = "activewindow_time")
     private Map<String, Long> windowTimeMap = new LinkedHashMap<>();
 
