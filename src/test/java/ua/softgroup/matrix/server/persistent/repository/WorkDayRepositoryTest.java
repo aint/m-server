@@ -8,8 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ua.softgroup.matrix.server.persistent.SpringDataConfig;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
@@ -30,12 +31,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@TestPropertySource("classpath:test-db.properties")
 @ContextConfiguration(classes = { SpringDataConfig.class })
+@ActiveProfiles("test")
+@SpringBootTest
 public class WorkDayRepositoryTest {
 
-    private static final String WORK_DAY_TABLE = WorkDay.class.getSimpleName();
-    private static final String WORK_TIME_TABLE = WorkTime.class.getSimpleName();
+    private static final String WORK_DAY_TABLE = "work_day";
+    private static final String WORK_TIME_TABLE = "work_time";
 
     private static final int WORK_DAYS_COUNT = 20;
 
@@ -44,16 +46,16 @@ public class WorkDayRepositoryTest {
 
     private static final Operation INSERT_DATA = sequenceOf(
             insertInto(WORK_TIME_TABLE)
-                    .columns("id", "startedWork", "todayMinutes", "totalMinutes", "startDowntime", "downtimeMinutes",
-                             "rate", "rateCurrencyId", "project_id",  "user_id")
+                    .columns("id", "started_work", "today_minutes", "total_minutes", "start_downtime", "downtime_minutes",
+                             "rate", "rate_currency_id", "project_id",  "user_id")
                     .values(1L, null, 0L, 0L, null, 0L, 2L, 1L, null, null)
                     .build(),
             insertInto(WORK_DAY_TABLE)
                     .withGeneratedValue("id", sequence().startingAt(1L))
-                    .withGeneratedValue("workMinutes", sequence().startingAt(0).incrementingBy(100))
-                    .withGeneratedValue("idleMinutes", sequence().startingAt(0).incrementingBy(10))
+                    .withGeneratedValue("work_minutes", sequence().startingAt(0).incrementingBy(100))
+                    .withGeneratedValue("idle_minutes", sequence().startingAt(0).incrementingBy(10))
                     .withGeneratedValue("date", dateSequence().startingAt(LocalDate.parse("2016-12-01")).incrementingBy(1, DAYS))
-                    .columns("coefficient", "checked", "checker_id", "workTime_id")
+                    .columns("coefficient", "checked", "checker_id", "work_time_id")
                     .repeatingValues(1.0D, false, null, 1L).times(WORK_DAYS_COUNT)
                     .build());
 
