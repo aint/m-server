@@ -1,18 +1,23 @@
-package ua.softgroup.matrix.server.config;
+package ua.softgroup.matrix.server;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.validation.Validator;
 
-@Configuration
+@SpringBootApplication
 @EnableCaching
-public class BeanConfig {
+public class MatrixApp {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MatrixApp.class, args);
+    }
 
     @Bean
     public Validator validator() {

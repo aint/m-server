@@ -1,16 +1,15 @@
-package ua.softgroup.matrix.server;
+package ua.softgroup.matrix.server.desktop;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+import ua.softgroup.matrix.server.config.LoadDefaultConfig;
 import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
 import ua.softgroup.matrix.server.desktop.api.ServerCommands;
-import ua.softgroup.matrix.server.config.LoadDefaultConfig;
 import ua.softgroup.matrix.server.desktop.model.ActiveWindowsModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
@@ -29,10 +28,10 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-@SpringBootApplication
+@Component
 @PropertySource("classpath:server.properties")
-public class SocketServerRunner implements CommandLineRunner {
-    private static final Logger LOG = LoggerFactory.getLogger(SocketServerRunner.class);
+public class ServerSocketRunner implements CommandLineRunner {
+    private static final Logger LOG = LoggerFactory.getLogger(ServerSocketRunner.class);
 
     private final MatrixServerApi matrixServerApi;
     private final ClientSettingsService clientSettingsService;
@@ -46,15 +45,11 @@ public class SocketServerRunner implements CommandLineRunner {
     private DataInputStream dataInputStream;
 
     @Autowired
-    public SocketServerRunner(MatrixServerApi matrixServerApi, ClientSettingsService clientSettingsService, Environment environment, LoadDefaultConfig defaultConfig) {
+    public ServerSocketRunner(MatrixServerApi matrixServerApi, ClientSettingsService clientSettingsService, Environment environment, LoadDefaultConfig defaultConfig) {
         this.matrixServerApi = matrixServerApi;
         this.clientSettingsService = clientSettingsService;
         this.environment = environment;
         this.defaultConfig = defaultConfig;
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(SocketServerRunner.class, args);
     }
 
     @Override
@@ -71,7 +66,7 @@ public class SocketServerRunner implements CommandLineRunner {
             openObjectInputStream();
             openDataOutputStream();
             openDataInputStream();
-            
+
             ServerCommands command;
             while (!clientRequestClose(command = readServerCommand())) {
                 LOG.info("Client entered command {}", command.name());
@@ -97,6 +92,7 @@ public class SocketServerRunner implements CommandLineRunner {
 
     private void acceptClientSocket() throws IOException {
         clientSocket = serverSocket.accept();
+        LOG.info("Accepted client {}:{}", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
     }
 
     private void openObjectInputStream() throws IOException {
@@ -211,7 +207,4 @@ public class SocketServerRunner implements CommandLineRunner {
         dataOutputStream.writeUTF(status);
         dataOutputStream.flush();
     }
-
-
-
 }
