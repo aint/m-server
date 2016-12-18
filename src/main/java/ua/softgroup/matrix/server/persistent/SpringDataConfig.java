@@ -11,23 +11,21 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+import ua.softgroup.matrix.server.persistent.entity.User;
+
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@PropertySource({ "classpath:db.properties" })
+@PropertySource("classpath:application.properties")
 @EnableJpaRepositories("ua.softgroup.matrix.server.persistent.repository")
 public class SpringDataConfig {
 
-    private static final String PROPERTY_NAME_DATABASE_DRIVER = "jdbc.driverClassName";
-    private static final String PROPERTY_NAME_DATABASE_URL = "jdbc.url";
-    private static final String PROPERTY_NAME_DATABASE_USERNAME = "jdbc.username";
-    private static final String PROPERTY_NAME_DATABASE_PASSWORD = "jdbc.password";
-
-    private static final String PROPERTY_NAME_HIBERNATE_DIALECT = "hibernate.dialect";
-    private static final String PROPERTY_NAME_HIBERNATE_SHOW_SQL = "hibernate.show_sql";
-    private static final String PROPERTY_NAME_HIBERNATE_HBM2DDL = "hibernate.hbm2ddl.auto";
+    private static final String PROPERTY_HIBERNATE_DIALECT = "hibernate.dialect";
+    private static final String PROPERTY_HIBERNATE_SHOW_SQL = "hibernate.show_sql";
+    private static final String PROPERTY_HIBERNATE_HBM2DDL = "hibernate.hbm2ddl.auto";
+    private static final String PROPERTY_HIBERNATE_NAMING_STRATEGY = "hibernate.physical_naming_strategy";
 
     @Resource
     private Environment env;
@@ -35,10 +33,10 @@ public class SpringDataConfig {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(env.getRequiredProperty(PROPERTY_NAME_DATABASE_DRIVER));
-        dataSource.setUrl(env.getRequiredProperty(PROPERTY_NAME_DATABASE_URL));
-        dataSource.setUsername(env.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
-        dataSource.setPassword(env.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD));
+        dataSource.setDriverClassName(env.getRequiredProperty("spring.datasource.driver-class-name"));
+        dataSource.setUrl(env.getRequiredProperty("spring.datasource.url"));
+        dataSource.setUsername(env.getRequiredProperty("spring.datasource.username"));
+        dataSource.setPassword(env.getRequiredProperty("spring.datasource.password"));
 
         return dataSource;
     }
@@ -47,7 +45,7 @@ public class SpringDataConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean entityManager = new LocalContainerEntityManagerFactoryBean();
         entityManager.setDataSource(dataSource());
-        entityManager.setPackagesToScan("ua.softgroup.matrix.server.persistent.entity");
+        entityManager.setPackagesToScan(User.class.getPackage().getName());
         entityManager.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         entityManager.setJpaProperties(hibernateProperties());
         entityManager.afterPropertiesSet();
@@ -67,9 +65,10 @@ public class SpringDataConfig {
 
     private Properties hibernateProperties() {
         Properties properties = new Properties();
-        properties.put(PROPERTY_NAME_HIBERNATE_DIALECT, env.getRequiredProperty(PROPERTY_NAME_HIBERNATE_DIALECT));
-        properties.put(PROPERTY_NAME_HIBERNATE_SHOW_SQL, env.getRequiredProperty(PROPERTY_NAME_HIBERNATE_SHOW_SQL));
-        properties.put(PROPERTY_NAME_HIBERNATE_HBM2DDL, env.getRequiredProperty(PROPERTY_NAME_HIBERNATE_HBM2DDL));
+        properties.put(PROPERTY_HIBERNATE_DIALECT, env.getRequiredProperty("spring.jpa.properties.hibernate.dialect"));
+        properties.put(PROPERTY_HIBERNATE_SHOW_SQL, env.getRequiredProperty("spring.jpa.show-sql"));
+        properties.put(PROPERTY_HIBERNATE_HBM2DDL, env.getRequiredProperty("spring.jpa.hibernate.ddl-auto"));
+        properties.put(PROPERTY_HIBERNATE_NAMING_STRATEGY, env.getRequiredProperty("spring.jpa.hibernate.naming.physical-strategy"));
         return properties;
     }
 }
