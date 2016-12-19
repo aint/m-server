@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import ua.softgroup.matrix.server.persistent.entity.AbstractPeriod;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
+import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
@@ -136,11 +136,11 @@ public class SummaryEndpoint {
                 workDay.isChecked(),
                 workDay.getCoefficient(),
                 workDay.getWorkTimePeriods().stream()
-                        .map(AbstractPeriod::getStart)
+                        .map(WorkTimePeriod::getStart)
                         .min(LocalDateTime::compareTo)
                         .orElse(null),
                 workDay.getWorkTimePeriods().stream()
-                        .map(AbstractPeriod::getEnd)
+                        .map(WorkTimePeriod::getEnd)
                         .max(LocalDateTime::compareTo)
                         .orElse(null)
         );

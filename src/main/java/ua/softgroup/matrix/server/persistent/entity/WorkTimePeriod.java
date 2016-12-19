@@ -1,20 +1,20 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-@MappedSuperclass
-public class AbstractPeriod implements Serializable {
-    private static final long serialVersionUID = 1L;
+@Entity
+public class WorkTimePeriod implements Serializable {
+    private static final long serialVersionUID = 2140610419978157701L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column
@@ -26,7 +26,13 @@ public class AbstractPeriod implements Serializable {
     @ManyToOne
     private WorkDay workDay;
 
-    public AbstractPeriod() {
+    public WorkTimePeriod() {
+    }
+
+    public WorkTimePeriod(LocalDateTime start, LocalDateTime end, WorkDay workDay) {
+        this.start = start;
+        this.end = end;
+        this.workDay = workDay;
     }
 
     public Long getId() {
@@ -63,10 +69,11 @@ public class AbstractPeriod implements Serializable {
 
     @Override
     public String toString() {
-        return "AbstractPeriod{" +
-                "start=" + start +
+        return "WorkTimePeriod{" +
+                "id=" + id +
+                ", start=" + start +
                 ", end=" + end +
-                ", id=" + id +
+                ", workDay=" + workDay +
                 '}';
     }
 }

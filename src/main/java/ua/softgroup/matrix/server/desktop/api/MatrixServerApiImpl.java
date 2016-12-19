@@ -25,11 +25,11 @@ import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTime;
-import ua.softgroup.matrix.server.persistent.entity.WorktimePeriod;
+import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.MetricsService;
-import ua.softgroup.matrix.server.service.PeriodService;
+import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
@@ -62,7 +62,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private final ProjectService projectService;
     private final ClientSettingsService clientSettingsService;
     private final WorkTimeService workTimeService ;
-    private final PeriodService periodService;
+    private final WorkTimePeriodService workTimePeriodService;
     private final MetricsService metricsService;
     private final WorkDayRepository workDayRepository;
     private final Environment environment;
@@ -73,7 +73,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                ProjectService projectService,
                                ClientSettingsService clientSettingsService,
                                WorkTimeService workTimeService,
-                               PeriodService periodService,
+                               WorkTimePeriodService workTimePeriodService,
                                MetricsService metricsService,
                                WorkDayRepository workDayRepository,
                                Environment environment) {
@@ -82,7 +82,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         this.projectService = projectService;
         this.clientSettingsService = clientSettingsService;
         this.workTimeService = workTimeService;
-        this.periodService = periodService;
+        this.workTimePeriodService = workTimePeriodService;
         this.metricsService = metricsService;
         this.workDayRepository = workDayRepository;
         this.environment = environment;
@@ -193,7 +193,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + minutes);
             workDayRepository.save(todayWorkDay);
 
-            periodService.save(new WorktimePeriod(startedWork, LocalDateTime.now(), todayWorkDay));
+            workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), todayWorkDay));
         }
     }
 
@@ -229,8 +229,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                     .orElse(new WorkDay(0L, 0L, userWorkTime));
             todayWorkDay.setIdleMinutes(todayWorkDay.getIdleMinutes() + duration.toMinutes());
             workDayRepository.save(todayWorkDay);
-
-//            periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), todayWorkDay));
         }
 
     }
@@ -261,7 +259,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + timeModel.getMinute());
                                 workDayRepository.save(todayWorkDay);
 
-                                periodService.save(new WorktimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), todayWorkDay));
+                                workTimePeriodService.save(new WorkTimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), todayWorkDay));
                         }));
 
         Optional.ofNullable(synchronizedModel.getDowntimeModel())
@@ -284,8 +282,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                         .orElse(new WorkDay(0L, 0L, userWorkTime));
                                 todayWorkDay.setIdleMinutes(diff > 0 ? diff : todayWorkDay.getIdleMinutes());
                                 workDayRepository.save(todayWorkDay);
-
-//                                periodService.save(new DowntimePeriod(startTime, LocalDateTime.now(), todayWorkDay));
                         }));
 
         return true;

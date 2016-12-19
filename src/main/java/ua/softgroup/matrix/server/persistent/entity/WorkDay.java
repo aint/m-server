@@ -53,7 +53,7 @@ public class WorkDay implements Serializable {
     private WorkTime workTime;
 
     @OneToMany(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<WorktimePeriod> workTimePeriods;
+    private Set<WorkTimePeriod> workTimePeriods;
 
     public WorkDay() {
     }
@@ -141,11 +141,11 @@ public class WorkDay implements Serializable {
         this.workTime = workTime;
     }
 
-    public Set<WorktimePeriod> getWorkTimePeriods() {
+    public Set<WorkTimePeriod> getWorkTimePeriods() {
         return workTimePeriods;
     }
 
-    public void setWorkTimePeriods(Set<WorktimePeriod> workTimePeriods) {
+    public void setWorkTimePeriods(Set<WorkTimePeriod> workTimePeriods) {
         this.workTimePeriods = workTimePeriods;
     }
 
