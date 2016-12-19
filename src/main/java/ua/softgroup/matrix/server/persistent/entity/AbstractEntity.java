@@ -1,7 +1,6 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
 import org.springframework.data.domain.Persistable;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.util.ClassUtils;
 
 import javax.persistence.GeneratedValue;
@@ -77,7 +76,7 @@ public abstract class AbstractEntity<PK extends Serializable> implements Persist
         if (!getClass().equals(ClassUtils.getUserClass(obj))) {
             return false;
         }
-        AbstractPersistable<?> that = (AbstractPersistable<?>) obj;
+        AbstractEntity<?> that = (AbstractEntity<?>) obj;
 
         return null == this.getId() ? false : this.getId().equals(that.getId());
     }
