@@ -4,23 +4,15 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 @Entity
-public class TimeAudit implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class TimeAudit extends AbstractEntity<Long> {
+    private static final long serialVersionUID = 7093407748878141348L;
 
     @Column
     @CreationTimestamp
@@ -46,14 +38,6 @@ public class TimeAudit implements Serializable {
         this.reason = reason;
         this.adder = adder;
         this.workDay = workDay;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public LocalDateTime getCreationDate() {

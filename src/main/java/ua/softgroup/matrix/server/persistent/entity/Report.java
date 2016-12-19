@@ -9,6 +9,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -16,12 +18,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-public class Report implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Report extends AbstractEntity<Long> {
+    private static final long serialVersionUID = 8555919835948549711L;
 
     @Column
     @CreationTimestamp
@@ -52,7 +50,7 @@ public class Report implements Serializable {
     }
 
     public Report(Long id) {
-        this.id = id;
+        super.setId(id);
     }
 
     public Report(String title, String description, User author) {
@@ -66,14 +64,6 @@ public class Report implements Serializable {
         this.description = description;
         this.project = project;
         this.author = author;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public LocalDateTime getCreationDate() {
@@ -135,7 +125,7 @@ public class Report implements Serializable {
     @Override
     public String toString() {
         return "Report{" +
-                "id=" + id +
+                "id=" + super.getId() +
                 ", creationDate=" + creationDate +
                 ", updateDate=" + updateDate +
                 ", title='" + title + '\'' +

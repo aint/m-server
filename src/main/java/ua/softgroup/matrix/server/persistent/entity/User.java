@@ -15,7 +15,6 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
@@ -65,10 +64,7 @@ public class User implements Serializable {
 
     @ManyToMany(mappedBy = "users")
     private Set<Project> projects = new HashSet<>();
-
-    public User() {
-    }
-
+    
     public Long getId() {
         return id;
     }

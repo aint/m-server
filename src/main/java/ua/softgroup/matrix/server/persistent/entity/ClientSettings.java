@@ -1,15 +1,11 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
 
 @Entity
-public class ClientSettings implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class ClientSettings extends AbstractEntity<Long> {
+    private static final long serialVersionUID = -4678740217747959072L;
 
     @Column
     private int settingsVersion;
@@ -40,15 +36,6 @@ public class ClientSettings implements Serializable {
         this.startDowntimeAfterInMinutes = startDowntimeAfterInMinutes;
         this.reportEditablePeriodInDays = reportEditablePeriodInDays;
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
 
     public int getSettingsVersion() {
         return settingsVersion;
@@ -93,7 +80,7 @@ public class ClientSettings implements Serializable {
     @Override
     public String toString() {
         return "ClientSettings{" +
-                "id=" + id +
+                "id=" + super.getId() +
                 ", settingsVersion=" + settingsVersion +
                 ", screenshotUpdateFrequentlyInMinutes=" + screenshotUpdateFrequentlyInMinutes +
                 ", keyboardUpdateFrequentlyInMinutes=" + keyboardUpdateFrequentlyInMinutes +

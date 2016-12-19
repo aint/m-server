@@ -3,23 +3,15 @@ package ua.softgroup.matrix.server.persistent.entity;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-public class WorkTime implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class WorkTime extends AbstractEntity<Long> {
+    private static final long serialVersionUID = -7529514121101458195L;
 
     @Column
     private LocalDateTime startedWork;
@@ -61,7 +53,7 @@ public class WorkTime implements Serializable {
     }
 
     public WorkTime(Long id) {
-        this.id = id;
+        super.setId(id);
     }
 
     public WorkTime(Project project, User user) {
@@ -86,14 +78,6 @@ public class WorkTime implements Serializable {
         this.totalMinutes = totalMinutes;
         this.project = project;
         this.user = user;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public LocalDateTime getStartedWork() {
@@ -195,7 +179,7 @@ public class WorkTime implements Serializable {
     @Override
     public String toString() {
         return "WorkTime{" +
-                "id=" + id +
+                "id=" + super.getId() +
                 ", startedWork=" + startedWork +
                 ", todayMinutes=" + todayMinutes +
                 ", totalMinutes=" + totalMinutes +

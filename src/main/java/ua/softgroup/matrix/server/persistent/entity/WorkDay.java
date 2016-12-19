@@ -6,13 +6,9 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -20,12 +16,8 @@ import java.util.Set;
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 @Entity
-public class WorkDay implements Serializable {
+public class WorkDay extends AbstractEntity<Long> {
     private static final long serialVersionUID = -5318207364986821484L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @Column
     @CreationTimestamp
@@ -67,14 +59,6 @@ public class WorkDay implements Serializable {
         this.workMinutes = workMinutes;
         this.idleMinutes = idleMinutes;
         this.workTime = workTime;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public LocalDate getDate() {
@@ -152,7 +136,7 @@ public class WorkDay implements Serializable {
     @Override
     public String toString() {
         return "WorkDay{" +
-                "id=" + id +
+                "id=" + super.getId() +
                 ", date=" + date +
                 ", workMinutes=" + workMinutes +
                 ", idleMinutes=" + idleMinutes +
