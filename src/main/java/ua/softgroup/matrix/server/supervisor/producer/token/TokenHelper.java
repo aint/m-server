@@ -12,7 +12,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.supervisor.producer.exception.JwtException;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -42,8 +41,7 @@ public class TokenHelper {
     private PublicKey publicKey;
     private PrivateKey privateKey;
 
-    @PostConstruct
-    public void init() throws IOException, GeneralSecurityException {
+    public TokenHelper() throws IOException, GeneralSecurityException {
         publicKey = generatePublic(securityKey2Bytes(PUBLIC_KEY_FILE));
         privateKey = generatePrivate(securityKey2Bytes(PRIVATE_KEY_FILE));
     }

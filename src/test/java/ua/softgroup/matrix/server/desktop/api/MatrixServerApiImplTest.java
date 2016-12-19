@@ -62,7 +62,8 @@ public class MatrixServerApiImplTest {
         report1.setCreationDate(LocalDateTime.now().minusDays(1));
         Report report2 = new Report("report2", "desc2", project, user);
         report2.setCreationDate(LocalDateTime.now().minusDays(2));
-        when(reportService.getAllReportsOf(user, project)).thenReturn(generateReportsSetOf(report1 ,report2));
+        Set<Report> reports = generateReportsSetOf(report1, report2);
+        when(reportService.getAllReportsOf(user, project)).thenReturn(reports);
         when(reportService.getById(0L)).thenReturn(Optional.empty());
 
         ReportModel reportModel = getReportModel();
