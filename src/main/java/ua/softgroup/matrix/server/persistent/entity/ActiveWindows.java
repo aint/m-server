@@ -4,7 +4,6 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,9 +13,9 @@ public class ActiveWindows extends Metrics {
     private static final long serialVersionUID = 5299063888582451183L;
 
     @ElementCollection
-    @MapKeyColumn(name = "windowTitle", columnDefinition = "TEXT")
-    @Column(name = "timeSeconds")
-    @CollectionTable(name = "activewindow_time")
+    @MapKeyColumn(name = "window_title", length = 500)
+    @Column(name = "time_seconds")
+    @CollectionTable(name = "active_window_time")
     private Map<String, Long> windowTimeMap = new LinkedHashMap<>();
 
     public ActiveWindows() {
