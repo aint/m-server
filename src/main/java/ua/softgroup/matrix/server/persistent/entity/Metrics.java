@@ -8,13 +8,13 @@ public class Metrics extends AbstractEntity<Long> {
     private static final long serialVersionUID = -1760850406067102667L;
 
     @ManyToOne
-    private WorkTime workTime;
+    private Project project;
 
-    public WorkTime getWorkTime() {
-        return workTime;
+    public Project getProject() {
+        return project;
     }
 
-    public void setWorkTime(WorkTime workTime) {
-        this.workTime = workTime;
+    public void setProject(Project workTime) {
+        this.project = workTime;
     }
 }

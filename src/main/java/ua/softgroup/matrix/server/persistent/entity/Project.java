@@ -6,7 +6,9 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -37,11 +39,35 @@ public class Project extends AbstractEntity<Long>  {
     @Column
     private Long rateCurrencyId;
 
+    @Column
+    private LocalDateTime workStarted;
+
+    @Column
+    private LocalDateTime idleStarted;
+
+    @Column
+    private Long todayMinutes = 0L;
+
+    @Column
+    private Long totalMinutes = 0L;
+
+    @Column
+    private Long idleMinutes = 0L;
+
     @ManyToOne
     private User user;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Report> reports = new HashSet<>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<WorkDay> workDays;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Keyboard> keyboardLogs;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Screenshot> screenshots;
 
     public Long getSupervisorId() {
         return supervisorId;
@@ -107,6 +133,46 @@ public class Project extends AbstractEntity<Long>  {
         this.rateCurrencyId = rateCurrencyId;
     }
 
+    public LocalDateTime getWorkStarted() {
+        return workStarted;
+    }
+
+    public void setWorkStarted(LocalDateTime workStarted) {
+        this.workStarted = workStarted;
+    }
+
+    public LocalDateTime getIdleStarted() {
+        return idleStarted;
+    }
+
+    public void setIdleStarted(LocalDateTime idleStarted) {
+        this.idleStarted = idleStarted;
+    }
+
+    public Long getTodayMinutes() {
+        return todayMinutes;
+    }
+
+    public void setTodayMinutes(Long todayMinutes) {
+        this.todayMinutes = todayMinutes;
+    }
+
+    public Long getTotalMinutes() {
+        return totalMinutes;
+    }
+
+    public void setTotalMinutes(Long totalMinutes) {
+        this.totalMinutes = totalMinutes;
+    }
+
+    public Long getIdleMinutes() {
+        return idleMinutes;
+    }
+
+    public void setIdleMinutes(Long idleMinutes) {
+        this.idleMinutes = idleMinutes;
+    }
+
     public Set<Report> getReports() {
         return reports;
     }
@@ -123,6 +189,30 @@ public class Project extends AbstractEntity<Long>  {
         this.user = user;
     }
 
+    public Set<WorkDay> getWorkDays() {
+        return workDays;
+    }
+
+    public void setWorkDays(Set<WorkDay> workDays) {
+        this.workDays = workDays;
+    }
+
+    public List<Keyboard> getKeyboardLogs() {
+        return keyboardLogs;
+    }
+
+    public void setKeyboardLogs(List<Keyboard> keyboardLogs) {
+        this.keyboardLogs = keyboardLogs;
+    }
+
+    public List<Screenshot> getScreenshots() {
+        return screenshots;
+    }
+
+    public void setScreenshots(List<Screenshot> screenshots) {
+        this.screenshots = screenshots;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -135,6 +225,11 @@ public class Project extends AbstractEntity<Long>  {
                 ", endDate=" + endDate +
                 ", rate=" + rate +
                 ", rateCurrencyId=" + rateCurrencyId +
+                ", workStarted=" + workStarted +
+                ", idleStarted=" + idleStarted +
+                ", todayMinutes=" + todayMinutes +
+                ", totalMinutes=" + totalMinutes +
+                ", idleMinutes=" + idleMinutes +
                 '}';
     }
 }

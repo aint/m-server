@@ -13,9 +13,9 @@ public class Screenshot extends Metrics {
     public Screenshot() {
     }
 
-    public Screenshot(String screenshotLink, WorkTime workTime) {
+    public Screenshot(String screenshotLink, Project project) {
         this.screenshotLink = screenshotLink;
-        setWorkTime(workTime);
+        setProject(project);
     }
 
     public String getScreenshotLink() {

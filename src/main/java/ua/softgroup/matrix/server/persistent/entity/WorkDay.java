@@ -42,7 +42,7 @@ public class WorkDay extends AbstractEntity<Long> {
     private User checker;
 
     @ManyToOne
-    private WorkTime workTime;
+    private Project project;
 
     @OneToMany(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkTimePeriod> workTimePeriods;
@@ -55,10 +55,10 @@ public class WorkDay extends AbstractEntity<Long> {
         this.idleMinutes = idleMinutes;
     }
 
-    public WorkDay(Long workMinutes, Long idleMinutes, WorkTime workTime) {
+    public WorkDay(Long workMinutes, Long idleMinutes, Project project) {
         this.workMinutes = workMinutes;
         this.idleMinutes = idleMinutes;
-        this.workTime = workTime;
+        this.project = project;
     }
 
     public LocalDate getDate() {
@@ -117,12 +117,12 @@ public class WorkDay extends AbstractEntity<Long> {
         this.checker = checker;
     }
 
-    public WorkTime getWorkTime() {
-        return workTime;
+    public Project getProject() {
+        return project;
     }
 
-    public void setWorkTime(WorkTime workTime) {
-        this.workTime = workTime;
+    public void setProject(Project workTime) {
+        this.project = workTime;
     }
 
     public Set<WorkTimePeriod> getWorkTimePeriods() {

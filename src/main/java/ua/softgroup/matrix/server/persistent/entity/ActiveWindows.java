@@ -21,8 +21,8 @@ public class ActiveWindows extends Metrics {
     public ActiveWindows() {
     }
 
-    public ActiveWindows(Map<String, Long> windowTimeMap, WorkTime workTime) {
-        super.setWorkTime(workTime);
+    public ActiveWindows(Map<String, Long> windowTimeMap, Project project) {
+        super.setProject(project);
         this.windowTimeMap = windowTimeMap;
     }
 

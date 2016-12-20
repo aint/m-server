@@ -13,9 +13,9 @@ public class Keyboard extends Metrics {
     public Keyboard() {
     }
 
-    public Keyboard(String keyboardLog, WorkTime workTime) {
+    public Keyboard(String keyboardLog, Project project) {
         this.keyboardLog = keyboardLog.trim();
-        setWorkTime(workTime);
+        setProject(project);
     }
 
     public String getKeyboardLog() {
