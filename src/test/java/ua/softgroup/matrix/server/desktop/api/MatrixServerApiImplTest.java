@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 public class MatrixServerApiImplTest {
 
     private static final String TOKEN = "token_value";
-    private static final Long PROJECT_ID = 42L;
+    private static final Long PROJECT_SUP_ID = 42L;
 
     @MockBean
     private UserService userService;
@@ -51,7 +51,7 @@ public class MatrixServerApiImplTest {
         user = createUser();
         project = createProject();
         when(userService.getByTrackerToken(TOKEN)).thenReturn(Optional.of(user));
-        when(projectService.getById(PROJECT_ID)).thenReturn(Optional.of(project));
+        when(projectService.getById(PROJECT_SUP_ID)).thenReturn(Optional.of(project));
 
         matrixServerApi = new MatrixServerApiImpl(userService, reportService, projectService, null, null, null, null, null, null);
     }
@@ -92,13 +92,13 @@ public class MatrixServerApiImplTest {
 
     private Project createProject() {
         Project project = new Project();
-        project.setId(PROJECT_ID);
+        project.setSupervisorId(PROJECT_SUP_ID);
         project.setTitle("title");
         return project;
     }
 
     private ReportModel getReportModel() {
-        return new ReportModel(0L, TOKEN, "rmTitle", "rmDesc", PROJECT_ID);
+        return new ReportModel(0L, TOKEN, "rmTitle", "rmDesc", PROJECT_SUP_ID);
     }
 
     private Set<Report> generateReportsSetOf(Report... reports) {

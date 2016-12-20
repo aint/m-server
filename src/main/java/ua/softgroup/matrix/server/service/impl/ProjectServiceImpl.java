@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import retrofit2.Response;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
@@ -20,6 +19,7 @@ import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint;
 import ua.softgroup.matrix.server.supervisor.consumer.json.CurrenciesResponseModel;
 import ua.softgroup.matrix.server.supervisor.consumer.json.CurrencyModel;
+import ua.softgroup.matrix.server.supervisor.consumer.json.ProjectJson;
 import ua.softgroup.matrix.server.supervisor.consumer.json.UserActiveProjectsResponseModel;
 
 import javax.annotation.PostConstruct;
@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -83,7 +84,6 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         return response.body();
     }
 
-    @Transactional
     @Override
     public Set<ProjectModel> getUserActiveProjects(String token) {
         User user = userService.getByTrackerToken(token).orElseThrow(NoSuchElementException::new);
@@ -99,7 +99,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
             LOG.warn("NativeCache size {}", nativeCache.getSize());
             LOG.warn("NativeCache get {}", nativeCache.getKeys());
 
-            projectStream = user.getProjects().stream()
+            projectStream = getRepository().findByUser(user).stream()
                     .map(project -> updateProjectRateFromWorkTime(user, project));
         }
         return projectStream
@@ -110,8 +110,18 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
-    private Project addUserAndSaveProject(Project project, User user) {
-        project.getUsers().add(user);
+    private Project addUserAndSaveProject(ProjectJson projectJson, User user) {
+        Project project = Optional.ofNullable(getRepository().findBySupervisorIdAndUser(projectJson.getId(), user))
+                                    .orElseGet(Project::new);
+        project.setSupervisorId(projectJson.getId());
+        project.setAuthorName(projectJson.getAuthorName());
+        project.setDescription(projectJson.getDescription());
+        project.setTitle(projectJson.getTitle());
+        project.setStartDate(projectJson.getStartDate());
+        project.setEndDate(projectJson.getEndDate());
+        project.setRate(projectJson.getRate());
+        project.setRateCurrencyId(projectJson.getRateCurrencyId());
+        project.setUser(user);
         return getRepository().save(project);
     }
 
@@ -123,23 +133,26 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         projectModel.setAuthorName(project.getAuthorName());
         projectModel.setStartDate(project.getStartDate());
         projectModel.setEndDate(project.getEndDate());
-        projectModel.setRate(project.getRate());
-        projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId()));
+        //TODO set projectModel rate to long type
+        projectModel.setRate(project.getRate().intValue());
+        projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId().intValue()));
         return projectModel;
     }
 
     private Project setWorkTimeRateFromProject(User user, Project project) {
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(project, user));
-        workTime.setRate(project.getRate());
-        workTime.setRateCurrencyId(project.getRateCurrencyId());
+        //TODO set workTime rate to long type
+        workTime.setRate(project.getRate().intValue());
+        workTime.setRateCurrencyId(project.getRateCurrencyId().intValue());
         workTimeService.save(workTime);
         return project;
     }
 
     private Project updateProjectRateFromWorkTime(User user, Project project) {
         WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(project, user));
-        project.setRate(workTime.getRate());
-        project.setRateCurrencyId(workTime.getRateCurrencyId());
+        //TODO set workTime rate to long type
+        project.setRate(workTime.getRate().longValue());
+        project.setRateCurrencyId(workTime.getRateCurrencyId().longValue());
         return project;
     }
 

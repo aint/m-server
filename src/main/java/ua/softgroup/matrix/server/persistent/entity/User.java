@@ -62,9 +62,6 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Report> reports = new HashSet<>();
 
-    @ManyToMany(mappedBy = "users")
-    private Set<Project> projects = new HashSet<>();
-    
     public Long getId() {
         return id;
     }
@@ -191,14 +188,6 @@ public class User implements Serializable {
 
     public void setReports(Set<Report> reports) {
         this.reports = reports;
-    }
-
-    public Set<Project> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(Set<Project> projects) {
-        this.projects = projects;
     }
 
     @Override

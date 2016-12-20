@@ -1,7 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.consumer.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ua.softgroup.matrix.server.persistent.entity.Project;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
 public class UserActiveProjectsResponseModel implements RetrofitModel {
 
     @JsonProperty("success") private boolean success;
-    @JsonProperty("list") private List<Project> projectModelList;
+    @JsonProperty("list") private List<ProjectJson> projectModelList;
 
     public boolean isSuccess() {
         return success;
@@ -21,11 +20,11 @@ public class UserActiveProjectsResponseModel implements RetrofitModel {
         this.success = success;
     }
 
-    public List<Project> getProjectModelList() {
+    public List<ProjectJson> getProjectModelList() {
         return projectModelList;
     }
 
-    public void setProjectModelList(List<Project> projectModelList) {
+    public void setProjectModelList(List<ProjectJson> projectModelList) {
         this.projectModelList = projectModelList;
     }
 

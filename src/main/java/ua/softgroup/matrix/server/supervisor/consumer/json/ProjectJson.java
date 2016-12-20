@@ -1,54 +1,44 @@
-package ua.softgroup.matrix.server.persistent.entity;
+package ua.softgroup.matrix.server.supervisor.consumer.json;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
-@Entity
-public class Project extends AbstractEntity<Long>  {
-    private static final long serialVersionUID = 1L;
+/**
+ * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
+ */
+public class ProjectJson {
 
-    @Column
-    private Long supervisorId;
+    @JsonProperty
+    private Long id;
 
-    @Column(columnDefinition = "TEXT")
+    @JsonProperty
     private String title;
 
-    @Column
+    @JsonProperty("description_text")
     private String description;
 
-    @Column
+    @JsonProperty("author_name")
     private String authorName;
 
-    @Column
+    @JsonProperty("start_date")
     private LocalDate startDate;
 
-    @Column
+    @JsonProperty("end_date")
     private LocalDate endDate;
 
-    @Column
+    @JsonProperty
     private Long rate;
 
-    @Column
+    @JsonProperty("rate_currency_id")
     private Long rateCurrencyId;
 
-    @ManyToOne
-    private User user;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Report> reports = new HashSet<>();
-
-    public Long getSupervisorId() {
-        return supervisorId;
+    public Long getId() {
+        return id;
     }
 
-    public void setSupervisorId(Long supervisorId) {
-        this.supervisorId = supervisorId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -107,27 +97,10 @@ public class Project extends AbstractEntity<Long>  {
         this.rateCurrencyId = rateCurrencyId;
     }
 
-    public Set<Report> getReports() {
-        return reports;
-    }
-
-    public void setReports(Set<Report> reports) {
-        this.reports = reports;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     @Override
     public String toString() {
-        return "Project{" +
-                "id=" + super.getId() +
-                ", supervisorId=" + supervisorId +
+        return "ProjectJson{" +
+                "id=" + id +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", authorName='" + authorName + '\'' +
