@@ -11,8 +11,8 @@ public class SummaryJson {
     private LocalDate date;
     private Long workTimeMinutes;
     private Long idleTimeMinutes;
-    private Integer rate;
-    private Integer currencyId;
+    private Long rate;
+    private Long currencyId;
     private boolean checked;
     private Double coefficient;
     private LocalDateTime start;
@@ -21,7 +21,7 @@ public class SummaryJson {
     public SummaryJson() {
     }
 
-    public SummaryJson(LocalDate date, Long workTimeMinutes, Long idleTimeMinutes, Integer rate, Integer currencyId,
+    public SummaryJson(LocalDate date, Long workTimeMinutes, Long idleTimeMinutes, Long rate, Long currencyId,
                        boolean checked, Double coefficient, LocalDateTime start, LocalDateTime end) {
         this.date = date;
         this.workTimeMinutes = workTimeMinutes;
@@ -58,19 +58,19 @@ public class SummaryJson {
         this.idleTimeMinutes = idleTimeMinutes;
     }
 
-    public Integer getRate() {
+    public Long getRate() {
         return rate;
     }
 
-    public void setRate(Integer rate) {
+    public void setRate(Long rate) {
         this.rate = rate;
     }
 
-    public Integer getCurrencyId() {
+    public Long getCurrencyId() {
         return currencyId;
     }
 
-    public void setCurrencyId(Integer currencyId) {
+    public void setCurrencyId(Long currencyId) {
         this.currencyId = currencyId;
     }
 

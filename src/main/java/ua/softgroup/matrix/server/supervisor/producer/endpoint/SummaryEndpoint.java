@@ -12,12 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
-import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.SummaryJson;
 
@@ -49,16 +47,14 @@ public class SummaryEndpoint {
 
     private final ProjectService projectService;
     private final UserService userService;
-    private final WorkTimeService workTimeService;
 
     @Autowired
     private WorkDayRepository workDayRepository;
 
     @Autowired
-    public SummaryEndpoint(ProjectService projectService, UserService userService, WorkTimeService workTimeService) {
+    public SummaryEndpoint(ProjectService projectService, UserService userService) {
         this.projectService = projectService;
         this.userService = userService;
-        this.workTimeService = workTimeService;
     }
 
     @GET
@@ -78,15 +74,14 @@ public class SummaryEndpoint {
                                       @Min(0) @PathParam("project_id") Long projectId,
                                       @Min(0) @PathParam("months_number") Long months) {
 
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
+        Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
 
         LocalDate start = LocalDate.now().minusMonths(months).with(TemporalAdjusters.firstDayOfMonth());
         LocalDate end = (months == 0)
                 ? LocalDate.now().plusDays(1)
                 : LocalDate.now().minusMonths(months).with(TemporalAdjusters.lastDayOfMonth());
-        return Response.ok(getSummaryBetween(start, end, workTime)).build();
+        return Response.ok(getSummaryBetween(start, end, project)).build();
     }
 
     @GET
@@ -106,33 +101,32 @@ public class SummaryEndpoint {
                                      @Min(0) @PathParam("project_id") Long projectId,
                                      @Min(0) @PathParam("days_number") Long days) {
 
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NotFoundException::new);
+        Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
 
         LocalDate start = LocalDate.now().minusDays(days);
         LocalDate end = (days == 0)
                 ? LocalDate.now().plusDays(1)
                 : LocalDate.now();
-        return Response.ok(getSummaryBetween(start, end, workTime)).build();
+        return Response.ok(getSummaryBetween(start, end, project)).build();
     }
 
-    private List<SummaryJson> getSummaryBetween(LocalDate start, LocalDate end, WorkTime workTime) {
+    private List<SummaryJson> getSummaryBetween(LocalDate start, LocalDate end, Project project) {
         return Stream.iterate(start, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(start, end))
-                .map(localDate -> workDayRepository.findByDateAndWorkTime(localDate, workTime))
+                .map(localDate -> workDayRepository.findByDateAndProject(localDate, project))
                 .filter(Objects::nonNull)
-                .map(workDay -> createSummaryJson(workTime, workDay))
+                .map(workDay -> createSummaryJson(project, workDay))
                 .collect(Collectors.toList());
     }
 
-    private SummaryJson createSummaryJson(WorkTime workTime, WorkDay workDay) {
+    private SummaryJson createSummaryJson(Project project, WorkDay workDay) {
         return new SummaryJson(
                 workDay.getDate(),
                 workDay.getWorkMinutes(),
                 workDay.getIdleMinutes(),
-                workTime.getRate(),
-                workTime.getRateCurrencyId(),
+                project.getRate(),
+                project.getRateCurrencyId(),
                 workDay.isChecked(),
                 workDay.getCoefficient(),
                 workDay.getWorkTimePeriods().stream()

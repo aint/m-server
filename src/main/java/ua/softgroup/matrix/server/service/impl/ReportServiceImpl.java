@@ -8,13 +8,11 @@ import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
-import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.repository.ReportRepository;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 
 import javax.validation.Validator;
@@ -29,16 +27,14 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
 
     private final ProjectService projectService;
     private final UserService userService;
-    private final WorkTimeService workTimeService;
     private final WorkDayRepository workDayRepository;
     private final Validator validator;
 
     @Autowired
-    public ReportServiceImpl(ReportRepository repository, ProjectService projectService, UserService userService, WorkTimeService workTimeService, WorkDayRepository workDayRepository, Validator validator) {
+    public ReportServiceImpl(ReportRepository repository, ProjectService projectService, UserService userService, WorkDayRepository workDayRepository, Validator validator) {
         super(repository);
         this.projectService = projectService;
         this.userService = userService;
-        this.workTimeService = workTimeService;
         this.workDayRepository = workDayRepository;
         this.validator = validator;
     }
@@ -70,10 +66,9 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
         report.setProject(project);
         report.setTitle(rm.getTitle());
         report.setDescription(rm.getDescription());
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
         LocalDate creationDate = Optional.ofNullable(report.getCreationDate()).orElseGet(LocalDateTime::now).toLocalDate();
-        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(creationDate, workTime))
-                .orElseGet(() ->  workDayRepository.save(new WorkDay(0L, 0L, workTime)));
+        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndProject(creationDate, project))
+                .orElseGet(() ->  workDayRepository.save(new WorkDay(0L, 0L, project)));
         report.setWorkDay(workDay);
         return getRepository().save(report);
     }

@@ -13,12 +13,10 @@ import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.TimeAudit;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
-import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.repository.TimeAuditRepository;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
@@ -50,7 +48,6 @@ public class TimesEndpoint {
 
     private final ProjectService projectService;
     private final UserService userService;
-    private final WorkTimeService workTimeService;
 
     @Autowired
     private TimeAuditRepository timeAuditRepository;
@@ -58,10 +55,9 @@ public class TimesEndpoint {
     private WorkDayRepository workDayRepository;
 
     @Autowired
-    public TimesEndpoint(ProjectService projectService, UserService userService, WorkTimeService workTimeService) {
+    public TimesEndpoint(ProjectService projectService, UserService userService) {
         this.projectService = projectService;
         this.userService = userService;
-        this.workTimeService = workTimeService;
     }
 
     @GET
@@ -80,10 +76,9 @@ public class TimesEndpoint {
     public Response getWorkTime(@Min(0) @PathParam("user_id") Long userId,
                                 @Min(0) @PathParam("project_id") Long projectId) {
 
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
-        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes())).build();
+        Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
+        return Response.ok(new TimeJson(project.getTodayMinutes(), project.getTotalMinutes())).build();
     }
 
     @POST
@@ -106,14 +101,13 @@ public class TimesEndpoint {
                                 @JsonView(JsonViewType.IN.class) TimeJson timeJson) {
 
         LOG.info("POST JSON {}", timeJson);
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(0L, 0L, project, user));
-        workTime.setTotalMinutes(workTime.getTotalMinutes() + timeJson.getTotalMinutes());
-        workTimeService.save(workTime);
+        Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
+        project.setTotalMinutes(project.getTotalMinutes() + timeJson.getTotalMinutes());
+        projectService.save(project);
 
-        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(timeJson.getDate(), workTime))
-                                  .orElse(new WorkDay(0L, 0L, workTime));
+        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndProject(timeJson.getDate(), project))
+                                  .orElse(new WorkDay(0L, 0L, project));
         workDay.setWorkMinutes(workDay.getWorkMinutes() + timeJson.getTotalMinutes());
         workDayRepository.save(workDay);
 
@@ -121,7 +115,7 @@ public class TimesEndpoint {
         User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
         timeAuditRepository.save(new TimeAudit(timeJson.getTotalMinutes(), timeJson.getReason(), principal, workDay));
 
-        return Response.ok(new TimeJson(workTime.getTodayMinutes(), workTime.getTotalMinutes())).build();
+        return Response.ok(new TimeJson(project.getTodayMinutes(), project.getTotalMinutes())).build();
     }
 
 }

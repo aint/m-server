@@ -24,7 +24,6 @@ import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
-import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
@@ -33,7 +32,6 @@ import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.service.WorkTimeService;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
@@ -61,7 +59,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private final ReportService reportService;
     private final ProjectService projectService;
     private final ClientSettingsService clientSettingsService;
-    private final WorkTimeService workTimeService ;
     private final WorkTimePeriodService workTimePeriodService;
     private final MetricsService metricsService;
     private final WorkDayRepository workDayRepository;
@@ -72,7 +69,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                ReportService reportService,
                                ProjectService projectService,
                                ClientSettingsService clientSettingsService,
-                               WorkTimeService workTimeService,
                                WorkTimePeriodService workTimePeriodService,
                                MetricsService metricsService,
                                WorkDayRepository workDayRepository,
@@ -81,7 +77,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         this.reportService = reportService;
         this.projectService = projectService;
         this.clientSettingsService = clientSettingsService;
-        this.workTimeService = workTimeService;
         this.workTimePeriodService = workTimePeriodService;
         this.metricsService = metricsService;
         this.workDayRepository = workDayRepository;
@@ -165,31 +160,28 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public void startWork(TimeModel timeModel) {
         LOG.debug("Start work. TimeModel {} ", timeModel);
-        WorkTime userWorkTime = getWorkTimeOfUserAndProject(timeModel.getToken(), timeModel.getProjectId());
-        userWorkTime.setStartedWork(LocalDateTime.now());
-        workTimeService.save(userWorkTime);
+        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+        project.setWorkStarted(LocalDateTime.now());
+        projectService.save(project);
     }
 
     @Override
     public void endWork(TimeModel timeModel) {
         LOG.debug("TimeModel {}", timeModel);
-        User user = userService.getByTrackerToken(timeModel.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("User {} end work", user);
         Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
-        LocalDateTime startedWork = userWorkTime.getStartedWork();
+        LocalDateTime startedWork = project.getWorkStarted();
         if (startedWork != null) {
             Duration duration = Duration.between(startedWork, LocalDateTime.now());
             long minutes = duration.toMinutes();
             LOG.debug("Work period in minutes {}", minutes);
             LOG.debug("Work period in millis {}", duration.toMillis());
-            userWorkTime.setStartedWork(null);
-            userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + minutes);
-            userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + minutes);
-            workTimeService.save(userWorkTime);
+            project.setWorkStarted(null);
+            project.setTotalMinutes(project.getTotalMinutes() + minutes);
+            project.setTodayMinutes(project.getTodayMinutes() + minutes);
+            projectService.save(project);
 
-            WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
-                    .orElse(new WorkDay(0L, 0L, userWorkTime));
+            WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndProject(LocalDate.now(), project))
+                    .orElse(new WorkDay(0L, 0L, project));
             todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + minutes);
             workDayRepository.save(todayWorkDay);
 
@@ -200,33 +192,27 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public void startDowntime(TimeModel downtimeModel) {
         LOG.debug("startDowntime DownTimeModel {}", downtimeModel);
-        User user = userService.getByTrackerToken(downtimeModel.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("startDowntime User {}", user);
         Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
-        userWorkTime.setStartDowntime(LocalDateTime.now());
-        workTimeService.save(userWorkTime);
+        project.setIdleStarted(LocalDateTime.now());
+        projectService.save(project);
     }
 
     @Override
     public void endDowntime(TimeModel downtimeModel) {
         LOG.debug("endDowntime DownTimeModel {}", downtimeModel);
-        User user = userService.getByTrackerToken(downtimeModel.getToken()).orElseThrow(NoSuchElementException::new);
-        LOG.debug("endDowntime username {}", user.getUsername());
         Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-        WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
-        LOG.debug("endDowntime WorkTime {}", userWorkTime);
-        LocalDateTime startTime = userWorkTime.getStartDowntime();
+        LOG.debug("endDowntime Project {}", project);
+        LocalDateTime startTime = project.getIdleStarted();
         if (startTime != null) {
             Duration duration = Duration.between(startTime, LocalDateTime.now());
             LOG.debug("Downtime in minutes {}", duration.toMinutes());
             LOG.debug("Downtime in millis {}", duration.toMillis());
-            userWorkTime.setDowntimeMinutes(userWorkTime.getDowntimeMinutes() + duration.toMinutes());
-            userWorkTime.setStartDowntime(null);
-            workTimeService.save(userWorkTime);
+            project.setIdleMinutes(project.getIdleMinutes() + duration.toMinutes());
+            project.setIdleStarted(null);
+            projectService.save(project);
 
-            WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
-                    .orElse(new WorkDay(0L, 0L, userWorkTime));
+            WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndProject(LocalDate.now(), project))
+                    .orElse(new WorkDay(0L, 0L, project));
             todayWorkDay.setIdleMinutes(todayWorkDay.getIdleMinutes() + duration.toMinutes());
             workDayRepository.save(todayWorkDay);
         }
@@ -246,16 +232,16 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 .ifPresent(timeModels -> timeModels.stream()
                         .filter(Objects::nonNull)
                         .forEach(timeModel -> {
-                                LOG.warn("OFFLINE Timemodel {}", timeModel);
-                                WorkTime userWorkTime = getWorkTimeOfUserAndProject(timeModel.getToken(), timeModel.getProjectId());
-                                LOG.warn("OFFLINE {}", userWorkTime);
-                                userWorkTime.setStartedWork(null);
-                                userWorkTime.setTotalMinutes(userWorkTime.getTotalMinutes() + timeModel.getMinute());
-                                userWorkTime.setTodayMinutes(userWorkTime.getTodayMinutes() + timeModel.getMinute());
-                                workTimeService.save(userWorkTime);
+                                LOG.info("OFFLINE Timemodel {}", timeModel);
+                                Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+                                LOG.info("OFFLINE {}", project);
+                                project.setWorkStarted(null);
+                                project.setTotalMinutes(project.getTotalMinutes() + timeModel.getMinute());
+                                project.setTodayMinutes(project.getTodayMinutes() + timeModel.getMinute());
+                                projectService.save(project);
 
-                                WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
-                                        .orElse(new WorkDay(0L, 0L, userWorkTime));
+                                WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndProject(LocalDate.now(), project))
+                                        .orElse(new WorkDay(0L, 0L, project));
                                 todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + timeModel.getMinute());
                                 workDayRepository.save(todayWorkDay);
 
@@ -266,20 +252,16 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 .ifPresent(downtimeModels -> downtimeModels.stream()
                         .filter(Objects::nonNull)
                         .forEach(downtimeModel -> {
-                                LOG.warn("Offline Downtime {}", downtimeModel);
-                                User user = userService.getByTrackerToken(downtimeModel.getToken()).orElseThrow(NoSuchElementException::new);
+                                LOG.info("Offline Downtime {}", downtimeModel);
                                 Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-                                LOG.warn("User id {}, Project id {}", user.getId(), project.getId());
-                                WorkTime userWorkTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElseThrow(NoSuchElementException::new);
-                                LOG.debug("WorkTime {}", userWorkTime);
-                                userWorkTime.setStartDowntime(null);
+                                project.setIdleStarted(null);
                                 long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getHours() - downtimeModel.getMinute());
-                                LOG.warn("Downtime diff {}", diff);
-                                userWorkTime.setDowntimeMinutes(diff > 0 ? diff : userWorkTime.getDowntimeMinutes());
-                                workTimeService.save(userWorkTime);
+                                LOG.info("Downtime diff {}", diff);
+                                project.setIdleMinutes(diff > 0 ? diff : project.getIdleMinutes());
+                                projectService.save(project);
 
-                                WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndWorkTime(LocalDate.now(), userWorkTime))
-                                        .orElse(new WorkDay(0L, 0L, userWorkTime));
+                                WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndProject(LocalDate.now(), project))
+                                        .orElse(new WorkDay(0L, 0L, project));
                                 todayWorkDay.setIdleMinutes(diff > 0 ? diff : todayWorkDay.getIdleMinutes());
                                 workDayRepository.save(todayWorkDay);
                         }));
@@ -309,9 +291,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public TimeModel getTodayWorkTime(TimeModel timeModel) {
         LOG.debug("getTodayWorkTime: {}", timeModel);
-        WorkTime userWorkTime = getWorkTimeOfUserAndProject(timeModel.getToken(), timeModel.getProjectId());
-        LocalDateTime startedWork = userWorkTime.getStartedWork();
-        Long todayMinutes = userWorkTime.getTodayMinutes();
+        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+        LocalDateTime startedWork = project.getWorkStarted();
+        Long todayMinutes = project.getTodayMinutes();
         if (startedWork != null) {
             Duration duration = Duration.between(startedWork, LocalDateTime.now());
             LOG.debug("getTodayWorkTime: Current work time in minutes {}", todayMinutes + duration.toMinutes());
@@ -325,11 +307,11 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public TimeModel getTotalWorkTime(TimeModel timeModel) {
         LOG.debug("getTotalWorkTime: {}", timeModel);
-        WorkTime totalWorkTime = getWorkTimeOfUserAndProject(timeModel.getToken(), timeModel.getProjectId());
-        Long totalMinutes = totalWorkTime.getTotalMinutes();
+        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
+        Long totalMinutes = project.getTotalMinutes();
         Long hours = totalMinutes / 60;
         Long minutes = totalMinutes - hours * 60;
-        Long downtime = totalWorkTime.getDowntimeMinutes();
+        Long downtime = project.getIdleMinutes();
         double downtimePercent = Math.floor(downtime * 100 / Double.valueOf(totalMinutes) * 100) / 100;
         LOG.debug("getTotalWorkTime: hours {}, minutes {}, downtime {}%", hours, minutes, downtimePercent);
         return new TimeModel(hours, minutes, downtimePercent);
@@ -338,41 +320,33 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public void saveKeyboardLog(WriteKeyboard writeKeyboard) {
         LOG.debug("saveKeyboardLog: {}", writeKeyboard);
-        WorkTime workTime = getWorkTimeOfUserAndProject(writeKeyboard.getToken(), writeKeyboard.getProjectID());
-        LOG.info("saveKeyboardLog: {}", workTime);
-        metricsService.save(new Keyboard(writeKeyboard.getWords(), workTime));
+        Project project = projectService.getById(writeKeyboard.getProjectID()).orElseThrow(NoSuchElementException::new);
+        LOG.info("saveKeyboardLog: {}", project);
+        metricsService.save(new Keyboard(writeKeyboard.getWords(), project));
     }
 
     @Override
     public void saveActiveWindowsLog(ActiveWindowsModel activeWindows) {
         LOG.debug("saveActiveWindowsLog: {}", activeWindows);
-        WorkTime workTime = getWorkTimeOfUserAndProject(activeWindows.getToken(), activeWindows.getProjectId());
-        LOG.info("saveActiveWindowsLog: {}", workTime);
-        metricsService.save(new ActiveWindows(activeWindows.getWindowTimeMap(), workTime));
+        Project project = projectService.getById(activeWindows.getProjectId()).orElseThrow(NoSuchElementException::new);
+        LOG.info("saveActiveWindowsLog: {}", project);
+        metricsService.save(new ActiveWindows(activeWindows.getWindowTimeMap(), project));
     }
 
     @Override
     public void saveScreenshot(ScreenshotModel file) {
         LOG.debug("saveScreenshot: {}", file);
-        WorkTime workTime = getWorkTimeOfUserAndProject(file.getToken(), file.getProjectID());
-        LOG.info("saveScreenshot: {}", workTime);
+        Project project = projectService.getById(file.getProjectID()).orElseThrow(NoSuchElementException::new);
+        LOG.info("saveScreenshot: {}", project);
         try {
             String filePath = CWD + environment.getProperty("screenshot.path") + System.currentTimeMillis() + "." + FILE_EXTENSION;
             File screenshotFile = new File(filePath);
             screenshotFile.getParentFile().mkdirs();
             ImageIO.write(ImageIO.read(new ByteArrayInputStream(file.getFile())), FILE_EXTENSION, screenshotFile);
-            metricsService.save(new Screenshot(filePath, workTime));
+            metricsService.save(new Screenshot(filePath, project));
         } catch (Exception e) {
             LOG.error("Failed to save screenshot", e);
         }
-    }
-
-    private WorkTime getWorkTimeOfUserAndProject(String token, Long projectId) {
-        User user = userService.getByTrackerToken(token).orElseThrow(NoSuchElementException::new);
-        Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
-        LOG.debug("username {}", user.getUsername());
-        LOG.debug("project Id {}", projectId);
-        return workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(null, project, user));
     }
 
     private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {

@@ -53,7 +53,7 @@ public class MatrixServerApiImplTest {
         when(userService.getByTrackerToken(TOKEN)).thenReturn(Optional.of(user));
         when(projectService.getById(PROJECT_SUP_ID)).thenReturn(Optional.of(project));
 
-        matrixServerApi = new MatrixServerApiImpl(userService, reportService, projectService, null, null, null, null, null, null);
+        matrixServerApi = new MatrixServerApiImpl(userService, reportService, projectService, null, null, null, null, null);
     }
 
     @Test

@@ -13,8 +13,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ua.softgroup.matrix.server.persistent.SpringDataConfig;
+import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
-import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 
 import javax.sql.DataSource;
 import java.time.LocalDate;
@@ -38,24 +38,28 @@ public class WorkDayRepositoryTest {
 
     private static final String WORK_DAY_TABLE = "work_day";
     private static final String WORK_TIME_TABLE = "work_time";
+    private static final String PROJECT_TABLE = "project";
 
     private static final int WORK_DAYS_COUNT = 20;
 
     private static final Operation DELETE_ALL = sequenceOf(
-            deleteAllFrom(WORK_DAY_TABLE, WORK_TIME_TABLE));
+            deleteAllFrom(WORK_DAY_TABLE, PROJECT_TABLE));
 
     private static final Operation INSERT_DATA = sequenceOf(
-            insertInto(WORK_TIME_TABLE)
-                    .columns("id", "started_work", "today_minutes", "total_minutes", "start_downtime", "downtime_minutes",
-                             "rate", "rate_currency_id", "project_id",  "user_id")
-                    .values(1L, null, 0L, 0L, null, 0L, 2L, 1L, null, null)
+            insertInto(PROJECT_TABLE)
+                    .columns("id", "supervisor_id", "title", "description", "author_name", "start_date", "end_date",
+                             "rate", "rate_currency_id", "work_started", "idle_started", "today_minutes", "total_minutes",
+                             "idle_minutes", "user_id")
+                    .values(1L, 1L, "Title", "Description", "Author name", null, null,
+                            2L, 1L, null, null, 0L, 0L,
+                            0L, null)
                     .build(),
             insertInto(WORK_DAY_TABLE)
                     .withGeneratedValue("id", sequence().startingAt(1L))
                     .withGeneratedValue("work_minutes", sequence().startingAt(0).incrementingBy(100))
                     .withGeneratedValue("idle_minutes", sequence().startingAt(0).incrementingBy(10))
                     .withGeneratedValue("date", dateSequence().startingAt(LocalDate.parse("2016-12-01")).incrementingBy(1, DAYS))
-                    .columns("coefficient", "checked", "checker_id", "work_time_id")
+                    .columns("coefficient", "checked", "checker_id", "project_id")
                     .repeatingValues(1.0D, false, null, 1L).times(WORK_DAYS_COUNT)
                     .build());
 
@@ -76,14 +80,18 @@ public class WorkDayRepositoryTest {
 
     @Test
     public void findByDateAndWorkTime() {
-        WorkDay workDay = workDayRepository.findByDateAndWorkTime(LocalDate.parse("2016-12-03"), new WorkTime(1L));
+        Project project = new Project(1L);
+        project.setSupervisorId(1L);
+        WorkDay workDay = workDayRepository.findByDateAndProject(LocalDate.parse("2016-12-03"), project);
         assertThat(workDay.getWorkMinutes()).isEqualTo(200);
         assertThat(workDay.getIdleMinutes()).isEqualTo(20);
     }
 
     @Test
     public void findByDateAndWorkTime_NotFound() {
-        WorkDay workDay = workDayRepository.findByDateAndWorkTime(LocalDate.parse("2015-01-01"), new WorkTime(1L));
+        Project project = new Project(1L);
+        project.setSupervisorId(1L);
+        WorkDay workDay = workDayRepository.findByDateAndProject(LocalDate.parse("2015-01-01"), project);
         assertThat(workDay).isNull();
     }
 

@@ -11,11 +11,9 @@ import retrofit2.Response;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
-import ua.softgroup.matrix.server.persistent.entity.WorkTime;
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.service.WorkTimeService;
 import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint;
 import ua.softgroup.matrix.server.supervisor.consumer.json.CurrenciesResponseModel;
 import ua.softgroup.matrix.server.supervisor.consumer.json.CurrencyModel;
@@ -41,18 +39,16 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
 
     private final SupervisorEndpoint supervisorEndpoint;
     private final UserService userService;
-    private final WorkTimeService workTimeService;
     private final CacheManager cacheManager;
 
     private Map<Integer, String> currencyMap = new HashMap<>();
     private Cache currencyCache;
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepository repository, SupervisorEndpoint supervisorEndpoint, UserService userService, WorkTimeService workTimeService, CacheManager cacheManager) {
+    public ProjectServiceImpl(ProjectRepository repository, SupervisorEndpoint supervisorEndpoint, UserService userService, CacheManager cacheManager) {
         super(repository);
         this.supervisorEndpoint = supervisorEndpoint;
         this.userService = userService;
-        this.workTimeService = workTimeService;
         this.cacheManager = cacheManager;
     }
 
@@ -99,20 +95,22 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
             LOG.warn("NativeCache size {}", nativeCache.getSize());
             LOG.warn("NativeCache get {}", nativeCache.getKeys());
 
-            projectStream = getRepository().findByUser(user).stream()
-                    .map(project -> updateProjectRateFromWorkTime(user, project));
+            projectStream = getRepository().findByUser(user).stream();
         }
         return projectStream
                 .filter(project -> project.getEndDate() == null || LocalDate.now().isBefore(project.getEndDate()))
                 .peek(project ->  LOG.debug("User {}, {}", user.getUsername(), project))
-                .map(project -> setWorkTimeRateFromProject(user, project))
                 .map(this::convertProjectEntityToModel)
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
+    @Override
+    public Optional<Project> getBySupervisorIdAndUser(Long supervisorId, User user) {
+        return Optional.ofNullable(getRepository().findBySupervisorIdAndUser(supervisorId, user));
+    }
+
     private Project addUserAndSaveProject(ProjectJson projectJson, User user) {
-        Project project = Optional.ofNullable(getRepository().findBySupervisorIdAndUser(projectJson.getId(), user))
-                                    .orElseGet(Project::new);
+        Project project = getBySupervisorIdAndUser(projectJson.getId(), user).orElseGet(Project::new);
         project.setSupervisorId(projectJson.getId());
         project.setAuthorName(projectJson.getAuthorName());
         project.setDescription(projectJson.getDescription());
@@ -137,23 +135,6 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         projectModel.setRate(project.getRate().intValue());
         projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId().intValue()));
         return projectModel;
-    }
-
-    private Project setWorkTimeRateFromProject(User user, Project project) {
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(project, user));
-        //TODO set workTime rate to long type
-        workTime.setRate(project.getRate().intValue());
-        workTime.setRateCurrencyId(project.getRateCurrencyId().intValue());
-        workTimeService.save(workTime);
-        return project;
-    }
-
-    private Project updateProjectRateFromWorkTime(User user, Project project) {
-        WorkTime workTime = workTimeService.getWorkTimeOfUserAndProject(user, project).orElse(new WorkTime(project, user));
-        //TODO set workTime rate to long type
-        project.setRate(workTime.getRate().longValue());
-        project.setRateCurrencyId(workTime.getRateCurrencyId().longValue());
-        return project;
     }
 
     @Override

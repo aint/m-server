@@ -57,7 +57,7 @@ public class Project extends AbstractEntity<Long>  {
     @ManyToOne
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Report> reports = new HashSet<>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -68,6 +68,13 @@ public class Project extends AbstractEntity<Long>  {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Screenshot> screenshots;
+
+    public Project() {
+    }
+
+    public Project(Long id) {
+        super.setId(id);
+    }
 
     public Long getSupervisorId() {
         return supervisorId;
