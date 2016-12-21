@@ -1,14 +1,9 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 public class User implements Serializable {
@@ -23,44 +18,20 @@ public class User implements Serializable {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column
-    private String firstName;
-
-    @Column
-    private String lastName;
-
-    @Column
-    private String middleName;
-
-    @Column
-    private int monthlyRate;
-
-    @Column
-    private int monthlyRateCurrencyId;
-
-    @Column
-    private int externalHourlyRate;
-
-    @Column
-    private int externalHourlyRateCurrencyId;
-
-    @Column
-    private int internalHourlyRate;
-
-    @Column
-    private int internalHourlyRateCurrencyId;
-
-    @Column
-    private String emailHome;
-
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Report> reports = new HashSet<>();
+    @Column
+    private Long externalHourlyRate;
+
+    @Column
+    private Long externalHourlyRateCurrencyId;
+
+    @Column
+    private Long internalHourlyRate;
+
+    @Column
+    private Long internalHourlyRateCurrencyId;
 
     public Long getId() {
         return id;
@@ -86,94 +57,6 @@ public class User implements Serializable {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public int getMonthlyRate() {
-        return monthlyRate;
-    }
-
-    public void setMonthlyRate(int monthlyRate) {
-        this.monthlyRate = monthlyRate;
-    }
-
-    public int getMonthlyRateCurrencyId() {
-        return monthlyRateCurrencyId;
-    }
-
-    public void setMonthlyRateCurrencyId(int monthlyRateCurrencyId) {
-        this.monthlyRateCurrencyId = monthlyRateCurrencyId;
-    }
-
-    public int getExternalHourlyRate() {
-        return externalHourlyRate;
-    }
-
-    public void setExternalHourlyRate(int externalHourlyRate) {
-        this.externalHourlyRate = externalHourlyRate;
-    }
-
-    public int getExternalHourlyRateCurrencyId() {
-        return externalHourlyRateCurrencyId;
-    }
-
-    public void setExternalHourlyRateCurrencyId(int externalHourlyRateCurrencyId) {
-        this.externalHourlyRateCurrencyId = externalHourlyRateCurrencyId;
-    }
-
-    public int getInternalHourlyRate() {
-        return internalHourlyRate;
-    }
-
-    public void setInternalHourlyRate(int internalHourlyRate) {
-        this.internalHourlyRate = internalHourlyRate;
-    }
-
-    public int getInternalHourlyRateCurrencyId() {
-        return internalHourlyRateCurrencyId;
-    }
-
-    public void setInternalHourlyRateCurrencyId(int internalHourlyRateCurrencyId) {
-        this.internalHourlyRateCurrencyId = internalHourlyRateCurrencyId;
-    }
-
-    public String getEmailHome() {
-        return emailHome;
-    }
-
-    public void setEmailHome(String emailHome) {
-        this.emailHome = emailHome;
-    }
-
     public String getPassword() {
         return password;
     }
@@ -182,12 +65,36 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public Set<Report> getReports() {
-        return reports;
+    public Long getExternalHourlyRate() {
+        return externalHourlyRate;
     }
 
-    public void setReports(Set<Report> reports) {
-        this.reports = reports;
+    public void setExternalHourlyRate(Long externalHourlyRate) {
+        this.externalHourlyRate = externalHourlyRate;
+    }
+
+    public Long getExternalHourlyRateCurrencyId() {
+        return externalHourlyRateCurrencyId;
+    }
+
+    public void setExternalHourlyRateCurrencyId(Long externalHourlyRateCurrencyId) {
+        this.externalHourlyRateCurrencyId = externalHourlyRateCurrencyId;
+    }
+
+    public Long getInternalHourlyRate() {
+        return internalHourlyRate;
+    }
+
+    public void setInternalHourlyRate(Long internalHourlyRate) {
+        this.internalHourlyRate = internalHourlyRate;
+    }
+
+    public Long getInternalHourlyRateCurrencyId() {
+        return internalHourlyRateCurrencyId;
+    }
+
+    public void setInternalHourlyRateCurrencyId(Long internalHourlyRateCurrencyId) {
+        this.internalHourlyRateCurrencyId = internalHourlyRateCurrencyId;
     }
 
     @Override
@@ -196,18 +103,11 @@ public class User implements Serializable {
                 "id=" + id +
                 ", trackerToken='" + trackerToken + '\'' +
                 ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", middleName='" + middleName + '\'' +
-                ", monthlyRate=" + monthlyRate +
-                ", monthlyRateCurrencyId=" + monthlyRateCurrencyId +
+                ", password=" + password +
                 ", externalHourlyRate=" + externalHourlyRate +
                 ", externalHourlyRateCurrencyId=" + externalHourlyRateCurrencyId +
                 ", internalHourlyRate=" + internalHourlyRate +
                 ", internalHourlyRateCurrencyId=" + internalHourlyRateCurrencyId +
-                ", emailHome='" + emailHome + '\'' +
-                ", password='" + password +
                 '}';
     }
 }

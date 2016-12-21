@@ -11,17 +11,17 @@ public class ProfileJson {
     @JsonProperty("middle_name")
     private String middleName;
     @JsonProperty("monthly_rate")
-    private int monthlyRate;
+    private Long monthlyRate;
     @JsonProperty("monthly_rate_currency_id")
-    private int monthlyRateCurrencyId;
+    private Long monthlyRateCurrencyId;
     @JsonProperty("external_hourly_rate")
-    private int externalHourlyRate;
+    private Long externalHourlyRate;
     @JsonProperty("external_hourly_rate_currency_id")
-    private int externalHourlyRateCurrencyId;
+    private Long externalHourlyRateCurrencyId;
     @JsonProperty("internal_hourly_rate")
-    private int internalHourlyRate;
+    private Long internalHourlyRate;
     @JsonProperty("internal_hourly_rate_currency_id")
-    private int internalHourlyRateCurrencyId;
+    private Long internalHourlyRateCurrencyId;
     @JsonProperty("email_home")
     private String emailHome;
 
@@ -49,51 +49,51 @@ public class ProfileJson {
         this.middleName = middleName;
     }
 
-    public int getMonthlyRate() {
+    public Long getMonthlyRate() {
         return monthlyRate;
     }
 
-    public void setMonthlyRate(int monthlyRate) {
+    public void setMonthlyRate(Long monthlyRate) {
         this.monthlyRate = monthlyRate;
     }
 
-    public int getMonthlyRateCurrencyId() {
+    public Long getMonthlyRateCurrencyId() {
         return monthlyRateCurrencyId;
     }
 
-    public void setMonthlyRateCurrencyId(int monthlyRateCurrencyId) {
+    public void setMonthlyRateCurrencyId(Long monthlyRateCurrencyId) {
         this.monthlyRateCurrencyId = monthlyRateCurrencyId;
     }
 
-    public int getExternalHourlyRate() {
+    public Long getExternalHourlyRate() {
         return externalHourlyRate;
     }
 
-    public void setExternalHourlyRate(int externalHourlyRate) {
+    public void setExternalHourlyRate(Long externalHourlyRate) {
         this.externalHourlyRate = externalHourlyRate;
     }
 
-    public int getExternalHourlyRateCurrencyId() {
+    public Long getExternalHourlyRateCurrencyId() {
         return externalHourlyRateCurrencyId;
     }
 
-    public void setExternalHourlyRateCurrencyId(int externalHourlyRateCurrencyId) {
+    public void setExternalHourlyRateCurrencyId(Long externalHourlyRateCurrencyId) {
         this.externalHourlyRateCurrencyId = externalHourlyRateCurrencyId;
     }
 
-    public int getInternalHourlyRate() {
+    public Long getInternalHourlyRate() {
         return internalHourlyRate;
     }
 
-    public void setInternalHourlyRate(int internalHourlyRate) {
+    public void setInternalHourlyRate(Long internalHourlyRate) {
         this.internalHourlyRate = internalHourlyRate;
     }
 
-    public int getInternalHourlyRateCurrencyId() {
+    public Long getInternalHourlyRateCurrencyId() {
         return internalHourlyRateCurrencyId;
     }
 
-    public void setInternalHourlyRateCurrencyId(int internalHourlyRateCurrencyId) {
+    public void setInternalHourlyRateCurrencyId(Long internalHourlyRateCurrencyId) {
         this.internalHourlyRateCurrencyId = internalHourlyRateCurrencyId;
     }
 

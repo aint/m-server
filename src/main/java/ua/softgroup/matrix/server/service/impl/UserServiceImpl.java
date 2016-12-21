@@ -81,29 +81,18 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
         return response;
     }
 
-    //TODO user with ID should update automatically
     private void saveUser(UserJson userJson, String password) {
         LOG.debug("UserJson {}", userJson);
-        User user = getRepository().findOne(userJson.getId());
-        LOG.debug("User {}", user);
-        if (user == null) {
-            user = new User();
-        }
+        User user = Optional.ofNullable(getRepository().findOne(userJson.getId())).orElse(new User());
+        LOG.debug("UserEntity {}", user);
         user.setId(userJson.getId());
         user.setPassword(password);
-        user.setEmail(userJson.getEmail());
         user.setUsername(userJson.getUsername());
         user.setTrackerToken(userJson.getTrackerToken());
-        user.setFirstName(userJson.getProfile().getFirstName());
-        user.setLastName(userJson.getProfile().getLastName());
-        user.setMiddleName(userJson.getProfile().getMiddleName());
-        user.setMonthlyRate(userJson.getProfile().getMonthlyRate());
-        user.setMonthlyRateCurrencyId(userJson.getProfile().getMonthlyRateCurrencyId());
         user.setExternalHourlyRate(userJson.getProfile().getExternalHourlyRate());
         user.setExternalHourlyRateCurrencyId(userJson.getProfile().getExternalHourlyRateCurrencyId());
         user.setInternalHourlyRate(userJson.getProfile().getInternalHourlyRate());
         user.setInternalHourlyRateCurrencyId(userJson.getProfile().getInternalHourlyRateCurrencyId());
-        user.setEmailHome(userJson.getProfile().getEmailHome());
 
         getRepository().save(user);
     }
