@@ -2,16 +2,18 @@ package ua.softgroup.matrix.server.supervisor.consumer.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by Vadim on 24.10.2016.
- */
-public class UserModel implements RetrofitModel {
+public class UserJson {
 
-    @JsonProperty("id") private long id;
-    @JsonProperty("email") private String email;
-    @JsonProperty("username") private String username;
-    @JsonProperty("tracker_token") private String trackerToken;
-    @JsonProperty("profile") private ProfileModel profileModel;
+    @JsonProperty
+    private long id;
+    @JsonProperty
+    private String email;
+    @JsonProperty
+    private String username;
+    @JsonProperty("tracker_token")
+    private String trackerToken;
+    @JsonProperty
+    private ProfileJson profile;
 
     public long getId() {
         return id;
@@ -45,22 +47,22 @@ public class UserModel implements RetrofitModel {
         this.trackerToken = trackerToken;
     }
 
-    public ProfileModel getProfileModel() {
-        return profileModel;
+    public ProfileJson getProfile() {
+        return profile;
     }
 
-    public void setProfileModel(ProfileModel profileModel) {
-        this.profileModel = profileModel;
+    public void setProfile(ProfileJson profile) {
+        this.profile = profile;
     }
 
     @Override
     public String toString() {
-        return "UserModel{" +
+        return "UserJson{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
                 ", trackerToken='" + trackerToken + '\'' +
-                ", profileModel=" + profileModel +
+                ", profile=" + profile +
                 '}';
     }
 }

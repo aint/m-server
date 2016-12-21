@@ -15,10 +15,10 @@ import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint;
-import ua.softgroup.matrix.server.supervisor.consumer.json.CurrenciesResponseModel;
-import ua.softgroup.matrix.server.supervisor.consumer.json.CurrencyModel;
+import ua.softgroup.matrix.server.supervisor.consumer.json.ActiveProjectsJson;
+import ua.softgroup.matrix.server.supervisor.consumer.json.CurrenciesJson;
+import ua.softgroup.matrix.server.supervisor.consumer.json.CurrencyJson;
 import ua.softgroup.matrix.server.supervisor.consumer.json.ProjectJson;
-import ua.softgroup.matrix.server.supervisor.consumer.json.UserActiveProjectsResponseModel;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     private final UserService userService;
     private final CacheManager cacheManager;
 
-    private Map<Integer, String> currencyMap = new HashMap<>();
+    private Map<Long, String> currencyMap = new HashMap<>();
     private Cache currencyCache;
 
     @Autowired
@@ -58,20 +58,20 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     private void queryCurrencies(String token) throws IOException {
-        Response<CurrenciesResponseModel> response = supervisorEndpoint
+        Response<CurrenciesJson> response = supervisorEndpoint
                 .getCurrencies(token)
                 .execute();
         if (!response.isSuccessful()) {
             throw new IOException("Oops... Something goes wrong. " + response.errorBody().string());
         }
 
-        currencyMap = response.body().getCurrencyModelList().stream()
-                .map(currencyModel -> {currencyCache.put(currencyModel.getId(), currencyModel.getName()); return currencyModel; })
-                .collect(Collectors.toMap(CurrencyModel::getId, CurrencyModel::getName));
+        currencyMap = response.body().getList().stream()
+                .map(currencyJson -> { currencyCache.put(currencyJson.getId(), currencyJson.getName()); return currencyJson; })
+                .collect(Collectors.toMap(CurrencyJson::getId, CurrencyJson::getName));
     }
 
-    private UserActiveProjectsResponseModel queryUserActiveProjects(String token) throws IOException {
-        Response<UserActiveProjectsResponseModel> response = supervisorEndpoint
+    private ActiveProjectsJson queryUserActiveProjects(String token) throws IOException {
+        Response<ActiveProjectsJson> response = supervisorEndpoint
                 .getUserActiveProjects(token)
                 .execute();
         if (!response.isSuccessful()) {
@@ -86,7 +86,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         Stream<Project> projectStream;
         try {
             queryCurrencies(token);
-            projectStream = queryUserActiveProjects(token).getProjectModelList().stream()
+            projectStream = queryUserActiveProjects(token).getList().stream()
                     .map(project -> addUserAndSaveProject(project, user));
         } catch (IOException e) {
             LOG.info("Failed to query get-user-active-projects {}", e);
@@ -133,7 +133,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         projectModel.setEndDate(project.getEndDate());
         //TODO set projectModel rate to long type
         projectModel.setRate(project.getRate().intValue());
-        projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId().intValue()));
+        projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId()));
         return projectModel;
     }
 

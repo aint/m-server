@@ -11,8 +11,8 @@ import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint;
-import ua.softgroup.matrix.server.supervisor.consumer.json.LoginResponseModel;
-import ua.softgroup.matrix.server.supervisor.consumer.json.UserModel;
+import ua.softgroup.matrix.server.supervisor.consumer.json.LoginJson;
+import ua.softgroup.matrix.server.supervisor.consumer.json.UserJson;
 
 import javax.validation.Validator;
 import java.io.IOException;
@@ -57,22 +57,22 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     }
 
     private String tryToAuthenticate(String username, String password) throws IOException {
-        LoginResponseModel loginResponseModel = executeLoginQuery(username, password).body();
-        if (loginResponseModel.getSuccess()) {
-            saveUser(loginResponseModel.getUserModel(), password);
-            String token = loginResponseModel.getTrackerToken();
+        LoginJson loginJson = executeLoginQuery(username, password).body();
+        if (loginJson.getSuccess()) {
+            saveUser(loginJson.getUser(), password);
+            String token = loginJson.getTrackerToken();
             LOG.info("Given token {}", token);
             return token;
         }
-        String message = loginResponseModel.getMessage();
+        String message = loginJson.getMessage();
         LOG.info("Authentication failed: {}", message);
         return message.contains("password")
                 ? Constants.INVALID_PASSWORD.name()
                 : Constants.INVALID_USERNAME.name();
     }
 
-    private Response<LoginResponseModel> executeLoginQuery(String username, String password) throws IOException {
-        Response<LoginResponseModel> response = supervisorEndpoint
+    private Response<LoginJson> executeLoginQuery(String username, String password) throws IOException {
+        Response<LoginJson> response = supervisorEndpoint
                 .login(username, password)
                 .execute();
         if (!response.isSuccessful()) {
@@ -82,28 +82,28 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     }
 
     //TODO user with ID should update automatically
-    private void saveUser(UserModel userModel, String password) {
-        LOG.debug("UserModel {}", userModel);
-        User user = getRepository().findOne(userModel.getId());
+    private void saveUser(UserJson userJson, String password) {
+        LOG.debug("UserJson {}", userJson);
+        User user = getRepository().findOne(userJson.getId());
         LOG.debug("User {}", user);
         if (user == null) {
             user = new User();
         }
-        user.setId(userModel.getId());
+        user.setId(userJson.getId());
         user.setPassword(password);
-        user.setEmail(userModel.getEmail());
-        user.setUsername(userModel.getUsername());
-        user.setTrackerToken(userModel.getTrackerToken());
-        user.setFirstName(userModel.getProfileModel().getFirstName());
-        user.setLastName(userModel.getProfileModel().getLastName());
-        user.setMiddleName(userModel.getProfileModel().getMiddleName());
-        user.setMonthlyRate(userModel.getProfileModel().getMonthlyRate());
-        user.setMonthlyRateCurrencyId(userModel.getProfileModel().getMonthlyRateCurrencyId());
-        user.setExternalHourlyRate(userModel.getProfileModel().getExternalHourlyRate());
-        user.setExternalHourlyRateCurrencyId(userModel.getProfileModel().getExternalHourlyRateCurrencyId());
-        user.setInternalHourlyRate(userModel.getProfileModel().getInternalHourlyRate());
-        user.setInternalHourlyRateCurrencyId(userModel.getProfileModel().getInternalHourlyRateCurrencyId());
-        user.setEmailHome(userModel.getProfileModel().getEmailHome());
+        user.setEmail(userJson.getEmail());
+        user.setUsername(userJson.getUsername());
+        user.setTrackerToken(userJson.getTrackerToken());
+        user.setFirstName(userJson.getProfile().getFirstName());
+        user.setLastName(userJson.getProfile().getLastName());
+        user.setMiddleName(userJson.getProfile().getMiddleName());
+        user.setMonthlyRate(userJson.getProfile().getMonthlyRate());
+        user.setMonthlyRateCurrencyId(userJson.getProfile().getMonthlyRateCurrencyId());
+        user.setExternalHourlyRate(userJson.getProfile().getExternalHourlyRate());
+        user.setExternalHourlyRateCurrencyId(userJson.getProfile().getExternalHourlyRateCurrencyId());
+        user.setInternalHourlyRate(userJson.getProfile().getInternalHourlyRate());
+        user.setInternalHourlyRateCurrencyId(userJson.getProfile().getInternalHourlyRateCurrencyId());
+        user.setEmailHome(userJson.getProfile().getEmailHome());
 
         getRepository().save(user);
     }

@@ -2,15 +2,16 @@ package ua.softgroup.matrix.server.supervisor.consumer.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by Vadim on 24.10.2016.
- */
-public class LoginResponseModel implements RetrofitModel {
+public class LoginJson {
 
-    @JsonProperty("success") private Boolean success;
-    @JsonProperty("message") private String message;
-    @JsonProperty("tracker-token") private String trackerToken;
-    @JsonProperty("user") private UserModel userModel;
+    @JsonProperty
+    private Boolean success;
+    @JsonProperty
+    private String message;
+    @JsonProperty("tracker-token")
+    private String trackerToken;
+    @JsonProperty
+    private UserJson user;
 
     public Boolean getSuccess() {
         return success;
@@ -36,20 +37,20 @@ public class LoginResponseModel implements RetrofitModel {
         this.trackerToken = trackerToken;
     }
 
-    public UserModel getUserModel() {
-        return userModel;
+    public UserJson getUser() {
+        return user;
     }
 
-    public void setUserModel(UserModel userModel) {
-        this.userModel = userModel;
+    public void setUser(UserJson user) {
+        this.user = user;
     }
 
     @Override
     public String toString() {
-        return "LoginResponseModel{" +
+        return "LoginJson{" +
                 "success=" + success +
                 ", trackerToken='" + trackerToken + '\'' +
-                ", userModel=" + userModel +
+                ", user=" + user +
                 '}';
     }
 }

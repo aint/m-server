@@ -2,21 +2,28 @@ package ua.softgroup.matrix.server.supervisor.consumer.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by Vadim on 24.10.2016.
- */
-public class ProfileModel implements RetrofitModel {
+public class ProfileJson {
 
-    @JsonProperty("first_name") private String firstName;
-    @JsonProperty("last_name") private String lastName;
-    @JsonProperty("middle_name") private String middleName;
-    @JsonProperty("monthly_rate") private int monthlyRate;
-    @JsonProperty("monthly_rate_currency_id") private int monthlyRateCurrencyId;
-    @JsonProperty("external_hourly_rate") private int externalHourlyRate;
-    @JsonProperty("external_hourly_rate_currency_id") private int externalHourlyRateCurrencyId;
-    @JsonProperty("internal_hourly_rate") private int internalHourlyRate;
-    @JsonProperty("internal_hourly_rate_currency_id") private int internalHourlyRateCurrencyId;
-    @JsonProperty("email_home") private String emailHome;
+    @JsonProperty("first_name")
+    private String firstName;
+    @JsonProperty("last_name")
+    private String lastName;
+    @JsonProperty("middle_name")
+    private String middleName;
+    @JsonProperty("monthly_rate")
+    private int monthlyRate;
+    @JsonProperty("monthly_rate_currency_id")
+    private int monthlyRateCurrencyId;
+    @JsonProperty("external_hourly_rate")
+    private int externalHourlyRate;
+    @JsonProperty("external_hourly_rate_currency_id")
+    private int externalHourlyRateCurrencyId;
+    @JsonProperty("internal_hourly_rate")
+    private int internalHourlyRate;
+    @JsonProperty("internal_hourly_rate_currency_id")
+    private int internalHourlyRateCurrencyId;
+    @JsonProperty("email_home")
+    private String emailHome;
 
     public String getFirstName() {
         return firstName;
@@ -100,7 +107,7 @@ public class ProfileModel implements RetrofitModel {
 
     @Override
     public String toString() {
-        return "ProfileModel{" +
+        return "ProfileJson{" +
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", middleName='" + middleName + '\'' +

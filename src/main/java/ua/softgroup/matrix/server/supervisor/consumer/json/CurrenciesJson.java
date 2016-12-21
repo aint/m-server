@@ -2,12 +2,14 @@ package ua.softgroup.matrix.server.supervisor.consumer.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by Vadim on 24.10.2016.
- */
-public class LogoutResponseModel implements RetrofitModel {
+import java.util.List;
 
-    @JsonProperty("success") private boolean success;
+public class CurrenciesJson {
+
+    @JsonProperty
+    private boolean success;
+    @JsonProperty
+    private List<CurrencyJson> list;
 
     public boolean isSuccess() {
         return success;
@@ -17,10 +19,19 @@ public class LogoutResponseModel implements RetrofitModel {
         this.success = success;
     }
 
+    public List<CurrencyJson> getList() {
+        return list;
+    }
+
+    public void setList(List<CurrencyJson> list) {
+        this.list = list;
+    }
+
     @Override
     public String toString() {
-        return "LogoutResponseModel{" +
+        return "CurrenciesJson{" +
                 "success=" + success +
+                ", list=" + list +
                 '}';
     }
 }

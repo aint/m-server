@@ -2,19 +2,18 @@ package ua.softgroup.matrix.server.supervisor.consumer.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by Vadim on 24.10.2016.
- */
-public class CurrencyModel implements RetrofitModel {
+public class CurrencyJson {
 
-    @JsonProperty("id") private int id;
-    @JsonProperty("name") private String name;
+    @JsonProperty
+    private Long id;
+    @JsonProperty
+    private String name;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -28,7 +27,7 @@ public class CurrencyModel implements RetrofitModel {
 
     @Override
     public String toString() {
-        return "CurrencyModel{" +
+        return "CurrencyJson{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
