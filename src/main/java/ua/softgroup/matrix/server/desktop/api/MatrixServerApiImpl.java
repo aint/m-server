@@ -25,9 +25,9 @@ import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
-import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.MetricsService;
+import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
@@ -61,7 +61,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private final ClientSettingsService clientSettingsService;
     private final WorkTimePeriodService workTimePeriodService;
     private final MetricsService metricsService;
-    private final WorkDayRepository workDayRepository;
+    private final WorkDayService workDayService;
     private final Environment environment;
 
     @Autowired
@@ -71,7 +71,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                ClientSettingsService clientSettingsService,
                                WorkTimePeriodService workTimePeriodService,
                                MetricsService metricsService,
-                               WorkDayRepository workDayRepository,
+                               WorkDayService workDayService,
                                Environment environment) {
         this.userService = userService;
         this.reportService = reportService;
@@ -79,7 +79,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         this.clientSettingsService = clientSettingsService;
         this.workTimePeriodService = workTimePeriodService;
         this.metricsService = metricsService;
-        this.workDayRepository = workDayRepository;
+        this.workDayService = workDayService;
         this.environment = environment;
     }
 
@@ -180,12 +180,11 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             project.setTodayMinutes(project.getTodayMinutes() + minutes);
             projectService.save(project);
 
-            WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndProject(LocalDate.now(), project))
-                    .orElse(new WorkDay(0L, 0L, project));
-            todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + minutes);
-            workDayRepository.save(todayWorkDay);
+            WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
+            workDay.setWorkMinutes(workDay.getWorkMinutes() + minutes);
+            workDayService.save(workDay);
 
-            workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), todayWorkDay));
+            workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), workDay));
         }
     }
 
@@ -211,10 +210,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             project.setIdleStarted(null);
             projectService.save(project);
 
-            WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndProject(LocalDate.now(), project))
-                    .orElse(new WorkDay(0L, 0L, project));
-            todayWorkDay.setIdleMinutes(todayWorkDay.getIdleMinutes() + duration.toMinutes());
-            workDayRepository.save(todayWorkDay);
+            WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
+            workDay.setIdleMinutes(workDay.getIdleMinutes() + duration.toMinutes());
+            workDayService.save(workDay);
         }
 
     }
@@ -240,12 +238,11 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 project.setTodayMinutes(project.getTodayMinutes() + timeModel.getMinute());
                                 projectService.save(project);
 
-                                WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndProject(LocalDate.now(), project))
-                                        .orElse(new WorkDay(0L, 0L, project));
-                                todayWorkDay.setWorkMinutes(todayWorkDay.getWorkMinutes() + timeModel.getMinute());
-                                workDayRepository.save(todayWorkDay);
+                                WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
+                                workDay.setWorkMinutes(workDay.getWorkMinutes() + timeModel.getMinute());
+                                workDayService.save(workDay);
 
-                                workTimePeriodService.save(new WorkTimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), todayWorkDay));
+                                workTimePeriodService.save(new WorkTimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), workDay));
                         }));
 
         Optional.ofNullable(synchronizedModel.getDowntimeModel())
@@ -260,10 +257,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                 project.setIdleMinutes(diff > 0 ? diff : project.getIdleMinutes());
                                 projectService.save(project);
 
-                                WorkDay todayWorkDay = Optional.ofNullable(workDayRepository.findByDateAndProject(LocalDate.now(), project))
-                                        .orElse(new WorkDay(0L, 0L, project));
-                                todayWorkDay.setIdleMinutes(diff > 0 ? diff : todayWorkDay.getIdleMinutes());
-                                workDayRepository.save(todayWorkDay);
+                                WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
+                                workDay.setIdleMinutes(diff > 0 ? diff : workDay.getIdleMinutes());
+                                workDayService.save(workDay);
                         }));
 
         return true;

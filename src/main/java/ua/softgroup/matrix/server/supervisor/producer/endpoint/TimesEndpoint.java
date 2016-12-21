@@ -14,9 +14,9 @@ import ua.softgroup.matrix.server.persistent.entity.TimeAudit;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.repository.TimeAuditRepository;
-import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
@@ -33,7 +33,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Optional;
 
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
@@ -48,16 +47,16 @@ public class TimesEndpoint {
 
     private final ProjectService projectService;
     private final UserService userService;
+    private final WorkDayService workDayService;
 
     @Autowired
     private TimeAuditRepository timeAuditRepository;
-    @Autowired
-    private WorkDayRepository workDayRepository;
 
     @Autowired
-    public TimesEndpoint(ProjectService projectService, UserService userService) {
+    public TimesEndpoint(ProjectService projectService, UserService userService, WorkDayService workDayService) {
         this.projectService = projectService;
         this.userService = userService;
+        this.workDayService = workDayService;
     }
 
     @GET
@@ -106,10 +105,9 @@ public class TimesEndpoint {
         project.setTotalMinutes(project.getTotalMinutes() + timeJson.getTotalMinutes());
         projectService.save(project);
 
-        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndProject(timeJson.getDate(), project))
-                                  .orElse(new WorkDay(0L, 0L, project));
+        WorkDay workDay = workDayService.getByDateAndProject(timeJson.getDate(), project).orElse(new WorkDay(0L, 0L, project));
         workDay.setWorkMinutes(workDay.getWorkMinutes() + timeJson.getTotalMinutes());
-        workDayRepository.save(workDay);
+        workDayService.save(workDay);
 
         Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);

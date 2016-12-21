@@ -13,9 +13,9 @@ import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
-import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.SummaryJson;
 
@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,14 +47,13 @@ public class SummaryEndpoint {
 
     private final ProjectService projectService;
     private final UserService userService;
+    private final WorkDayService workDayService;
 
     @Autowired
-    private WorkDayRepository workDayRepository;
-
-    @Autowired
-    public SummaryEndpoint(ProjectService projectService, UserService userService) {
+    public SummaryEndpoint(ProjectService projectService, UserService userService, WorkDayService workDayService) {
         this.projectService = projectService;
         this.userService = userService;
+        this.workDayService = workDayService;
     }
 
     @GET
@@ -114,8 +113,9 @@ public class SummaryEndpoint {
     private List<SummaryJson> getSummaryBetween(LocalDate start, LocalDate end, Project project) {
         return Stream.iterate(start, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(start, end))
-                .map(localDate -> workDayRepository.findByDateAndProject(localDate, project))
-                .filter(Objects::nonNull)
+                .map(localDate -> workDayService.getByDateAndProject(localDate, project))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(workDay -> createSummaryJson(project, workDay))
                 .collect(Collectors.toList());
     }

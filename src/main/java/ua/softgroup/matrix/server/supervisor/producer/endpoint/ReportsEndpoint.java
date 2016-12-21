@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
-import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
@@ -53,15 +53,14 @@ public class ReportsEndpoint {
     private final ProjectService projectService;
     private final ReportService reportService;
     private final UserService userService;
+    private final WorkDayService workDayService;
 
     @Autowired
-    private WorkDayRepository workDayRepository;
-
-    @Autowired
-    public ReportsEndpoint(ProjectService projectService, ReportService reportService, UserService userService) {
+    public ReportsEndpoint(ProjectService projectService, ReportService reportService, UserService userService, WorkDayService workDayService) {
         this.projectService = projectService;
         this.reportService = reportService;
         this.userService = userService;
+        this.workDayService = workDayService;
     }
 
     @GET
@@ -133,7 +132,7 @@ public class ReportsEndpoint {
         report.getWorkDay().setChecker(principal);
         report.getWorkDay().setChecked(true);
         report.getWorkDay().setCoefficient(coefficient);
-        workDayRepository.save(report.getWorkDay());
+        workDayService.save(report.getWorkDay());
         return Response.ok(reportService.convertEntityToJson(reportService.save(report))).build();
     }
 
