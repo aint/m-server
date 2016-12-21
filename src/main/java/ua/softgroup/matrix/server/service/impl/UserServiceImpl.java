@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.service.impl;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     private String authenticateFromDb(String username, String password) {
         User user = getRepository().findByUsername(username);
         if (user != null) {
-            if (user.getPassword().equals(password)) {
+            if (BCrypt.checkpw(password, user.getPassword())) {
                 LOG.info("Offline authentication. Given token {}", user.getTrackerToken());
                 return user.getTrackerToken();
             }
@@ -86,7 +87,7 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
         User user = Optional.ofNullable(getRepository().findOne(userJson.getId())).orElse(new User());
         LOG.debug("UserEntity {}", user);
         user.setId(userJson.getId());
-        user.setPassword(password);
+        user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
         user.setUsername(userJson.getUsername());
         user.setTrackerToken(userJson.getTrackerToken());
         user.setExternalHourlyRate(userJson.getProfile().getExternalHourlyRate());
