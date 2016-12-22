@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.config.LoadDefaultConfig;
@@ -29,7 +28,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 @Component
-@PropertySource("classpath:server.properties")
 public class ServerSocketRunner implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(ServerSocketRunner.class);
 
@@ -87,7 +85,7 @@ public class ServerSocketRunner implements CommandLineRunner {
     }
 
     private void createServerSocket() throws IOException {
-        serverSocket = new ServerSocket(Integer.parseInt(environment.getProperty("socket.server.port")));
+        serverSocket = new ServerSocket(Integer.parseInt(environment.getRequiredProperty("socket.server.port")));
     }
 
     private void acceptClientSocket() throws IOException {
