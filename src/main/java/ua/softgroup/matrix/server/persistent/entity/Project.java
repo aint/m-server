@@ -8,7 +8,6 @@ import javax.persistence.OneToMany;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -62,12 +61,6 @@ public class Project extends AbstractEntity<Long>  {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkDay> workDays;
-
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Keyboard> keyboardLogs;
-
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Screenshot> screenshots;
 
     public Project() {
     }
@@ -202,22 +195,6 @@ public class Project extends AbstractEntity<Long>  {
 
     public void setWorkDays(Set<WorkDay> workDays) {
         this.workDays = workDays;
-    }
-
-    public List<Keyboard> getKeyboardLogs() {
-        return keyboardLogs;
-    }
-
-    public void setKeyboardLogs(List<Keyboard> keyboardLogs) {
-        this.keyboardLogs = keyboardLogs;
-    }
-
-    public List<Screenshot> getScreenshots() {
-        return screenshots;
-    }
-
-    public void setScreenshots(List<Screenshot> screenshots) {
-        this.screenshots = screenshots;
     }
 
     @Override

@@ -38,6 +38,9 @@ public class WorkDay extends AbstractEntity<Long> {
     @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Report report;
 
+    @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Tracking tracking;
+
     @ManyToOne
     private User checker;
 
@@ -107,6 +110,14 @@ public class WorkDay extends AbstractEntity<Long> {
 
     public void setReport(Report report) {
         this.report = report;
+    }
+
+    public Tracking getTracking() {
+        return tracking;
+    }
+
+    public void setTracking(Tracking tracking) {
+        this.tracking = tracking;
     }
 
     public User getChecker() {

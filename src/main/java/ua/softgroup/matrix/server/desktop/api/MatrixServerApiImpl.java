@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.desktop.model.ActiveWindowsModel;
 import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
@@ -16,17 +17,15 @@ import ua.softgroup.matrix.server.desktop.model.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.TokenModel;
 import ua.softgroup.matrix.server.desktop.model.UserPassword;
 import ua.softgroup.matrix.server.desktop.model.WriteKeyboard;
-import ua.softgroup.matrix.server.persistent.entity.ActiveWindows;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
-import ua.softgroup.matrix.server.persistent.entity.Keyboard;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
-import ua.softgroup.matrix.server.persistent.entity.Screenshot;
+import ua.softgroup.matrix.server.persistent.entity.Tracking;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
-import ua.softgroup.matrix.server.service.MetricsService;
+import ua.softgroup.matrix.server.service.TrackingService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 import ua.softgroup.matrix.server.service.ProjectService;
@@ -60,7 +59,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private final ProjectService projectService;
     private final ClientSettingsService clientSettingsService;
     private final WorkTimePeriodService workTimePeriodService;
-    private final MetricsService metricsService;
+    private final TrackingService trackingService;
     private final WorkDayService workDayService;
     private final Environment environment;
 
@@ -70,7 +69,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                ProjectService projectService,
                                ClientSettingsService clientSettingsService,
                                WorkTimePeriodService workTimePeriodService,
-                               MetricsService metricsService,
+                               TrackingService trackingService,
                                WorkDayService workDayService,
                                Environment environment) {
         this.userService = userService;
@@ -78,7 +77,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         this.projectService = projectService;
         this.clientSettingsService = clientSettingsService;
         this.workTimePeriodService = workTimePeriodService;
-        this.metricsService = metricsService;
+        this.trackingService = trackingService;
         this.workDayService = workDayService;
         this.environment = environment;
     }
@@ -163,6 +162,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
         project.setWorkStarted(LocalDateTime.now());
         projectService.save(project);
+
+        workDayService.save(workDayService.getByDateAndProject(LocalDate.now(), project)
+                                          .orElse(new WorkDay(0L, 0L, project)));
     }
 
     @Override
@@ -318,7 +320,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("saveKeyboardLog: {}", writeKeyboard);
         Project project = projectService.getById(writeKeyboard.getProjectID()).orElseThrow(NoSuchElementException::new);
         LOG.info("saveKeyboardLog: {}", project);
-        metricsService.save(new Keyboard(writeKeyboard.getWords(), project));
+        Tracking tracking = trackingService.getByProjectIdAndDate(writeKeyboard.getProjectID(), LocalDate.now());
+        tracking.setKeyboardText(tracking.getKeyboardText() + writeKeyboard.getWords());
+        trackingService.save(tracking);
     }
 
     @Override
@@ -326,9 +330,12 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         LOG.debug("saveActiveWindowsLog: {}", activeWindows);
         Project project = projectService.getById(activeWindows.getProjectId()).orElseThrow(NoSuchElementException::new);
         LOG.info("saveActiveWindowsLog: {}", project);
-        metricsService.save(new ActiveWindows(activeWindows.getWindowTimeMap(), project));
+        Tracking tracking = trackingService.getByProjectIdAndDate(activeWindows.getProjectId(), LocalDate.now());
+        tracking.setWindowTimeMap(activeWindows.getWindowTimeMap());
+        trackingService.save(tracking);
     }
 
+    @Transactional
     @Override
     public void saveScreenshot(ScreenshotModel file) {
         LOG.debug("saveScreenshot: {}", file);
@@ -339,7 +346,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             File screenshotFile = new File(filePath);
             screenshotFile.getParentFile().mkdirs();
             ImageIO.write(ImageIO.read(new ByteArrayInputStream(file.getFile())), FILE_EXTENSION, screenshotFile);
-            metricsService.save(new Screenshot(filePath, project));
+            Tracking tracking = trackingService.getByProjectIdAndDate(file.getProjectID(), LocalDate.now());
+            tracking.getScreenshots().add(filePath);
+            trackingService.save(tracking);
         } catch (Exception e) {
             LOG.error("Failed to save screenshot", e);
         }
