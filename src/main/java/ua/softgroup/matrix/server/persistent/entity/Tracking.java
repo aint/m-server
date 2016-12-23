@@ -35,7 +35,7 @@ public class Tracking extends AbstractEntity<Long> {
 
     @ElementCollection
     @CollectionTable(name = "tracking_window_time")
-    @MapKeyColumn(name = "window_title", length = 500)
+    @MapKeyColumn(name = "window_title")
     @Column(name = "time_seconds")
     private Map<String, Long> windowTimeMap = new LinkedHashMap<>();
 
