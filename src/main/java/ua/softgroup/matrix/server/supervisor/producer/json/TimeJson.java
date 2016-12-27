@@ -21,9 +21,6 @@ public class TimeJson {
     @JsonView(JsonViewType.IN.class)
     private LocalDate date;
 
-    public TimeJson() {
-    }
-
     public TimeJson(Long todayMinutes, Long totalMinutes) {
         this.todayMinutes = todayMinutes;
         this.totalMinutes = totalMinutes;

@@ -30,9 +30,6 @@ public class ReportJson {
     @JsonView(JsonViewType.OUT.class)
     private boolean checked;
 
-    public ReportJson() {
-    }
-
     public ReportJson(Long id, LocalDateTime creationDate, LocalDateTime updateDate, String title, String description, Long workMinutes, boolean checked) {
         this.id = id;
         this.creationDate = creationDate;

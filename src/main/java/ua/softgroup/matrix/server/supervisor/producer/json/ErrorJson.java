@@ -10,9 +10,6 @@ public class ErrorJson {
     @JsonView(JsonViewType.OUT.class)
     private String message;
 
-    public ErrorJson() {
-    }
-
     public ErrorJson(String message) {
         this.message = message;
     }

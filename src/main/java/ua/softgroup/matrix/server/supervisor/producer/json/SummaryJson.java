@@ -18,9 +18,6 @@ public class SummaryJson {
     private LocalDateTime start;
     private LocalDateTime end;
 
-    public SummaryJson() {
-    }
-
     public SummaryJson(LocalDate date, Long workTimeMinutes, Long idleTimeMinutes, Long rate, Long currencyId,
                        boolean checked, Double coefficient, LocalDateTime start, LocalDateTime end) {
         this.date = date;

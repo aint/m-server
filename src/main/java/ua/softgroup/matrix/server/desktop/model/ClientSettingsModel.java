@@ -13,9 +13,6 @@ public class ClientSettingsModel implements Serializable {
 
     private int downTime;
 
-    public ClientSettingsModel() {
-    }
-
     public ClientSettingsModel(int version, int screenshotUpdateFrequently, int keyboardUpdateFrequently, int downTime) {
         this.version = version;
         this.screenshotUpdateFrequently = screenshotUpdateFrequently;
