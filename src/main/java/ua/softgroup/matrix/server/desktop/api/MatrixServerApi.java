@@ -5,7 +5,6 @@ import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
-import ua.softgroup.matrix.server.desktop.model.SynchronizedModel;
 import ua.softgroup.matrix.server.desktop.model.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.TokenModel;
 import ua.softgroup.matrix.server.desktop.model.UserPassword;
@@ -33,8 +32,6 @@ public interface MatrixServerApi {
      */
     Constants saveReport(ReportModel reportModel);
 
-    Set<ReportModel> getAllReports(TokenModel tokenModel);
-
     Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId);
 
     void startWork(TimeModel timeModel);
@@ -48,10 +45,6 @@ public interface MatrixServerApi {
     TimeModel getTodayWorkTime(TimeModel timeModel);
 
     TimeModel getTotalWorkTime(TimeModel timeModel);
-
-    boolean sync(SynchronizedModel synchronizedModel);
-
-    boolean isClientSettingsUpdated(long settingsVersion);
 
     ClientSettingsModel getClientSettings();
 

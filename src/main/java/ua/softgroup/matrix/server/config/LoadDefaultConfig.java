@@ -16,15 +16,13 @@ import java.util.Properties;
 public class LoadDefaultConfig {
     private static final Logger LOG = LoggerFactory.getLogger(LoadDefaultConfig.class);
 
-    private static final int DEFAULT_CLIENT_SETTINGS_VERSION = 1;
-
     private ClientSettings clientSettings;
 
     private void initClientSettings() {
         try(InputStream in = LoadDefaultConfig.class.getClassLoader().getResourceAsStream("desktop.properties")) {
             Properties prop = new Properties();
             prop.load(in);
-            clientSettings = new ClientSettings(DEFAULT_CLIENT_SETTINGS_VERSION,
+            clientSettings = new ClientSettings(
                     Integer.parseInt(prop.getProperty("keyboard.frequently.minutes")),
                     Integer.parseInt(prop.getProperty("screenshot.frequently.minutes")),
                     Integer.parseInt(prop.getProperty("idle.start.minutes")),

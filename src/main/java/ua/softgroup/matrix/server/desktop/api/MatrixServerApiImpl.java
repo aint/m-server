@@ -12,25 +12,22 @@ import ua.softgroup.matrix.server.desktop.model.ClientSettingsModel;
 import ua.softgroup.matrix.server.desktop.model.ProjectModel;
 import ua.softgroup.matrix.server.desktop.model.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
-import ua.softgroup.matrix.server.desktop.model.SynchronizedModel;
 import ua.softgroup.matrix.server.desktop.model.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.TokenModel;
 import ua.softgroup.matrix.server.desktop.model.UserPassword;
 import ua.softgroup.matrix.server.desktop.model.WriteKeyboard;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.persistent.entity.Project;
-import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.Tracking;
-import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
-import ua.softgroup.matrix.server.service.TrackingService;
-import ua.softgroup.matrix.server.service.WorkDayService;
-import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
+import ua.softgroup.matrix.server.service.TrackingService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkDayService;
+import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
@@ -38,13 +35,8 @@ import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @PropertySource("classpath:desktop.properties")
@@ -93,62 +85,20 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public Constants saveReport(ReportModel reportModel) {
         LOG.debug("saveReport: {}", reportModel);
 
-        if (reportModel.getId() == 0) {
-            // save new
-            //TODO reportService.getTodayReportsOf()
-            User user = userService.getByTrackerToken(reportModel.getToken()).orElseThrow(NoSuchElementException::new);
-            Project project = projectService.getById(reportModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-            for (Report report : reportService.getAllReportsOf(user, project)) {
-                LocalDateTime creationDate = report.getCreationDate();
-                LOG.warn("saveReport: creation date {}", creationDate);
-                if (creationDate.isAfter(LocalDateTime.now().withHour(0).withMinute(0).withSecond(0))
-                        && creationDate.isBefore(LocalDateTime.now().withHour(23).withMinute(59).withSecond(59))) {
-                    LOG.warn("saveReport: exists");
-                    return Constants.REPORT_EXISTS;
-                }
-            }
+        if (reportModel.getId() == 0
+                && reportService.ifReportExistForToday(reportModel.getToken(), reportModel.getProjectId())) {
+            LOG.warn("Report exists and can't be updated without id");
+            return Constants.REPORT_EXISTS;
         }
 
-        if (reportService.getById(reportModel.getId()).isPresent()) {
-            Report report = reportService.getById(reportModel.getId()).get();
-            return updateReport(report, reportModel);
-        }
-
-        reportService.save(reportModel);
-
-        return Constants.TOKEN_VALIDATED;
-    }
-
-    private Constants updateReport(Report report, ReportModel reportModel) {
-        LOG.debug("updateReport");
-        Duration duration = Duration.between(report.getCreationDate(), LocalDateTime.now());
-        LOG.debug("Report created {} hours ago", duration.toHours());
-        final long reportEditablePeriod = Long.parseLong(environment.getProperty("report.editable.days")) * 24;
-        if (duration.toHours() > reportEditablePeriod) {
-            LOG.debug("Report expired");
-            return Constants.REPORT_EXPIRED;
-        }
-        reportService.save(reportModel);
-
-        return Constants.TOKEN_VALIDATED;
-    }
-
-    @Override
-    public Set<ReportModel> getAllReports(TokenModel tokenModel) {
-        User user = userService.getByTrackerToken(tokenModel.getToken()).orElseThrow(NoSuchElementException::new);
-        return reportService.getAllReportsOf(user).stream()
-                .map(report -> reportService.convertEntityToDto(report, tokenModel.getToken()))
-                .collect(Collectors.toCollection(HashSet::new));
+        long reportEditablePeriod = Long.parseLong(environment.getProperty("report.editable.days")) * 24;
+        return reportService.saveOrUpdate(reportModel, reportEditablePeriod);
     }
 
     @Override
     public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
         LOG.debug("Requested project id {}", projectId);
-        User user = userService.getByTrackerToken(tokenModel.getToken()).orElseThrow(NoSuchElementException::new);
-        Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
-        return reportService.getAllReportsOf(user, project).stream()
-                .map(report -> reportService.convertEntityToDto(report, tokenModel.getToken()))
-                .collect(Collectors.toCollection(HashSet::new));
+        return reportService.getAllReportsOf(tokenModel.getToken(), projectId);
     }
 
     @Override
@@ -217,65 +167,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
             workDayService.save(workDay);
         }
 
-    }
-
-    @Override
-    public boolean sync(SynchronizedModel synchronizedModel) {
-        LOG.warn("Sync {}", synchronizedModel);
-
-        Optional.ofNullable(synchronizedModel.getReportModel())
-                .ifPresent(reportModels -> reportModels.stream()
-                        .filter(Objects::nonNull)
-                        .forEach(this::saveReport));
-
-        Optional.ofNullable(synchronizedModel.getTimeModel())
-                .ifPresent(timeModels -> timeModels.stream()
-                        .filter(Objects::nonNull)
-                        .forEach(timeModel -> {
-                                LOG.info("OFFLINE Timemodel {}", timeModel);
-                                Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-                                LOG.info("OFFLINE {}", project);
-                                project.setWorkStarted(null);
-                                project.setTotalMinutes(project.getTotalMinutes() + timeModel.getMinute());
-                                project.setTodayMinutes(project.getTodayMinutes() + timeModel.getMinute());
-                                projectService.save(project);
-
-                                WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
-                                workDay.setWorkMinutes(workDay.getWorkMinutes() + timeModel.getMinute());
-                                workDayService.save(workDay);
-
-                                workTimePeriodService.save(new WorkTimePeriod(LocalDateTime.now().minusMinutes(timeModel.getMinute()), LocalDateTime.now(), workDay));
-                        }));
-
-        Optional.ofNullable(synchronizedModel.getDowntimeModel())
-                .ifPresent(downtimeModels -> downtimeModels.stream()
-                        .filter(Objects::nonNull)
-                        .forEach(downtimeModel -> {
-                                LOG.info("Offline Downtime {}", downtimeModel);
-                                Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-                                project.setIdleStarted(null);
-                                long diff = TimeUnit.MILLISECONDS.toMinutes(downtimeModel.getHours() - downtimeModel.getMinute());
-                                LOG.info("Downtime diff {}", diff);
-                                project.setIdleMinutes(diff > 0 ? diff : project.getIdleMinutes());
-                                projectService.save(project);
-
-                                WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
-                                workDay.setIdleMinutes(diff > 0 ? diff : workDay.getIdleMinutes());
-                                workDayService.save(workDay);
-                        }));
-
-        return true;
-    }
-
-    @Override
-    public boolean isClientSettingsUpdated(long settingsVersion) {
-        LOG.debug("Client settings version {}", settingsVersion);
-        ClientSettings clientSettings = clientSettingsService.getAll().stream()
-                .findFirst()
-                .orElseThrow(NoSuchElementException::new);
-        int dbSettingsVersion = clientSettings.getSettingsVersion();
-        LOG.debug("DB settings version {}", dbSettingsVersion);
-        return dbSettingsVersion != settingsVersion;
     }
 
     @Override
@@ -356,7 +247,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {
         return new ClientSettingsModel(
-                settings.getSettingsVersion(),
+                0,
                 settings.getScreenshotUpdateFrequentlyInMinutes(),
                 settings.getKeyboardUpdateFrequentlyInMinutes(),
                 settings.getStartDowntimeAfterInMinutes());
