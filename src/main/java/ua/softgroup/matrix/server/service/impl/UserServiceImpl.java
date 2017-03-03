@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 import ua.softgroup.matrix.server.desktop.api.Constants;
-import ua.softgroup.matrix.server.desktop.model.UserPassword;
+import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 import ua.softgroup.matrix.server.service.UserService;
@@ -35,26 +35,23 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
     }
 
     @Override
-    public String authenticate(UserPassword up) {
-        if (!validator.validate(up).isEmpty()) return Constants.INVALID_USERNAME.toString();
+    public String authenticate(AuthModel authModel) {
+//        if (!validator.validate(up).isEmpty()) return Constants.INVALID_USERNAME.toString();
         try {
-            return tryToAuthenticate(up.getUsername(), up.getPassword());
+            return tryToAuthenticate(authModel.getUsername(), authModel.getPassword());
         } catch (IOException e) {
             LOG.warn("Authentication error: {}", e);
-            return authenticateFromDb(up.getUsername(), up.getPassword());
+            return authenticateFromDb(authModel.getUsername(), authModel.getPassword());
         }
     }
 
     private String authenticateFromDb(String username, String password) {
         User user = getRepository().findByUsername(username);
-        if (user != null) {
-            if (BCrypt.checkpw(password, user.getPassword())) {
-                LOG.info("Offline authentication. Given token {}", user.getTrackerToken());
-                return user.getTrackerToken();
-            }
-            return Constants.INVALID_PASSWORD.name();
+        if (user != null && BCrypt.checkpw(password, user.getPassword())) {
+            LOG.info("Offline authentication. Given token {}", user.getTrackerToken());
+            return user.getTrackerToken();
         }
-        return Constants.INVALID_USERNAME.name();
+        return null;
     }
 
     private String tryToAuthenticate(String username, String password) throws IOException {

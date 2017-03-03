@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.desktop;
 
+import com.google.common.base.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +10,10 @@ import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.config.LoadDefaultConfig;
 import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
 import ua.softgroup.matrix.server.desktop.api.ServerCommands;
-import ua.softgroup.matrix.server.desktop.model.ActiveWindowsModel;
-import ua.softgroup.matrix.server.desktop.model.ReportModel;
-import ua.softgroup.matrix.server.desktop.model.ScreenshotModel;
-import ua.softgroup.matrix.server.desktop.model.TimeModel;
-import ua.softgroup.matrix.server.desktop.model.TokenModel;
-import ua.softgroup.matrix.server.desktop.model.UserPassword;
-import ua.softgroup.matrix.server.desktop.model.WriteKeyboard;
+import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
+import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
+import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 
 import java.io.DataInputStream;
@@ -138,79 +136,87 @@ public class ServerSocketRunner implements CommandLineRunner {
             return objectInputStream.readObject();
         }
 
+        public Supplier throwException() {
+            return () -> {
+                throw new RuntimeException();
+            };
+        }
+
         private void processClientInput(ServerCommands command) throws IOException, ClassNotFoundException {
             LOG.info("Client entered command {}", command.name());
             switch (command) {
                 case AUTHENTICATE: {
-                    String token = matrixServerApi.authenticate((UserPassword) readObject());
-                    sendString(token);
+                    RequestModel<AuthModel> authRequest = (RequestModel<AuthModel>) readObject();
+                    AuthModel authModel = authRequest.getDataContainer().or(throwException());
+                    ResponseModel<InitializeModel> responseModel = matrixServerApi.authenticate(authModel);
+                    sendObject(responseModel);
                     break;
                 }
-                case GET_ALL_PROJECT: {
-                    TokenModel token = (TokenModel) readObject();
-                    sendObject(matrixServerApi.getUserActiveProjects(token));
-                    break;
-                }
-                case SAVE_REPORT: {
-                    ReportModel report = (ReportModel) readObject();
-                    sendString(matrixServerApi.saveReport(report).name());
-                    break;
-                }
-                case SAVE_SCREENSHOT: {
-                    ScreenshotModel file = (ScreenshotModel) readObject();
-                    matrixServerApi.saveScreenshot(file);
-                    break;
-                }
-                case GET_REPORTS_BY_PROJECT_ID: {
-                    TokenModel token = (TokenModel) readObject();
-                    long id = dataInputStream.readLong();
-                    sendObject(matrixServerApi.getAllReportsByProjectId(token, id));
-                    break;
-                }
-                case START_WORK: {
-                    TimeModel timeModel = (TimeModel) readObject();
-                    matrixServerApi.startWork(timeModel);
-                    break;
-                }
-                case END_WORK: {
-                    TimeModel token = (TimeModel) readObject();
-                    matrixServerApi.endWork(token);
-                    break;
-                }
-                case START_DOWNTIME: {
-                    TimeModel timeModel = (TimeModel) readObject();
-                    matrixServerApi.startDowntime(timeModel);
-                    break;
-                }
-                case STOP_DOWNTIME: {
-                    TimeModel token = (TimeModel) readObject();
-                    matrixServerApi.endDowntime(token);
-                    break;
-                }
-                case GET_TODAY_TIME: {
-                    TimeModel workTime = matrixServerApi.getTodayWorkTime((TimeModel) readObject());
-                    sendObject(workTime);
-                    break;
-                }
-                case GET_TOTAL_TIME: {
-                    TimeModel workTime = matrixServerApi.getTotalWorkTime((TimeModel) readObject());
-                    sendObject(workTime);
-                    break;
-                }
-                case UPDATE_SETTING: {
-                    sendObject(matrixServerApi.getClientSettings());
-                    break;
-                }
-                case KEYBOARD_LOG: {
-                    WriteKeyboard keyboard = (WriteKeyboard) readObject();
-                    matrixServerApi.saveKeyboardLog(keyboard);
-                    break;
-                }
-                case ACTIVE_WINDOWS_LOG: {
-                    ActiveWindowsModel activeWindows = (ActiveWindowsModel) readObject();
-                    matrixServerApi.saveActiveWindowsLog(activeWindows);
-                    break;
-                }
+//                case GET_ALL_PROJECT: {
+//                    TokenModel token = (TokenModel) readObject();
+//                    sendObject(matrixServerApi.getUserActiveProjects(token));
+//                    break;
+//                }
+//                case SAVE_REPORT: {
+//                    ReportModel report = (ReportModel) readObject();
+//                    sendString(matrixServerApi.saveReport(report).name());
+//                    break;
+//                }
+//                case SAVE_SCREENSHOT: {
+//                    ScreenshotModel file = (ScreenshotModel) readObject();
+//                    matrixServerApi.saveScreenshot(file);
+//                    break;
+//                }
+//                case GET_REPORTS_BY_PROJECT_ID: {
+//                    TokenModel token = (TokenModel) readObject();
+//                    long id = dataInputStream.readLong();
+//                    sendObject(matrixServerApi.getAllReportsByProjectId(token, id));
+//                    break;
+//                }
+//                case START_WORK: {
+//                    TimeModel timeModel = (TimeModel) readObject();
+//                    matrixServerApi.startWork(timeModel);
+//                    break;
+//                }
+//                case END_WORK: {
+//                    TimeModel token = (TimeModel) readObject();
+//                    matrixServerApi.endWork(token);
+//                    break;
+//                }
+//                case START_DOWNTIME: {
+//                    TimeModel timeModel = (TimeModel) readObject();
+//                    matrixServerApi.startDowntime(timeModel);
+//                    break;
+//                }
+//                case STOP_DOWNTIME: {
+//                    TimeModel token = (TimeModel) readObject();
+//                    matrixServerApi.endDowntime(token);
+//                    break;
+//                }
+//                case GET_TODAY_TIME: {
+//                    TimeModel workTime = matrixServerApi.getTodayWorkTime((TimeModel) readObject());
+//                    sendObject(workTime);
+//                    break;
+//                }
+//                case GET_TOTAL_TIME: {
+//                    TimeModel workTime = matrixServerApi.getTotalWorkTime((TimeModel) readObject());
+//                    sendObject(workTime);
+//                    break;
+//                }
+//                case UPDATE_SETTING: {
+//                    sendObject(matrixServerApi.getClientSettings());
+//                    break;
+//                }
+//                case KEYBOARD_LOG: {
+//                    WriteKeyboard keyboard = (WriteKeyboard) readObject();
+//                    matrixServerApi.saveKeyboardLog(keyboard);
+//                    break;
+//                }
+//                case ACTIVE_WINDOWS_LOG: {
+//                    ActiveWindowsModel activeWindows = (ActiveWindowsModel) readObject();
+//                    matrixServerApi.saveActiveWindowsLog(activeWindows);
+//                    break;
+//                }
                 case CLOSE: {
                     closeClientSocket();
                     break;

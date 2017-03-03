@@ -8,7 +8,8 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
-import ua.softgroup.matrix.server.desktop.model.ProjectModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ProjectModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.TimeModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
@@ -134,6 +135,8 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         //TODO set projectModel rate to long type
         projectModel.setRate(project.getRate().intValue());
         projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId()));
+        projectModel.setProjectTime(new TimeModel(project.getTotalMinutes(), project.getTodayMinutes(), project.getIdleMinutes()));
+
         return projectModel;
     }
 

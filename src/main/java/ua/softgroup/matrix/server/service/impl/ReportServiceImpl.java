@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.desktop.api.Constants;
-import ua.softgroup.matrix.server.desktop.model.ReportModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
@@ -91,13 +91,14 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
 
     private Report save(ReportModel rm) {
         if (!validator.validate(rm).isEmpty()) return null;
-        User user = userService.getByTrackerToken(rm.getToken()).orElseThrow(NoSuchElementException::new);
+//        User user = userService.getByTrackerToken(rm.getToken()).orElseThrow(NoSuchElementException::new);
+        User user = userService.getByTrackerToken(null).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(rm.getProjectId()).orElseThrow(NoSuchElementException::new);
         Report report = Optional.ofNullable(getRepository().findOne(rm.getId())).orElse(new Report(rm.getId()));
         report.setAuthor(user);
         report.setProject(project);
-        report.setTitle(rm.getTitle());
-        report.setDescription(rm.getDescription());
+//        report.setTitle(rm.getTitle());
+//        report.setDescription(rm.getDescription());
         LocalDate creationDate = Optional.ofNullable(report.getCreationDate()).orElseGet(LocalDateTime::now).toLocalDate();
         WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndProject(creationDate, project))
                 .orElseGet(() ->  workDayRepository.save(new WorkDay(0L, 0L, project)));
@@ -122,8 +123,8 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
     private ReportModel convertEntityToDto(Report report) {
         ReportModel reportModel = new ReportModel();
         reportModel.setId(report.getId());
-        reportModel.setTitle(report.getTitle());
-        reportModel.setDescription(report.getDescription());
+//        reportModel.setTitle(report.getTitle());
+//        reportModel.setDescription(report.getDescription());
         reportModel.setProjectId(report.getProject().getId());
         reportModel.setDate(report.getCreationDate().toLocalDate());
         reportModel.setChecked(report.getWorkDay().isChecked());

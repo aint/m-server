@@ -1,7 +1,7 @@
 package ua.softgroup.matrix.server.service;
 
 import ua.softgroup.matrix.server.desktop.api.Constants;
-import ua.softgroup.matrix.server.desktop.model.ReportModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
