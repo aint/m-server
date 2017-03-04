@@ -2,16 +2,15 @@ package ua.softgroup.matrix.server.desktop.api;
 
 import ua.softgroup.matrix.server.desktop.model.datamodels.CheckPointModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.ProjectModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.SynchronizedModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ProjectsContainerDataModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ReportsContainerDataModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.SynchronizationModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus;
-
-import java.util.Set;
 
 public enum ServerCommands {
 
@@ -44,36 +43,23 @@ public enum ServerCommands {
     END_WORK,
 
     /**
-     * That command indicates that starts idling. The server expects to read the {@link RequestModel} object
-     * and then return a {@link ResponseModel} with a {@link ResponseStatus#SUCCESS} in the case of successful start,
-     * {@link ResponseStatus#FAIL} otherwise.
-     */
-    START_IDLE,
-
-    /**
-     * That command indicates that ends idling. The server expects to read the {@link RequestModel} object
-     * and then return a {@link ResponseModel} with a {@link ResponseStatus#SUCCESS} in the case of successful start,
-     * {@link ResponseStatus#FAIL} otherwise.
-     */
-    STOP_IDLE,
-
-    /**
      * The command for syncing with client after offline. The server expects to read the
-     * {@link RequestModel<SynchronizedModel>} object and then return a {@link ResponseModel} with a
+     * {@link RequestModel< SynchronizationModel >} object and then return a {@link ResponseModel} with a
      * {@link ResponseStatus#SUCCESS} in the case of successful start, {@link ResponseStatus#FAIL} otherwise.
      */
-    SYNCHRONIZED,
+    SYNCHRONIZE,
 
     /**
      * The command for retrieving a user's reports of the specified project. The server expects
-     * to read the {@link RequestModel}. Then the server returns a {@link ResponseModel<Set<ReportModel>>} with a
-     * {@link ResponseStatus#SUCCESS} in the case of successful start, {@link ResponseStatus#FAIL} otherwise.
+     * to read the {@link RequestModel}. Then the server returns a {@link ResponseModel<ReportsContainerDataModel>}
+     * with a {@link ResponseStatus#SUCCESS} in the case of successful start, {@link ResponseStatus#FAIL} otherwise.
      */
     GET_REPORTS,
 
     /**
+     * (Implement this command only in case of adding refresh option on client)
      * The command for retrieving a user's active projects. The server expects to read the {@link RequestModel}.
-     * Then the server returns a {@link ResponseModel<Set<ProjectModel>>} with a {@link ResponseStatus#SUCCESS}
+     * Then the server returns a {@link ResponseModel<ProjectsContainerDataModel>} with a {@link ResponseStatus#SUCCESS}
      * in the case of successful start, {@link ResponseStatus#FAIL} otherwise.
      */
     GET_ALL_PROJECT,
