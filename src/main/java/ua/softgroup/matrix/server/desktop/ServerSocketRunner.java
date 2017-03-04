@@ -12,6 +12,7 @@ import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
 import ua.softgroup.matrix.server.desktop.api.ServerCommands;
 import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
@@ -152,14 +153,19 @@ public class ServerSocketRunner implements CommandLineRunner {
                     sendObject(responseModel);
                     break;
                 }
+                case GET_REPORTS: {
+                    RequestModel request = (RequestModel) readObject();
+                    sendObject(matrixServerApi.getProjectReports(request));
+                    break;
+                }
+                case SAVE_REPORT: {
+                    RequestModel<ReportModel> reportRequest = (RequestModel<ReportModel>) readObject();
+                    sendObject(matrixServerApi.saveReport(reportRequest));
+                    break;
+                }
 //                case GET_ALL_PROJECT: {
 //                    TokenModel token = (TokenModel) readObject();
 //                    sendObject(matrixServerApi.getUserActiveProjects(token));
-//                    break;
-//                }
-//                case SAVE_REPORT: {
-//                    ReportModel report = (ReportModel) readObject();
-//                    sendString(matrixServerApi.saveReport(report).name());
 //                    break;
 //                }
 //                case SAVE_SCREENSHOT: {

@@ -4,11 +4,13 @@ import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ReportsContainerDataModel;
+import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
@@ -22,8 +24,9 @@ import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 
 import java.util.NoSuchElementException;
 
+import static ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus.SUCCESS;
+
 @Service
-@PropertySource("classpath:desktop.properties")
 public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
 
@@ -37,7 +40,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private final WorkTimePeriodService workTimePeriodService;
     private final TrackingService trackingService;
     private final WorkDayService workDayService;
-    private final Environment environment;
 
     @Autowired
     public MatrixServerApiImpl(UserService userService,
@@ -55,7 +57,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         this.workTimePeriodService = workTimePeriodService;
         this.trackingService = trackingService;
         this.workDayService = workDayService;
-        this.environment = environment;
     }
 
 
@@ -66,7 +67,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         if (token == null) {
             return new ResponseModel<>(ResponseStatus.INVALID_CREDENTIALS);
         }
-        ResponseModel<InitializeModel> responseModel = new ResponseModel<>(ResponseStatus.SUCCESS);
+        ResponseModel<InitializeModel> responseModel = new ResponseModel<>(SUCCESS);
         ClientSettings clientSettings = clientSettingsService.getAll().stream()
                 .findFirst()
                 .orElseThrow(NoSuchElementException::new);
@@ -80,20 +81,22 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         return responseModel;
     }
 
-//    @Override
-//    public Constants saveReport(ReportModel reportModel) {
-//        LOG.debug("saveReport: {}", reportModel);
-//
-//        if (reportModel.getId() == 0
-//                && reportService.ifReportExistForToday(reportModel.getToken(), reportModel.getProjectId())) {
-//            LOG.warn("Report exists and can't be updated without id");
-//            return Constants.REPORT_EXISTS;
-//        }
-//
-//        long reportEditablePeriod = Long.parseLong(environment.getProperty("report.editable.days")) * 24;
-//        return reportService.saveOrUpdate(reportModel, reportEditablePeriod);
-//    }
-//
+    @Override
+    public ResponseModel<ReportsContainerDataModel> getProjectReports(RequestModel requestModel) {
+        Long projectId = requestModel.getProjectId();
+        String token = requestModel.getToken();
+
+        return new ResponseModel<>(new ReportsContainerDataModel(reportService.getReportsOf(token, projectId)));
+    }
+
+    @Override
+    public ResponseModel saveReport(RequestModel<ReportModel> reportRequestModel) {
+        ReportModel reportModel = reportRequestModel.getDataContainer().get();
+        String token = reportRequestModel.getToken();
+
+        return new ResponseModel<>(reportService.saveOrUpdate(token, reportModel));
+    }
+
 //    @Override
 //    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
 //        LOG.debug("Requested project id {}", projectId);

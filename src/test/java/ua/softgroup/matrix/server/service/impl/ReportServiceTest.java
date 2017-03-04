@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringRunner;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
@@ -43,6 +44,8 @@ public class ReportServiceTest {
     private WorkDayRepository workDayRepository;
     @MockBean
     private Validator validator;
+    @MockBean
+    private Environment environment;
 
     private ReportService reportService;
 
@@ -54,7 +57,7 @@ public class ReportServiceTest {
         when(userService.getByTrackerToken(TOKEN)).thenReturn(Optional.of(user));
         when(projectService.getById(PROJECT_ID)).thenReturn(Optional.of(project));
 
-        reportService = new ReportServiceImpl(repository, projectService, userService, workDayRepository, validator);
+        reportService = new ReportServiceImpl(repository, projectService, userService, workDayRepository, validator, environment);
     }
 
     @Test

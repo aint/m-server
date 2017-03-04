@@ -17,6 +17,12 @@ public class TimeModel implements Serializable, DataModel {
 
     private double idlePercent;
 
+    public TimeModel(long totalTime, long todayTime, double idlePercent) {
+        this.totalTime = totalTime;
+        this.todayTime = todayTime;
+        this.idlePercent = idlePercent;
+    }
+
     public TimeModel(long totalTime, long todayTime, LocalDate todayStartTime, double idlePercent) {
         this.totalTime = totalTime;
         this.todayTime = todayTime;

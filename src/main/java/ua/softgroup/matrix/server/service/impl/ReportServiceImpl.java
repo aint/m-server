@@ -3,10 +3,12 @@ package ua.softgroup.matrix.server.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.softgroup.matrix.server.desktop.api.Constants;
 import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
+import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
@@ -28,7 +30,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus.REPORT_EXISTS;
+
 @Service
+@PropertySource("classpath:desktop.properties")
 public class ReportServiceImpl extends AbstractEntityTransactionalService<Report> implements ReportService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReportServiceImpl.class);
@@ -37,16 +42,18 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
     private final UserService userService;
     private final WorkDayRepository workDayRepository;
     private final Validator validator;
+    private final Environment environment;
 
     @Autowired
     public ReportServiceImpl(ReportRepository repository, ProjectService projectService,
                              UserService userService, WorkDayRepository workDayRepository,
-                             Validator validator) {
+                             Validator validator, Environment environment) {
         super(repository);
         this.projectService = projectService;
         this.userService = userService;
         this.workDayRepository = workDayRepository;
         this.validator = validator;
+        this.environment = environment;
     }
 
     @Override
@@ -56,9 +63,12 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
 
     @Override
     @Transactional
-    public Set<ReportModel> getAllReportsOf(String userToken, Long projectId) {
+    public Set<ReportModel> getReportsOf(String userToken, Long projectId) {
         User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
+
+        logger.info("Request user '{}' reports of project '{}'", user.getUsername(), projectId);
+
         return getRepository().findByAuthorAndProject(user, project).stream()
                 .map(this::convertEntityToDto)
                 .collect(Collectors.toCollection(HashSet::new));
@@ -75,35 +85,51 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
 
 
     @Override
-    public Constants saveOrUpdate(ReportModel reportModel, long editablePeriod) {
+    @Transactional
+    //TODO check is report editable via repository
+    //TODO maybe throw exception instead of return status?
+    public ResponseStatus saveOrUpdate(String userToken, ReportModel reportModel) {
+        if (reportModel.getId() == 0 && ifReportExistForToday(userToken, reportModel.getProjectId())) {
+            logger.warn("Report exists and can't be updated without id");
+            return REPORT_EXISTS;
+        }
+
         Report report = getRepository().findOne(reportModel.getId());
         if (report != null) {
-            Duration duration = Duration.between(report.getCreationDate(), LocalDateTime.now());
-            logger.debug("Updating report created {} hours ago", duration.toHours());
-            if (duration.toHours() > editablePeriod) {
-                logger.debug("Report expired");
-                return Constants.REPORT_EXPIRED;
+            long hours = Duration.between(report.getCreationDate(), LocalDateTime.now()).toHours();
+            long editablePeriod = Long.parseLong(environment.getProperty("report.editable.days")) * 24;
+            if (hours > editablePeriod || report.getWorkDay().isChecked()) {
+                logger.warn("Report {} created {} hours ago is expired or checked", report.getId(), hours);
+                return ResponseStatus.REPORT_EXPIRED;
             }
         }
-        save(reportModel);
-        return Constants.TOKEN_VALIDATED;
+
+        return save(userToken, reportModel);
     }
 
-    private Report save(ReportModel rm) {
-        if (!validator.validate(rm).isEmpty()) return null;
-//        User user = userService.getByTrackerToken(rm.getToken()).orElseThrow(NoSuchElementException::new);
-        User user = userService.getByTrackerToken(null).orElseThrow(NoSuchElementException::new);
+    private ResponseStatus save(String userToken, ReportModel rm) {
+        if (!validator.validate(rm).isEmpty()) {
+            logger.warn("Report {} validation failure", rm.getId());
+            return ResponseStatus.FAIL;
+        }
+
+        User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(rm.getProjectId()).orElseThrow(NoSuchElementException::new);
-        Report report = Optional.ofNullable(getRepository().findOne(rm.getId())).orElse(new Report(rm.getId()));
+
+        logger.info("Save/update user '{}' report of project '{}'", user.getUsername(), project.getId());
+
+        Report report = Optional.ofNullable(getRepository().findOne(rm.getId()))
+                                .orElse(new Report(rm.getId()));
         report.setAuthor(user);
         report.setProject(project);
-//        report.setTitle(rm.getTitle());
-//        report.setDescription(rm.getDescription());
-        LocalDate creationDate = Optional.ofNullable(report.getCreationDate()).orElseGet(LocalDateTime::now).toLocalDate();
+        report.setDescription(rm.getText());
+        LocalDate creationDate = report.getCreationDate().toLocalDate();
         WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndProject(creationDate, project))
-                .orElseGet(() ->  workDayRepository.save(new WorkDay(0L, 0L, project)));
+                                  .orElseGet(() ->  workDayRepository.save(new WorkDay(0L, 0L, project)));
         report.setWorkDay(workDay);
-        return getRepository().save(report);
+        getRepository().save(report);
+
+        return ResponseStatus.SUCCESS;
     }
 
     @Override
@@ -120,14 +146,15 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
         );
     }
 
+    //TODO implement attachment
     private ReportModel convertEntityToDto(Report report) {
         ReportModel reportModel = new ReportModel();
         reportModel.setId(report.getId());
-//        reportModel.setTitle(report.getTitle());
-//        reportModel.setDescription(report.getDescription());
         reportModel.setProjectId(report.getProject().getId());
+        reportModel.setText(report.getDescription());
         reportModel.setDate(report.getCreationDate().toLocalDate());
         reportModel.setChecked(report.getWorkDay().isChecked());
+        reportModel.setWorkTime(String.valueOf(report.getWorkDay().getWorkMinutes())); //TODO use int value
         return reportModel;
     }
 

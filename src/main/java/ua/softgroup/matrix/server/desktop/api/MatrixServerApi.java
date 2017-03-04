@@ -2,6 +2,9 @@ package ua.softgroup.matrix.server.desktop.api;
 
 import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.ReportsContainerDataModel;
+import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
 
 public interface MatrixServerApi {
@@ -14,15 +17,12 @@ public interface MatrixServerApi {
      */
     ResponseModel<InitializeModel> authenticate(AuthModel authModel);
 
+    ResponseModel<ReportsContainerDataModel> getProjectReports(RequestModel requestModel);
+
+    ResponseModel saveReport(RequestModel<ReportModel> reportModel);
+
 //    Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel);
 //
-//    /**
-//     * Saves a report for the given date
-//     *
-//     * @param reportModel report's model
-//     * @return an id of the saved report
-//     */
-//    Constants saveReport(ReportModel reportModel);
 //
 //    Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId);
 //
