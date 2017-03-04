@@ -163,6 +163,16 @@ public class ServerSocketRunner implements CommandLineRunner {
                     sendObject(matrixServerApi.saveReport(reportRequest));
                     break;
                 }
+                case START_WORK: {
+                    RequestModel requestModel = (RequestModel) readObject();
+                    sendObject(matrixServerApi.startWork(requestModel));
+                    break;
+                }
+                case END_WORK: {
+                    RequestModel requestModel = (RequestModel) readObject();
+                    sendObject(matrixServerApi.endWork(requestModel));
+                    break;
+                }
 //                case GET_ALL_PROJECT: {
 //                    TokenModel token = (TokenModel) readObject();
 //                    sendObject(matrixServerApi.getUserActiveProjects(token));
@@ -177,16 +187,6 @@ public class ServerSocketRunner implements CommandLineRunner {
 //                    TokenModel token = (TokenModel) readObject();
 //                    long id = dataInputStream.readLong();
 //                    sendObject(matrixServerApi.getAllReportsByProjectId(token, id));
-//                    break;
-//                }
-//                case START_WORK: {
-//                    TimeModel timeModel = (TimeModel) readObject();
-//                    matrixServerApi.startWork(timeModel);
-//                    break;
-//                }
-//                case END_WORK: {
-//                    TimeModel token = (TimeModel) readObject();
-//                    matrixServerApi.endWork(token);
 //                    break;
 //                }
 //                case START_DOWNTIME: {

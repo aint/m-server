@@ -9,6 +9,10 @@ import java.util.Set;
 
 public interface ProjectService extends GeneralEntityService<Project> {
 
+    void saveStartWorkTime(String userToken, Long projectId);
+
+    void saveEndWorkTime(String userToken, Long projectId);
+
     Set<ProjectModel> getUserActiveProjects(String token);
 
     Optional<Project> getBySupervisorIdAndUser(Long supervisorId, User user);

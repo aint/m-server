@@ -21,14 +21,15 @@ public interface MatrixServerApi {
 
     ResponseModel saveReport(RequestModel<ReportModel> reportModel);
 
+    ResponseModel startWork(RequestModel requestModel);
+
+    ResponseModel endWork(RequestModel requestModel);
+
 //    Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel);
 //
 //
 //    Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId);
 //
-//    void startWork(TimeModel timeModel);
-//
-//    void endWork(TimeModel timeModel);
 //
 //    void startDowntime(TimeModel downTimeModel);
 //

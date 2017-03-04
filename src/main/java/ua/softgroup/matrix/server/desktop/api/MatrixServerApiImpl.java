@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
@@ -19,8 +18,6 @@ import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.TrackingService;
 import ua.softgroup.matrix.server.service.UserService;
-import ua.softgroup.matrix.server.service.WorkDayService;
-import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 
 import java.util.NoSuchElementException;
 
@@ -37,26 +34,19 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private final ReportService reportService;
     private final ProjectService projectService;
     private final ClientSettingsService clientSettingsService;
-    private final WorkTimePeriodService workTimePeriodService;
     private final TrackingService trackingService;
-    private final WorkDayService workDayService;
 
     @Autowired
     public MatrixServerApiImpl(UserService userService,
                                ReportService reportService,
                                ProjectService projectService,
                                ClientSettingsService clientSettingsService,
-                               WorkTimePeriodService workTimePeriodService,
-                               TrackingService trackingService,
-                               WorkDayService workDayService,
-                               Environment environment) {
+                               TrackingService trackingService) {
         this.userService = userService;
         this.reportService = reportService;
         this.projectService = projectService;
         this.clientSettingsService = clientSettingsService;
-        this.workTimePeriodService = workTimePeriodService;
         this.trackingService = trackingService;
-        this.workDayService = workDayService;
     }
 
 
@@ -97,6 +87,20 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         return new ResponseModel<>(reportService.saveOrUpdate(token, reportModel));
     }
 
+    @Override
+    public ResponseModel startWork(RequestModel requestModel) {
+        projectService.saveStartWorkTime(requestModel.getToken(), requestModel.getProjectId());
+
+        return new ResponseModel<>(SUCCESS);
+    }
+
+    @Override
+    public ResponseModel endWork(RequestModel requestModel) {
+        projectService.saveEndWorkTime(requestModel.getToken(), requestModel.getProjectId());
+
+        return new ResponseModel<>(SUCCESS);
+    }
+
 //    @Override
 //    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
 //        LOG.debug("Requested project id {}", projectId);
@@ -106,40 +110,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 //    @Override
 //    public Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel) {
 //        return projectService.getUserActiveProjects(tokenModel.getToken());
-//    }
-//
-//    @Override
-//    public void startWork(TimeModel timeModel) {
-//        LOG.debug("Start work. TimeModel {} ", timeModel);
-//        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-//        project.setWorkStarted(LocalDateTime.now());
-//        projectService.save(project);
-//
-//        workDayService.save(workDayService.getByDateAndProject(LocalDate.now(), project)
-//                                          .orElse(new WorkDay(0L, 0L, project)));
-//    }
-//
-//    @Override
-//    public void endWork(TimeModel timeModel) {
-//        LOG.debug("TimeModel {}", timeModel);
-//        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-//        LocalDateTime startedWork = project.getWorkStarted();
-//        if (startedWork != null) {
-//            Duration duration = Duration.between(startedWork, LocalDateTime.now());
-//            long minutes = duration.toMinutes();
-//            LOG.debug("Work period in minutes {}", minutes);
-//            LOG.debug("Work period in millis {}", duration.toMillis());
-//            project.setWorkStarted(null);
-//            project.setTotalMinutes(project.getTotalMinutes() + minutes);
-//            project.setTodayMinutes(project.getTodayMinutes() + minutes);
-//            projectService.save(project);
-//
-//            WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
-//            workDay.setWorkMinutes(workDay.getWorkMinutes() + minutes);
-//            workDayService.save(workDay);
-//
-//            workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), workDay));
-//        }
 //    }
 //
 //    @Override

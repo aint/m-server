@@ -12,9 +12,13 @@ import ua.softgroup.matrix.server.desktop.model.datamodels.ProjectModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.TimeModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.WorkDay;
+import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkDayService;
+import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint;
 import ua.softgroup.matrix.server.supervisor.consumer.json.ActiveProjectsJson;
 import ua.softgroup.matrix.server.supervisor.consumer.json.CurrenciesJson;
@@ -23,7 +27,9 @@ import ua.softgroup.matrix.server.supervisor.consumer.json.ProjectJson;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -40,16 +46,22 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
 
     private final SupervisorEndpoint supervisorEndpoint;
     private final UserService userService;
+    private final WorkDayService workDayService;
+    private final WorkTimePeriodService workTimePeriodService;
     private final CacheManager cacheManager;
 
     private Map<Long, String> currencyMap = new HashMap<>();
     private Cache currencyCache;
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepository repository, SupervisorEndpoint supervisorEndpoint, UserService userService, CacheManager cacheManager) {
+    public ProjectServiceImpl(ProjectRepository repository, SupervisorEndpoint supervisorEndpoint,
+                              UserService userService, WorkDayService workDayService,
+                              WorkTimePeriodService workTimePeriodService, CacheManager cacheManager) {
         super(repository);
         this.supervisorEndpoint = supervisorEndpoint;
         this.userService = userService;
+        this.workDayService = workDayService;
+        this.workTimePeriodService = workTimePeriodService;
         this.cacheManager = cacheManager;
     }
 
@@ -79,6 +91,43 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
             throw new IOException("Oops... Something goes wrong. " + response.errorBody().string());
         }
         return response.body();
+    }
+
+    @Override
+    //TODO useless userToken, maybe rethink project id strategy
+    public void saveStartWorkTime(String userToken, Long projectId) {
+        LOG.info("Save starting work time {} of project {} ", LocalDateTime.now(), projectId);
+
+        Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
+        project.setWorkStarted(LocalDateTime.now());
+        getRepository().save(project);
+
+        workDayService.save(workDayService.getByDateAndProject(LocalDate.now(), project)
+                                          .orElseGet(() -> new WorkDay(0L, 0L, project)));
+    }
+
+    @Override
+    //TODO useless userToken, maybe rethink project id strategy
+    public void saveEndWorkTime(String userToken, Long projectId) {
+        LOG.info("Save ending work time {} of project {} ", LocalDateTime.now(), projectId);
+
+        Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
+        LocalDateTime startedWork = Optional.ofNullable(project.getWorkStarted()).orElseThrow(IllegalArgumentException::new);
+
+        long minutes = Duration.between(startedWork, LocalDateTime.now()).toMinutes();
+        LOG.debug("Work period in minutes {}", minutes);
+        project.setWorkStarted(null);
+        //TODO retrieve today work time from WorkDay entity
+        project.setTotalMinutes(project.getTotalMinutes() + minutes);
+        project.setTodayMinutes(project.getTodayMinutes() + minutes);
+        save(project);
+
+        WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project)
+                                        .orElseGet(() -> new WorkDay(0L, 0L, project));
+        workDay.setWorkMinutes(workDay.getWorkMinutes() + minutes);
+        workDayService.save(workDay);
+
+        workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), workDay));
     }
 
     @Override
