@@ -23,11 +23,7 @@ public class Tracking extends AbstractEntity<Long> {
     private String keyboardText;
 
     @Column
-    private Integer mouseMetric;
-
-    @ElementCollection
-    @CollectionTable(name = "tracking_links")
-    private List<String> links;
+    private Integer mouseFootage;
 
     @ElementCollection
     @CollectionTable(name = "tracking_screenshots")
@@ -37,7 +33,7 @@ public class Tracking extends AbstractEntity<Long> {
     @CollectionTable(name = "tracking_window_time")
     @MapKeyColumn(name = "window_title")
     @Column(name = "time_seconds")
-    private Map<String, Long> windowTimeMap = new LinkedHashMap<>();
+    private Map<String, Integer> windowTimeMap = new LinkedHashMap<>();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_day_id")
@@ -58,20 +54,12 @@ public class Tracking extends AbstractEntity<Long> {
         this.keyboardText = keyboardText;
     }
 
-    public Integer getMouseMetric() {
-        return mouseMetric;
+    public Integer getMouseFootage() {
+        return mouseFootage;
     }
 
-    public void setMouseMetric(Integer mouseMetric) {
-        this.mouseMetric = mouseMetric;
-    }
-
-    public List<String> getLinks() {
-        return links;
-    }
-
-    public void setLinks(List<String> links) {
-        this.links = links;
+    public void setMouseFootage(Integer mouseFootage) {
+        this.mouseFootage = mouseFootage;
     }
 
     public List<String> getScreenshots() {
@@ -82,11 +70,11 @@ public class Tracking extends AbstractEntity<Long> {
         this.screenshots = screenshots;
     }
 
-    public Map<String, Long> getWindowTimeMap() {
+    public Map<String, Integer> getWindowTimeMap() {
         return windowTimeMap;
     }
 
-    public void setWindowTimeMap(Map<String, Long> windowTimeMap) {
+    public void setWindowTimeMap(Map<String, Integer> windowTimeMap) {
         this.windowTimeMap = windowTimeMap;
     }
 

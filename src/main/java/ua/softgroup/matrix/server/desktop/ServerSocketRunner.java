@@ -11,6 +11,7 @@ import ua.softgroup.matrix.server.config.LoadDefaultConfig;
 import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
 import ua.softgroup.matrix.server.desktop.api.ServerCommands;
 import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.CheckPointModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
@@ -171,6 +172,11 @@ public class ServerSocketRunner implements CommandLineRunner {
                 case END_WORK: {
                     RequestModel requestModel = (RequestModel) readObject();
                     sendObject(matrixServerApi.endWork(requestModel));
+                    break;
+                }
+                case CHECK_POINT: {
+                    RequestModel<CheckPointModel> requestModel = (RequestModel<CheckPointModel>) readObject();
+                    sendObject(matrixServerApi.processCheckpoint(requestModel));
                     break;
                 }
 //                case GET_ALL_PROJECT: {

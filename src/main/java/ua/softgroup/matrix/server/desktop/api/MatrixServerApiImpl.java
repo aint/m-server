@@ -6,9 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.CheckPointModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.datamodels.ReportsContainerDataModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus;
@@ -26,9 +28,6 @@ import static ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseSt
 @Service
 public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
-
-    private static final String CWD = System.getProperty("user.dir");
-    private static final String FILE_EXTENSION = "png";
 
     private final UserService userService;
     private final ReportService reportService;
@@ -97,6 +96,20 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     @Override
     public ResponseModel endWork(RequestModel requestModel) {
         projectService.saveEndWorkTime(requestModel.getToken(), requestModel.getProjectId());
+
+        return new ResponseModel<>(SUCCESS);
+    }
+
+    @Override
+    public ResponseModel<TimeModel> processCheckpoint(RequestModel<CheckPointModel> requestModel) {
+        CheckPointModel checkPointModel = requestModel.getDataContainer().get();
+
+        trackingService.saveTrackingData(
+                requestModel.getProjectId(),
+                checkPointModel.getKeyboardLogs(),
+                (int) checkPointModel.getMouseFootage(),
+                checkPointModel.getWindowsTimeMap(),
+                checkPointModel.getScreenshot());
 
         return new ResponseModel<>(SUCCESS);
     }
@@ -176,45 +189,6 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 //        double downtimePercent = Math.floor(downtime * 100 / Double.valueOf(totalMinutes) * 100) / 100;
 //        LOG.debug("getTotalWorkTime: hours {}, minutes {}, downtime {}%", hours, minutes, downtimePercent);
 //        return new TimeModel(hours, minutes, downtimePercent);
-//    }
-//
-//    @Override
-//    public void saveKeyboardLog(WriteKeyboard writeKeyboard) {
-//        LOG.debug("saveKeyboardLog: {}", writeKeyboard);
-//        Project project = projectService.getById(writeKeyboard.getProjectID()).orElseThrow(NoSuchElementException::new);
-//        LOG.info("saveKeyboardLog: {}", project);
-//        Tracking tracking = trackingService.getByProjectIdAndDate(writeKeyboard.getProjectID(), LocalDate.now());
-//        tracking.setKeyboardText(tracking.getKeyboardText() + writeKeyboard.getWords());
-//        trackingService.save(tracking);
-//    }
-//
-//    @Override
-//    public void saveActiveWindowsLog(ActiveWindowsModel activeWindows) {
-//        LOG.debug("saveActiveWindowsLog: {}", activeWindows);
-//        Project project = projectService.getById(activeWindows.getProjectId()).orElseThrow(NoSuchElementException::new);
-//        LOG.info("saveActiveWindowsLog: {}", project);
-//        Tracking tracking = trackingService.getByProjectIdAndDate(activeWindows.getProjectId(), LocalDate.now());
-//        tracking.setWindowTimeMap(activeWindows.getWindowTimeMap());
-//        trackingService.save(tracking);
-//    }
-//
-//    @Transactional
-//    @Override
-//    public void saveScreenshot(ScreenshotModel file) {
-//        LOG.debug("saveScreenshot: {}", file);
-//        Project project = projectService.getById(file.getProjectID()).orElseThrow(NoSuchElementException::new);
-//        LOG.info("saveScreenshot: {}", project);
-//        try {
-//            String filePath = CWD + environment.getProperty("screenshot.path") + System.currentTimeMillis() + "." + FILE_EXTENSION;
-//            File screenshotFile = new File(filePath);
-//            screenshotFile.getParentFile().mkdirs();
-//            ImageIO.write(ImageIO.read(new ByteArrayInputStream(file.getFile())), FILE_EXTENSION, screenshotFile);
-//            Tracking tracking = trackingService.getByProjectIdAndDate(file.getProjectID(), LocalDate.now());
-//            tracking.getScreenshots().add(filePath);
-//            trackingService.save(tracking);
-//        } catch (Exception e) {
-//            LOG.error("Failed to save screenshot", e);
-//        }
 //    }
 //
 //    private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {
