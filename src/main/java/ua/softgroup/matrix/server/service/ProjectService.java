@@ -13,6 +13,8 @@ public interface ProjectService extends GeneralEntityService<Project> {
 
     void saveEndWorkTime(String userToken, Long projectId);
 
+    void saveCheckpointTime(Long projectId, Integer idleTime);
+
     Set<ProjectModel> getUserActiveProjects(String token);
 
     Optional<Project> getBySupervisorIdAndUser(Long supervisorId, User user);

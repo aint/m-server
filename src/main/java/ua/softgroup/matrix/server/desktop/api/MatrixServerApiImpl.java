@@ -104,6 +104,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public ResponseModel<TimeModel> processCheckpoint(RequestModel<CheckPointModel> requestModel) {
         CheckPointModel checkPointModel = requestModel.getDataContainer().get();
 
+        projectService.saveCheckpointTime(requestModel.getProjectId(), (int) checkPointModel.getIdleTime());
+
         trackingService.saveTrackingData(
                 requestModel.getProjectId(),
                 checkPointModel.getKeyboardLogs(),

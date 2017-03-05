@@ -48,7 +48,7 @@ public class WorkDayRepositoryTest {
     private static final Operation INSERT_DATA = sequenceOf(
             insertInto(PROJECT_TABLE)
                     .columns("id", "supervisor_id", "title", "description", "author_name", "start_date", "end_date",
-                             "rate", "rate_currency_id", "work_started", "idle_started", "today_minutes", "total_minutes",
+                             "rate", "rate_currency_id", "work_started", "checkpoint_time", "today_minutes", "total_minutes",
                              "idle_minutes", "user_id")
                     .values(1L, 1L, "Title", "Description", "Author name", null, null,
                             2L, 1L, null, null, 0L, 0L,

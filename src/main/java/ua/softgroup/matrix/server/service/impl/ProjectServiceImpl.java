@@ -131,6 +131,22 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     @Override
+    public void saveCheckpointTime(Long projectId, Integer idleTime) {
+        Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
+
+        LocalDateTime now = LocalDateTime.now();
+        long minutes = Duration.between(project.getCheckpointTime(), now).toMinutes();
+        project.setTodayMinutes(project.getTodayMinutes() + minutes);
+        project.setTotalMinutes(project.getTotalMinutes() + minutes);
+        project.setCheckpointTime(now);
+
+        project.setIdleMinutes(project.getIdleMinutes() + idleTime / 60);
+
+        save(project);
+    }
+
+
+    @Override
     public Set<ProjectModel> getUserActiveProjects(String token) {
         User user = userService.getByTrackerToken(token).orElseThrow(NoSuchElementException::new);
         Stream<Project> projectStream;

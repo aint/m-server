@@ -42,7 +42,7 @@ public class Project extends AbstractEntity<Long>  {
     private LocalDateTime workStarted;
 
     @Column
-    private LocalDateTime idleStarted;
+    private LocalDateTime checkpointTime;
 
     @Column
     private Long todayMinutes = 0L;
@@ -141,12 +141,12 @@ public class Project extends AbstractEntity<Long>  {
         this.workStarted = workStarted;
     }
 
-    public LocalDateTime getIdleStarted() {
-        return idleStarted;
+    public LocalDateTime getCheckpointTime() {
+        return checkpointTime;
     }
 
-    public void setIdleStarted(LocalDateTime idleStarted) {
-        this.idleStarted = idleStarted;
+    public void setCheckpointTime(LocalDateTime checkpointTime) {
+        this.checkpointTime = checkpointTime;
     }
 
     public Long getTodayMinutes() {
@@ -210,7 +210,7 @@ public class Project extends AbstractEntity<Long>  {
                 ", rate=" + rate +
                 ", rateCurrencyId=" + rateCurrencyId +
                 ", workStarted=" + workStarted +
-                ", idleStarted=" + idleStarted +
+                ", checkpointTime=" + checkpointTime +
                 ", todayMinutes=" + todayMinutes +
                 ", totalMinutes=" + totalMinutes +
                 ", idleMinutes=" + idleMinutes +
