@@ -1,6 +1,6 @@
 package ua.softgroup.matrix.server.desktop.api;
 
-import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 
 import static ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus.SUCCESS;
 
+@SuppressWarnings("rawtypes")
 @Service
 public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
@@ -48,26 +49,25 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         this.trackingService = trackingService;
     }
 
-
     @Override
-    public ResponseModel<InitializeModel> authenticate(AuthModel authModel) {
-        LOG.info("Authenticate {}, {}", authModel);
+    public ResponseModel<InitializeModel> authenticate(RequestModel<AuthModel> authrequestModel) {
+        LOG.info("Authenticate {}, {}", authrequestModel);
+
+        AuthModel authModel = authrequestModel.getDataContainer().or(throwException());
         String token = userService.authenticate(authModel);
         if (token == null) {
             return new ResponseModel<>(ResponseStatus.INVALID_CREDENTIALS);
         }
-        ResponseModel<InitializeModel> responseModel = new ResponseModel<>(SUCCESS);
         ClientSettings clientSettings = clientSettingsService.getAll().stream()
                 .findFirst()
                 .orElseThrow(NoSuchElementException::new);
         InitializeModel initializeModel = new InitializeModel(
                 token,
                 projectService.getUserActiveProjects(token),
-                clientSettings.getStartDowntimeAfterInMinutes(), clientSettings
-                .getScreenshotUpdateFrequentlyInMinutes(),
+                clientSettings.getStartDowntimeAfterInMinutes(),
+                clientSettings.getScreenshotUpdateFrequentlyInMinutes(),
                 10);
-        responseModel.setContainer(Optional.of(initializeModel));
-        return responseModel;
+        return new ResponseModel<>(initializeModel);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public ResponseModel saveReport(RequestModel<ReportModel> reportRequestModel) {
-        ReportModel reportModel = reportRequestModel.getDataContainer().get();
+        ReportModel reportModel = reportRequestModel.getDataContainer().or(throwException());
         String token = reportRequestModel.getToken();
 
         return new ResponseModel<>(reportService.saveOrUpdate(token, reportModel));
@@ -102,102 +102,24 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public ResponseModel<TimeModel> processCheckpoint(RequestModel<CheckPointModel> requestModel) {
-        CheckPointModel checkPointModel = requestModel.getDataContainer().get();
-
-        projectService.saveCheckpointTime(requestModel.getProjectId(), (int) checkPointModel.getIdleTime());
+        CheckPointModel checkPointModel = requestModel.getDataContainer().or(throwException());
 
         trackingService.saveTrackingData(
                 requestModel.getProjectId(),
                 checkPointModel.getKeyboardLogs(),
-                (int) checkPointModel.getMouseFootage(),
+                checkPointModel.getMouseFootage(),
                 checkPointModel.getWindowsTimeMap(),
                 checkPointModel.getScreenshot());
 
-        return new ResponseModel<>(SUCCESS);
+
+        TimeModel timeModel = projectService.saveCheckpointTime(requestModel.getProjectId(), (int) checkPointModel.getIdleTime());
+        return new ResponseModel<>(timeModel);
     }
 
-//    @Override
-//    public Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId) {
-//        LOG.debug("Requested project id {}", projectId);
-//        return reportService.getAllReportsOf(tokenModel.getToken(), projectId);
-//    }
-//
-//    @Override
-//    public Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel) {
-//        return projectService.getUserActiveProjects(tokenModel.getToken());
-//    }
-//
-//    @Override
-//    public void startDowntime(TimeModel downtimeModel) {
-//        LOG.debug("startDowntime DownTimeModel {}", downtimeModel);
-//        Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-//        project.setIdleStarted(LocalDateTime.now());
-//        projectService.save(project);
-//    }
-//
-//    @Override
-//    public void endDowntime(TimeModel downtimeModel) {
-//        LOG.debug("endDowntime DownTimeModel {}", downtimeModel);
-//        Project project = projectService.getById(downtimeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-//        LOG.debug("endDowntime Project {}", project);
-//        LocalDateTime startTime = project.getIdleStarted();
-//        if (startTime != null) {
-//            Duration duration = Duration.between(startTime, LocalDateTime.now());
-//            LOG.debug("Downtime in minutes {}", duration.toMinutes());
-//            LOG.debug("Downtime in millis {}", duration.toMillis());
-//            project.setIdleMinutes(project.getIdleMinutes() + duration.toMinutes());
-//            project.setIdleStarted(null);
-//            projectService.save(project);
-//
-//            WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project).orElse(new WorkDay(0L, 0L, project));
-//            workDay.setIdleMinutes(workDay.getIdleMinutes() + duration.toMinutes());
-//            workDayService.save(workDay);
-//        }
-//
-//    }
-//
-//    @Override
-//    public ClientSettingsModel getClientSettings() {
-//        return clientSettingsService.getAll().stream()
-//                .findFirst()
-//                .map(this::convertClientSettingsToModel)
-//                .orElseThrow(NoSuchElementException::new);
-//    }
-//
-//    @Override
-//    public TimeModel getTodayWorkTime(TimeModel timeModel) {
-//        LOG.debug("getTodayWorkTime: {}", timeModel);
-//        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-//        LocalDateTime startedWork = project.getWorkStarted();
-//        Long todayMinutes = project.getTodayMinutes();
-//        if (startedWork != null) {
-//            Duration duration = Duration.between(startedWork, LocalDateTime.now());
-//            LOG.debug("getTodayWorkTime: Current work time in minutes {}", todayMinutes + duration.toMinutes());
-//        }
-//        Long hours = todayMinutes / 60;
-//        Long minutes = todayMinutes - hours * 60;
-//        LOG.debug("getTodayWorkTime: hours {}, minutes {}", hours, minutes);
-//        return new TimeModel(hours, minutes);
-//    }
-//
-//    @Override
-//    public TimeModel getTotalWorkTime(TimeModel timeModel) {
-//        LOG.debug("getTotalWorkTime: {}", timeModel);
-//        Project project = projectService.getById(timeModel.getProjectId()).orElseThrow(NoSuchElementException::new);
-//        Long totalMinutes = project.getTotalMinutes();
-//        Long hours = totalMinutes / 60;
-//        Long minutes = totalMinutes - hours * 60;
-//        Long downtime = project.getIdleMinutes();
-//        double downtimePercent = Math.floor(downtime * 100 / Double.valueOf(totalMinutes) * 100) / 100;
-//        LOG.debug("getTotalWorkTime: hours {}, minutes {}, downtime {}%", hours, minutes, downtimePercent);
-//        return new TimeModel(hours, minutes, downtimePercent);
-//    }
-//
-//    private ClientSettingsModel convertClientSettingsToModel(ClientSettings settings) {
-//        return new ClientSettingsModel(
-//                0,
-//                settings.getScreenshotUpdateFrequentlyInMinutes(),
-//                settings.getKeyboardUpdateFrequentlyInMinutes(),
-//                settings.getStartDowntimeAfterInMinutes());
-//    }
+    private Supplier throwException() {
+        return () -> {
+            throw new RuntimeException("Data container is empty");
+        };
+    }
+
 }

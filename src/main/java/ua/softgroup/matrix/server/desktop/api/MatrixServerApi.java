@@ -9,15 +9,10 @@ import ua.softgroup.matrix.server.desktop.model.datamodels.TimeModel;
 import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
 
+@SuppressWarnings("rawtypes")
 public interface MatrixServerApi {
 
-    /**
-     * Tries to authenticate a user using the given credentials
-     *
-     * @param authModel DTO with username and password
-     * @return a token in the case of successful authentication, 'invalid credentials' otherwise
-     */
-    ResponseModel<InitializeModel> authenticate(AuthModel authModel);
+    ResponseModel<InitializeModel> authenticate(RequestModel<AuthModel> authModel);
 
     ResponseModel<ReportsContainerDataModel> getProjectReports(RequestModel requestModel);
 
@@ -28,27 +23,5 @@ public interface MatrixServerApi {
     ResponseModel endWork(RequestModel requestModel);
 
     ResponseModel<TimeModel> processCheckpoint(RequestModel<CheckPointModel> requestModel);
-
-//    Set<ProjectModel> getUserActiveProjects(TokenModel tokenModel);
-//
-//
-//    Set<ReportModel> getAllReportsByProjectId(TokenModel tokenModel, long projectId);
-//
-//
-//    void startDowntime(TimeModel downTimeModel);
-//
-//    void endDowntime(TimeModel downTimeModel);
-//
-//    TimeModel getTodayWorkTime(TimeModel timeModel);
-//
-//    TimeModel getTotalWorkTime(TimeModel timeModel);
-//
-//    ClientSettingsModel getClientSettings();
-//
-//    void saveKeyboardLog(WriteKeyboard writeKeyboard);
-//
-//    void saveActiveWindowsLog(ActiveWindowsModel activeWindows);
-//
-//    void saveScreenshot(ScreenshotModel file);
 
 }
