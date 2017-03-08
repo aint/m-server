@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
-import ua.softgroup.matrix.server.desktop.api.Constants;
 import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.UserRepository;
@@ -59,14 +58,11 @@ public class UserServiceImpl extends AbstractEntityTransactionalService<User> im
         if (loginJson.getSuccess()) {
             saveUser(loginJson.getUser(), password);
             String token = loginJson.getTrackerToken();
-            LOG.info("Given token {}", token);
+            LOG.info("User authenticated successfully: {}", token);
             return token;
         }
-        String message = loginJson.getMessage();
-        LOG.info("Authentication failed: {}", message);
-        return message.contains("password")
-                ? Constants.INVALID_PASSWORD.name()
-                : Constants.INVALID_USERNAME.name();
+        LOG.info("Authentication failed: {}", loginJson.getMessage());
+        return null;
     }
 
     private Response<LoginJson> executeLoginQuery(String username, String password) throws IOException {
