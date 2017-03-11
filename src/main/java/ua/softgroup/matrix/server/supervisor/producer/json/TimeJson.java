@@ -10,10 +10,10 @@ import java.time.LocalDate;
 public class TimeJson {
 
     @JsonView(JsonViewType.OUT.class)
-    private Long todayMinutes;
+    private Integer todayMinutes;
 
     @JsonView({ JsonViewType.OUT.class, JsonViewType.IN.class })
-    private Long totalMinutes;
+    private Integer totalMinutes;
 
     @JsonView(JsonViewType.IN.class)
     private String reason;
@@ -21,24 +21,24 @@ public class TimeJson {
     @JsonView(JsonViewType.IN.class)
     private LocalDate date;
 
-    public TimeJson(Long todayMinutes, Long totalMinutes) {
+    public TimeJson(Integer todayMinutes, Integer totalMinutes) {
         this.todayMinutes = todayMinutes;
         this.totalMinutes = totalMinutes;
     }
 
-    public Long getTotalMinutes() {
+    public Integer getTotalMinutes() {
         return totalMinutes;
     }
 
-    public void setTotalMinutes(Long totalMinutes) {
+    public void setTotalMinutes(Integer totalMinutes) {
         this.totalMinutes = totalMinutes;
     }
 
-    public Long getTodayMinutes() {
+    public Integer getTodayMinutes() {
         return todayMinutes;
     }
 
-    public void setTodayMinutes(Long todayMinutes) {
+    public void setTodayMinutes(Integer todayMinutes) {
         this.todayMinutes = todayMinutes;
     }
 

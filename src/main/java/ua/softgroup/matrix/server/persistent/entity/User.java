@@ -22,16 +22,16 @@ public class User implements Serializable {
     private String password;
 
     @Column
-    private Long externalHourlyRate;
+    private Integer externalHourlyRate;
 
     @Column
-    private Long externalHourlyRateCurrencyId;
+    private Integer externalHourlyRateCurrencyId;
 
     @Column
-    private Long internalHourlyRate;
+    private Integer internalHourlyRate;
 
     @Column
-    private Long internalHourlyRateCurrencyId;
+    private Integer internalHourlyRateCurrencyId;
 
     public Long getId() {
         return id;
@@ -65,35 +65,35 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public Long getExternalHourlyRate() {
+    public Integer getExternalHourlyRate() {
         return externalHourlyRate;
     }
 
-    public void setExternalHourlyRate(Long externalHourlyRate) {
+    public void setExternalHourlyRate(Integer externalHourlyRate) {
         this.externalHourlyRate = externalHourlyRate;
     }
 
-    public Long getExternalHourlyRateCurrencyId() {
+    public Integer getExternalHourlyRateCurrencyId() {
         return externalHourlyRateCurrencyId;
     }
 
-    public void setExternalHourlyRateCurrencyId(Long externalHourlyRateCurrencyId) {
+    public void setExternalHourlyRateCurrencyId(Integer externalHourlyRateCurrencyId) {
         this.externalHourlyRateCurrencyId = externalHourlyRateCurrencyId;
     }
 
-    public Long getInternalHourlyRate() {
+    public Integer getInternalHourlyRate() {
         return internalHourlyRate;
     }
 
-    public void setInternalHourlyRate(Long internalHourlyRate) {
+    public void setInternalHourlyRate(Integer internalHourlyRate) {
         this.internalHourlyRate = internalHourlyRate;
     }
 
-    public Long getInternalHourlyRateCurrencyId() {
+    public Integer getInternalHourlyRateCurrencyId() {
         return internalHourlyRateCurrencyId;
     }
 
-    public void setInternalHourlyRateCurrencyId(Long internalHourlyRateCurrencyId) {
+    public void setInternalHourlyRateCurrencyId(Integer internalHourlyRateCurrencyId) {
         this.internalHourlyRateCurrencyId = internalHourlyRateCurrencyId;
     }
 

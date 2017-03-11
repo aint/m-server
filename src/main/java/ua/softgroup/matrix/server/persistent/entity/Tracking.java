@@ -19,11 +19,11 @@ import java.util.Map;
 public class Tracking extends AbstractEntity<Long> {
     private static final long serialVersionUID = -6554909949520971201L;
 
-    @Column
-    private String keyboardText;
+    @Column(columnDefinition = "LONGTEXT")
+    private String keyboardText = "";
 
     @Column
-    private Integer mouseFootage;
+    private Double mouseFootage = 0.0;
 
     @ElementCollection
     @CollectionTable(name = "tracking_screenshots")
@@ -54,11 +54,11 @@ public class Tracking extends AbstractEntity<Long> {
         this.keyboardText = keyboardText;
     }
 
-    public Integer getMouseFootage() {
+    public Double getMouseFootage() {
         return mouseFootage;
     }
 
-    public void setMouseFootage(Integer mouseFootage) {
+    public void setMouseFootage(Double mouseFootage) {
         this.mouseFootage = mouseFootage;
     }
 

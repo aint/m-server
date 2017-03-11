@@ -33,10 +33,10 @@ public class Project extends AbstractEntity<Long>  {
     private LocalDate endDate;
 
     @Column
-    private Long rate;
+    private Integer rate;
 
     @Column
-    private Long rateCurrencyId;
+    private Integer rateCurrencyId;
 
     @Column
     private LocalDateTime workStarted;
@@ -45,13 +45,13 @@ public class Project extends AbstractEntity<Long>  {
     private LocalDateTime checkpointTime;
 
     @Column
-    private Long todayMinutes = 0L;
+    private Integer todaySeconds = 0;
 
     @Column
-    private Long totalMinutes = 0L;
+    private Integer totalSeconds = 0;
 
     @Column
-    private Long idleMinutes = 0L;
+    private Integer idleSeconds = 0;
 
     @ManyToOne
     private User user;
@@ -117,19 +117,19 @@ public class Project extends AbstractEntity<Long>  {
         this.endDate = endDate;
     }
 
-    public Long getRate() {
+    public Integer getRate() {
         return rate;
     }
 
-    public void setRate(Long rate) {
+    public void setRate(Integer rate) {
         this.rate = rate;
     }
 
-    public Long getRateCurrencyId() {
+    public Integer getRateCurrencyId() {
         return rateCurrencyId;
     }
 
-    public void setRateCurrencyId(Long rateCurrencyId) {
+    public void setRateCurrencyId(Integer rateCurrencyId) {
         this.rateCurrencyId = rateCurrencyId;
     }
 
@@ -149,28 +149,28 @@ public class Project extends AbstractEntity<Long>  {
         this.checkpointTime = checkpointTime;
     }
 
-    public Long getTodayMinutes() {
-        return todayMinutes;
+    public Integer getTodaySeconds() {
+        return todaySeconds;
     }
 
-    public void setTodayMinutes(Long todayMinutes) {
-        this.todayMinutes = todayMinutes;
+    public void setTodaySeconds(Integer todayMinutes) {
+        this.todaySeconds = todayMinutes;
     }
 
-    public Long getTotalMinutes() {
-        return totalMinutes;
+    public Integer getTotalSeconds() {
+        return totalSeconds;
     }
 
-    public void setTotalMinutes(Long totalMinutes) {
-        this.totalMinutes = totalMinutes;
+    public void setTotalSeconds(Integer totalMinutes) {
+        this.totalSeconds = totalMinutes;
     }
 
-    public Long getIdleMinutes() {
-        return idleMinutes;
+    public Integer getIdleSeconds() {
+        return idleSeconds;
     }
 
-    public void setIdleMinutes(Long idleMinutes) {
-        this.idleMinutes = idleMinutes;
+    public void setIdleSeconds(Integer idleMinutes) {
+        this.idleSeconds = idleMinutes;
     }
 
     public Set<Report> getReports() {
@@ -211,9 +211,9 @@ public class Project extends AbstractEntity<Long>  {
                 ", rateCurrencyId=" + rateCurrencyId +
                 ", workStarted=" + workStarted +
                 ", checkpointTime=" + checkpointTime +
-                ", todayMinutes=" + todayMinutes +
-                ", totalMinutes=" + totalMinutes +
-                ", idleMinutes=" + idleMinutes +
+                ", todaySeconds=" + todaySeconds +
+                ", totalSeconds=" + totalSeconds +
+                ", idleSeconds=" + idleSeconds +
                 '}';
     }
 }

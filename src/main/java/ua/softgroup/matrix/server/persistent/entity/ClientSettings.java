@@ -8,59 +8,46 @@ public class ClientSettings extends AbstractEntity<Long> {
     private static final long serialVersionUID = -4678740217747959072L;
 
     @Column
-    private int screenshotUpdateFrequentlyInMinutes;
+    private Integer screenshotUpdateFrequentlyInMinutes;
 
     @Column
-    private int keyboardUpdateFrequentlyInMinutes;
+    private Integer startDowntimeAfterInMinutes;
 
     @Column
-    private int startDowntimeAfterInMinutes;
-
-    @Column
-    private int reportEditablePeriodInDays;
+    private Integer reportEditablePeriodInDays;
 
     public ClientSettings() {
     }
 
-    public ClientSettings(int screenshotUpdateFrequentlyInMinutes,
-                          int keyboardUpdateFrequentlyInMinutes,
-                          int startDowntimeAfterInMinutes,
-                          int reportEditablePeriodInDays) {
+    public ClientSettings(Integer screenshotUpdateFrequentlyInMinutes,
+                          Integer startDowntimeAfterInMinutes,
+                          Integer reportEditablePeriodInDays) {
         this.screenshotUpdateFrequentlyInMinutes = screenshotUpdateFrequentlyInMinutes;
-        this.keyboardUpdateFrequentlyInMinutes = keyboardUpdateFrequentlyInMinutes;
         this.startDowntimeAfterInMinutes = startDowntimeAfterInMinutes;
         this.reportEditablePeriodInDays = reportEditablePeriodInDays;
     }
 
-    public int getScreenshotUpdateFrequentlyInMinutes() {
+    public Integer getScreenshotUpdateFrequentlyInMinutes() {
         return screenshotUpdateFrequentlyInMinutes;
     }
 
-    public void setScreenshotUpdateFrequentlyInMinutes(int screenshotUpdateFrequentlyInMinutes) {
+    public void setScreenshotUpdateFrequentlyInMinutes(Integer screenshotUpdateFrequentlyInMinutes) {
         this.screenshotUpdateFrequentlyInMinutes = screenshotUpdateFrequentlyInMinutes;
     }
 
-    public int getKeyboardUpdateFrequentlyInMinutes() {
-        return keyboardUpdateFrequentlyInMinutes;
-    }
-
-    public void setKeyboardUpdateFrequentlyInMinutes(int keyboardUpdateFrequentlyInMinutes) {
-        this.keyboardUpdateFrequentlyInMinutes = keyboardUpdateFrequentlyInMinutes;
-    }
-
-    public int getStartDowntimeAfterInMinutes() {
+    public Integer getStartDowntimeAfterInMinutes() {
         return startDowntimeAfterInMinutes;
     }
 
-    public void setStartDowntimeAfterInMinutes(int startDowntimeAfterInMinutes) {
+    public void setStartDowntimeAfterInMinutes(Integer startDowntimeAfterInMinutes) {
         this.startDowntimeAfterInMinutes = startDowntimeAfterInMinutes;
     }
 
-    public int getReportEditablePeriodInDays() {
+    public Integer getReportEditablePeriodInDays() {
         return reportEditablePeriodInDays;
     }
 
-    public void setReportEditablePeriodInDays(int reportEditablePeriodInDays) {
+    public void setReportEditablePeriodInDays(Integer reportEditablePeriodInDays) {
         this.reportEditablePeriodInDays = reportEditablePeriodInDays;
     }
 
@@ -69,7 +56,6 @@ public class ClientSettings extends AbstractEntity<Long> {
         return "ClientSettings{" +
                 "id=" + super.getId() +
                 ", screenshotUpdateFrequentlyInMinutes=" + screenshotUpdateFrequentlyInMinutes +
-                ", keyboardUpdateFrequentlyInMinutes=" + keyboardUpdateFrequentlyInMinutes +
                 ", startDowntimeAfterInMinutes=" + startDowntimeAfterInMinutes +
                 ", reportEditablePeriodInDays=" + reportEditablePeriodInDays +
                 '}';

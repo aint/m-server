@@ -19,9 +19,9 @@ public class CheckPointModel implements Serializable, DataModel {
 
     private Map<String, Integer> windowsTimeMap;
 
-    private long idleTime; //in seconds
+    private int idleTime;
 
-    public CheckPointModel(long order, byte[] screenshot, String keyboardLogs, double mouseFootage, Map<String, Integer> windowsTimeMap, long idleTime) {
+    public CheckPointModel(long order, byte[] screenshot, String keyboardLogs, double mouseFootage, Map<String, Integer> windowsTimeMap, int idleTime) {
         this.order = order;
         this.screenshot = screenshot;
         this.keyboardLogs = keyboardLogs;
@@ -70,11 +70,11 @@ public class CheckPointModel implements Serializable, DataModel {
         this.windowsTimeMap = windowsTimeMap;
     }
 
-    public long getIdleTime() {
+    public int getIdleTime() {
         return idleTime;
     }
 
-    public void setIdleTime(long idleTime) {
+    public void setIdleTime(int idleTime) {
         this.idleTime = idleTime;
     }
 }

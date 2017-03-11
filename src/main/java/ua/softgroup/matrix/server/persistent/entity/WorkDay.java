@@ -24,13 +24,13 @@ public class WorkDay extends AbstractEntity<Long> {
     private LocalDate date;
 
     @Column
-    private Long workMinutes = 0L;
+    private Integer workSeconds = 0;
 
     @Column
-    private Long idleMinutes = 0L;
+    private Integer idleSeconds = 0;
 
     @Column
-    private boolean checked = false;
+    private boolean checked;
 
     @Column
     private Double coefficient = 1.0;
@@ -53,14 +53,14 @@ public class WorkDay extends AbstractEntity<Long> {
     public WorkDay() {
     }
 
-    public WorkDay(Long workMinutes, Long idleMinutes) {
-        this.workMinutes = workMinutes;
-        this.idleMinutes = idleMinutes;
+    public WorkDay(Integer workSeconds, Integer idleSeconds) {
+        this.workSeconds = workSeconds;
+        this.idleSeconds = idleSeconds;
     }
 
-    public WorkDay(Long workMinutes, Long idleMinutes, Project project) {
-        this.workMinutes = workMinutes;
-        this.idleMinutes = idleMinutes;
+    public WorkDay(Integer workSeconds, Integer idleSeconds, Project project) {
+        this.workSeconds = workSeconds;
+        this.idleSeconds = idleSeconds;
         this.project = project;
     }
 
@@ -72,20 +72,20 @@ public class WorkDay extends AbstractEntity<Long> {
         this.date = date;
     }
 
-    public Long getWorkMinutes() {
-        return workMinutes;
+    public Integer getWorkSeconds() {
+        return workSeconds;
     }
 
-    public void setWorkMinutes(Long workTimeMinutes) {
-        this.workMinutes = workTimeMinutes;
+    public void setWorkSeconds(Integer workTimeMinutes) {
+        this.workSeconds = workTimeMinutes;
     }
 
-    public Long getIdleMinutes() {
-        return idleMinutes;
+    public Integer getIdleSeconds() {
+        return idleSeconds;
     }
 
-    public void setIdleMinutes(Long idleTimeMinutes) {
-        this.idleMinutes = idleTimeMinutes;
+    public void setIdleSeconds(Integer idleTimeMinutes) {
+        this.idleSeconds = idleTimeMinutes;
     }
 
     public boolean isChecked() {
@@ -149,8 +149,8 @@ public class WorkDay extends AbstractEntity<Long> {
         return "WorkDay{" +
                 "id=" + super.getId() +
                 ", date=" + date +
-                ", workMinutes=" + workMinutes +
-                ", idleMinutes=" + idleMinutes +
+                ", workMinutes=" + workSeconds +
+                ", idleMinutes=" + idleSeconds +
                 ", checked=" + checked +
                 ", coefficient=" + coefficient +
                 '}';

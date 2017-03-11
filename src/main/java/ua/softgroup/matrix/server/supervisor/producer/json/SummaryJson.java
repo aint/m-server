@@ -9,16 +9,16 @@ import java.time.LocalDateTime;
 public class SummaryJson {
 
     private LocalDate date;
-    private Long workTimeMinutes;
-    private Long idleTimeMinutes;
-    private Long rate;
-    private Long currencyId;
+    private Integer workTimeMinutes;
+    private Integer idleTimeMinutes;
+    private Integer rate;
+    private Integer currencyId;
     private boolean checked;
     private Double coefficient;
     private LocalDateTime start;
     private LocalDateTime end;
 
-    public SummaryJson(LocalDate date, Long workTimeMinutes, Long idleTimeMinutes, Long rate, Long currencyId,
+    public SummaryJson(LocalDate date, Integer workTimeMinutes, Integer idleTimeMinutes, Integer rate, Integer currencyId,
                        boolean checked, Double coefficient, LocalDateTime start, LocalDateTime end) {
         this.date = date;
         this.workTimeMinutes = workTimeMinutes;
@@ -39,35 +39,35 @@ public class SummaryJson {
         this.date = date;
     }
 
-    public Long getWorkTimeMinutes() {
+    public Integer getWorkTimeMinutes() {
         return workTimeMinutes;
     }
 
-    public void setWorkTimeMinutes(Long workTimeMinutes) {
+    public void setWorkTimeMinutes(Integer workTimeMinutes) {
         this.workTimeMinutes = workTimeMinutes;
     }
 
-    public Long getIdleTimeMinutes() {
+    public Integer getIdleTimeMinutes() {
         return idleTimeMinutes;
     }
 
-    public void setIdleTimeMinutes(Long idleTimeMinutes) {
+    public void setIdleTimeMinutes(Integer idleTimeMinutes) {
         this.idleTimeMinutes = idleTimeMinutes;
     }
 
-    public Long getRate() {
+    public Integer getRate() {
         return rate;
     }
 
-    public void setRate(Long rate) {
+    public void setRate(Integer rate) {
         this.rate = rate;
     }
 
-    public Long getCurrencyId() {
+    public Integer getCurrencyId() {
         return currencyId;
     }
 
-    public void setCurrencyId(Long currencyId) {
+    public void setCurrencyId(Integer currencyId) {
         this.currencyId = currencyId;
     }
 

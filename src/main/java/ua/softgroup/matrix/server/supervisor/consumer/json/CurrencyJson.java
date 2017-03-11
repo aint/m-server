@@ -5,15 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CurrencyJson {
 
     @JsonProperty
-    private Long id;
+    private Integer id;
     @JsonProperty
     private String name;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

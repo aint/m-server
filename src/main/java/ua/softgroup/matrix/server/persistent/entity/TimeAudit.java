@@ -19,7 +19,7 @@ public class TimeAudit extends AbstractEntity<Long> {
     private LocalDateTime creationDate;
 
     @Column
-    private Long addedMinutes;
+    private Integer addedMinutes;
 
     @Column
     private String reason;
@@ -33,7 +33,7 @@ public class TimeAudit extends AbstractEntity<Long> {
     public TimeAudit() {
     }
 
-    public TimeAudit(Long addedMinutes, String reason, User adder, WorkDay workDay) {
+    public TimeAudit(Integer addedMinutes, String reason, User adder, WorkDay workDay) {
         this.addedMinutes = addedMinutes;
         this.reason = reason;
         this.adder = adder;
@@ -48,11 +48,11 @@ public class TimeAudit extends AbstractEntity<Long> {
         this.creationDate = creationDate;
     }
 
-    public Long getAddedMinutes() {
+    public Integer getAddedMinutes() {
         return addedMinutes;
     }
 
-    public void setAddedMinutes(Long addedMinutes) {
+    public void setAddedMinutes(Integer addedMinutes) {
         this.addedMinutes = addedMinutes;
     }
 

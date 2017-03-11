@@ -11,20 +11,20 @@ public class ReportModel implements Serializable, DataModel {
 
     private String text;
 
-    private long projectId;
+    private long projectId; //TODO for removing
 
     private boolean checked;
 
-    private LocalDate date;
+    private LocalDate date; //TODO think about this
 
-    private String workTime;
+    private int workTime;
 
     private byte[] attachment;
 
     public ReportModel() {
     }
 
-    public ReportModel(long id, String text, long projectId, boolean checked, LocalDate date, String workTime) {
+    public ReportModel(long id, String text, long projectId, boolean checked, LocalDate date, int workTime) {
         this.id = id;
         this.text = text;
         this.projectId = projectId;
@@ -85,11 +85,11 @@ public class ReportModel implements Serializable, DataModel {
         this.date = date;
     }
 
-    public String getWorkTime() {
+    public int getWorkTime() {
         return workTime;
     }
 
-    public void setWorkTime(String workTime) {
+    public void setWorkTime(int workTime) {
         this.workTime = workTime;
     }
 

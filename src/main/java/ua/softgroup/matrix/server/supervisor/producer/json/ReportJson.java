@@ -25,12 +25,12 @@ public class ReportJson {
     private String description;
 
     @JsonView(JsonViewType.OUT.class)
-    private Long workMinutes;
+    private Integer workMinutes;
 
     @JsonView(JsonViewType.OUT.class)
     private boolean checked;
 
-    public ReportJson(Long id, LocalDateTime creationDate, LocalDateTime updateDate, String title, String description, Long workMinutes, boolean checked) {
+    public ReportJson(Long id, LocalDateTime creationDate, LocalDateTime updateDate, String title, String description, Integer workMinutes, boolean checked) {
         this.id = id;
         this.creationDate = creationDate;
         this.updateDate = updateDate;
@@ -80,11 +80,11 @@ public class ReportJson {
         this.description = description;
     }
 
-    public Long getWorkMinutes() {
+    public Integer getWorkMinutes() {
         return workMinutes;
     }
 
-    public void setWorkMinutes(Long workMinutes) {
+    public void setWorkMinutes(Integer workMinutes) {
         this.workMinutes = workMinutes;
     }
 

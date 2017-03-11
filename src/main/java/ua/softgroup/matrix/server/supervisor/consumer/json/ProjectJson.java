@@ -28,10 +28,10 @@ public class ProjectJson {
     private LocalDate endDate;
 
     @JsonProperty
-    private Long rate;
+    private Integer rate;
 
     @JsonProperty("rate_currency_id")
-    private Long rateCurrencyId;
+    private Integer rateCurrencyId;
 
     public Long getId() {
         return id;
@@ -81,19 +81,19 @@ public class ProjectJson {
         this.endDate = endDate;
     }
 
-    public Long getRate() {
+    public Integer getRate() {
         return rate;
     }
 
-    public void setRate(Long rate) {
+    public void setRate(Integer rate) {
         this.rate = rate;
     }
 
-    public Long getRateCurrencyId() {
+    public Integer getRateCurrencyId() {
         return rateCurrencyId;
     }
 
-    public void setRateCurrencyId(Long rateCurrencyId) {
+    public void setRateCurrencyId(Integer rateCurrencyId) {
         this.rateCurrencyId = rateCurrencyId;
     }
 
