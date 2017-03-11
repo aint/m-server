@@ -120,8 +120,8 @@ public class SummaryEndpoint {
     private SummaryJson createSummaryJson(Project project, WorkDay workDay) {
         return new SummaryJson(
                 workDay.getDate(),
-                workDay.getWorkMinutes(),
-                workDay.getIdleMinutes(),
+                workDay.getWorkSeconds(),
+                workDay.getIdleSeconds(),
                 project.getRate(),
                 project.getRateCurrencyId(),
                 workDay.isChecked(),

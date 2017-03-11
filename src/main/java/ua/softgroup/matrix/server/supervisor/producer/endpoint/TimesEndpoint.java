@@ -77,7 +77,7 @@ public class TimesEndpoint {
 
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
-        return Response.ok(new TimeJson(project.getTodayMinutes(), project.getTotalMinutes())).build();
+        return Response.ok(new TimeJson(project.getTodaySeconds(), project.getTotalSeconds())).build();
     }
 
     @POST
@@ -102,18 +102,18 @@ public class TimesEndpoint {
         LOG.info("POST JSON {}", timeJson);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
-        project.setTotalMinutes(project.getTotalMinutes() + timeJson.getTotalMinutes());
+        project.setTotalSeconds(project.getTotalSeconds() + timeJson.getTotalMinutes());
         projectService.save(project);
 
-        WorkDay workDay = workDayService.getByDateAndProject(timeJson.getDate(), project).orElse(new WorkDay(0L, 0L, project));
-        workDay.setWorkMinutes(workDay.getWorkMinutes() + timeJson.getTotalMinutes());
+        WorkDay workDay = workDayService.getByDateAndProject(timeJson.getDate(), project).orElse(new WorkDay(0, 0, project));
+        workDay.setWorkSeconds(workDay.getWorkSeconds() + timeJson.getTotalMinutes());
         workDayService.save(workDay);
 
         Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
         timeAuditRepository.save(new TimeAudit(timeJson.getTotalMinutes(), timeJson.getReason(), principal, workDay));
 
-        return Response.ok(new TimeJson(project.getTodayMinutes(), project.getTotalMinutes())).build();
+        return Response.ok(new TimeJson(project.getTodaySeconds(), project.getTotalSeconds())).build();
     }
 
 }

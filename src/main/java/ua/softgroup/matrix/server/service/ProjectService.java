@@ -1,6 +1,7 @@
 package ua.softgroup.matrix.server.service;
 
 import ua.softgroup.matrix.server.desktop.model.datamodels.ProjectModel;
+import ua.softgroup.matrix.server.desktop.model.datamodels.TimeModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 
@@ -13,7 +14,7 @@ public interface ProjectService extends GeneralEntityService<Project> {
 
     void saveEndWorkTime(String userToken, Long projectId);
 
-    void saveCheckpointTime(Long projectId, Integer idleTime);
+    TimeModel saveCheckpointTime(Long projectId, Integer idleTime);
 
     Set<ProjectModel> getUserActiveProjects(String token);
 

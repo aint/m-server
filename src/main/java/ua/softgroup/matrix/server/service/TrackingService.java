@@ -9,6 +9,6 @@ public interface TrackingService extends GeneralEntityService<Tracking> {
 
     Tracking getByProjectIdAndDate(Long projectId, LocalDate date);
 
-    void saveTrackingData(Long projectId, String keyboardText, Integer mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot);
+    void saveTrackingData(Long projectId, String keyboardText, Double mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot);
 
 }

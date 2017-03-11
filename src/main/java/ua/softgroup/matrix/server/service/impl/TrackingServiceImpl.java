@@ -57,12 +57,15 @@ public class TrackingServiceImpl extends AbstractEntityTransactionalService<Trac
 
     @Override
     @Transactional
-    public void saveTrackingData(Long projectId, String keyboardText, Integer mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot) {
+    public void saveTrackingData(Long projectId, String keyboardText, Double mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot) {
         Tracking trackingData = getByProjectIdAndDate(projectId, LocalDate.now());
+        logger.debug("KeyboardLog {}", keyboardText);
         trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
 
+        logger.debug("MouseFootage {}", mouseFootage);
         trackingData.setMouseFootage(trackingData.getMouseFootage() + mouseFootage);
 
+        logger.debug("ActiveWindows {}", windowsTimeMap);
         //TODO use entity graph to fetch map in one query
         trackingData.getWindowTimeMap().forEach((k, v) -> windowsTimeMap.merge(k, v, Integer::sum));
         trackingData.setWindowTimeMap(windowsTimeMap);
@@ -72,7 +75,7 @@ public class TrackingServiceImpl extends AbstractEntityTransactionalService<Trac
             File screenshotFile = new File(filePath);
             screenshotFile.getParentFile().mkdirs();
             ImageIO.write(ImageIO.read(is), FILE_EXTENSION, screenshotFile);
-            trackingData.getScreenshots().add(filePath);
+//            trackingData.getScreenshots().add(filePath);
         } catch (Exception e) {
             logger.error("Failed to save screenshot", e);
         }

@@ -50,7 +50,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     private final WorkTimePeriodService workTimePeriodService;
     private final CacheManager cacheManager;
 
-    private Map<Long, String> currencyMap = new HashMap<>();
+    private Map<Integer, String> currencyMap = new HashMap<>();
     private Cache currencyCache;
 
     @Autowired
@@ -103,7 +103,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         getRepository().save(project);
 
         workDayService.save(workDayService.getByDateAndProject(LocalDate.now(), project)
-                                          .orElseGet(() -> new WorkDay(0L, 0L, project)));
+                                          .orElseGet(() -> new WorkDay(0, 0, project)));
     }
 
     @Override
@@ -112,37 +112,42 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         LOG.info("Save ending work time {} of project {} ", LocalDateTime.now(), projectId);
 
         Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
-        LocalDateTime startedWork = Optional.ofNullable(project.getWorkStarted()).orElseThrow(IllegalArgumentException::new);
+        LocalDateTime startedWork = Optional.ofNullable(project.getCheckpointTime()).orElse(project.getWorkStarted());
 
-        long minutes = Duration.between(startedWork, LocalDateTime.now()).toMinutes();
-        LOG.debug("Work period in minutes {}", minutes);
+        int seconds = (int) Duration.between(startedWork, LocalDateTime.now()).toMillis() / 1000;
+        LOG.debug("Work period in seconds {}", seconds);
         project.setWorkStarted(null);
+        project.setCheckpointTime(null);
         //TODO retrieve today work time from WorkDay entity
-        project.setTotalMinutes(project.getTotalMinutes() + minutes);
-        project.setTodayMinutes(project.getTodayMinutes() + minutes);
+        project.setTotalSeconds(project.getTotalSeconds() + seconds);
+        project.setTodaySeconds(project.getTodaySeconds() + seconds);
         save(project);
 
         WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project)
-                                        .orElseGet(() -> new WorkDay(0L, 0L, project));
-        workDay.setWorkMinutes(workDay.getWorkMinutes() + minutes);
+                                        .orElseGet(() -> new WorkDay(0, 0, project));
+        workDay.setWorkSeconds(workDay.getWorkSeconds() + seconds);
         workDayService.save(workDay);
 
         workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), workDay));
     }
 
     @Override
-    public void saveCheckpointTime(Long projectId, Integer idleTime) {
+    public TimeModel saveCheckpointTime(Long projectId, Integer idleTime) {
         Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
 
         LocalDateTime now = LocalDateTime.now();
-        long minutes = Duration.between(project.getCheckpointTime(), now).toMinutes();
-        project.setTodayMinutes(project.getTodayMinutes() + minutes);
-        project.setTotalMinutes(project.getTotalMinutes() + minutes);
+        LocalDateTime previousCheckpoint = Optional.ofNullable(project.getCheckpointTime()).orElse(project.getWorkStarted());
+        int seconds = (int) Duration.between(previousCheckpoint, now).toMillis() / 1000;
+        project.setTodaySeconds(project.getTodaySeconds() + seconds);
+        project.setTotalSeconds(project.getTotalSeconds() + seconds);
         project.setCheckpointTime(now);
 
-        project.setIdleMinutes(project.getIdleMinutes() + idleTime / 60);
+        project.setIdleSeconds(project.getIdleSeconds() + idleTime);
 
         save(project);
+
+        double downtimePercent = Math.floor(project.getIdleSeconds() * 100 / Double.valueOf(project.getTotalSeconds()) * 100) / 100;
+        return new TimeModel(project.getTotalSeconds(), project.getTodaySeconds(), downtimePercent);
     }
 
 
@@ -197,10 +202,10 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         projectModel.setAuthorName(project.getAuthorName());
         projectModel.setStartDate(project.getStartDate());
         projectModel.setEndDate(project.getEndDate());
-        //TODO set projectModel rate to long type
-        projectModel.setRate(project.getRate().intValue());
+        projectModel.setRate(project.getRate());
         projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId()));
-        projectModel.setProjectTime(new TimeModel(project.getTotalMinutes(), project.getTodayMinutes(), project.getIdleMinutes()));
+        double downtimePercent = Math.floor(project.getIdleSeconds() * 100 / Double.valueOf(project.getTotalSeconds()) * 100) / 100;
+        projectModel.setProjectTime(new TimeModel(project.getTotalSeconds(), project.getTodaySeconds(), downtimePercent));
 
         return projectModel;
     }

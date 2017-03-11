@@ -83,8 +83,8 @@ public class WorkDayRepositoryTest {
         Project project = new Project(1L);
         project.setSupervisorId(1L);
         WorkDay workDay = workDayRepository.findByDateAndProject(LocalDate.parse("2016-12-03"), project);
-        assertThat(workDay.getWorkMinutes()).isEqualTo(200);
-        assertThat(workDay.getIdleMinutes()).isEqualTo(20);
+        assertThat(workDay.getWorkSeconds()).isEqualTo(200);
+        assertThat(workDay.getIdleSeconds()).isEqualTo(20);
     }
 
     @Test

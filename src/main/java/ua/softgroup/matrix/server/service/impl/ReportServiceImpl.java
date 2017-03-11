@@ -123,9 +123,10 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
         report.setAuthor(user);
         report.setProject(project);
         report.setDescription(rm.getText());
-        LocalDate creationDate = report.getCreationDate().toLocalDate();
-        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndProject(creationDate, project))
-                                  .orElseGet(() ->  workDayRepository.save(new WorkDay(0L, 0L, project)));
+        report.setCreationDate(Optional.ofNullable(report.getCreationDate()).orElse(rm.getDate().atStartOfDay()));
+        LocalDate localDate = report.getCreationDate().toLocalDate();
+        WorkDay workDay = Optional.ofNullable(workDayRepository.findByDateAndProject(localDate, project))
+                                  .orElseGet(() ->  workDayRepository.save(new WorkDay(0, 0, project)));
         report.setWorkDay(workDay);
         getRepository().save(report);
 
@@ -141,7 +142,7 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
                 report.getUpdateDate(),
                 report.getTitle(),
                 report.getDescription(),
-                report.getWorkDay().getWorkMinutes(),
+                report.getWorkDay().getWorkSeconds(),
                 report.getWorkDay().isChecked()
         );
     }
@@ -154,7 +155,7 @@ public class ReportServiceImpl extends AbstractEntityTransactionalService<Report
         reportModel.setText(report.getDescription());
         reportModel.setDate(report.getCreationDate().toLocalDate());
         reportModel.setChecked(report.getWorkDay().isChecked());
-        reportModel.setWorkTime(String.valueOf(report.getWorkDay().getWorkMinutes())); //TODO use int value
+        reportModel.setWorkTime(report.getWorkDay().getWorkSeconds());
         return reportModel;
     }
 

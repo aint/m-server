@@ -23,7 +23,6 @@ public class LoadDefaultConfig {
             Properties prop = new Properties();
             prop.load(in);
             clientSettings = new ClientSettings(
-                    Integer.parseInt(prop.getProperty("keyboard.frequently.minutes")),
                     Integer.parseInt(prop.getProperty("screenshot.frequently.minutes")),
                     Integer.parseInt(prop.getProperty("idle.start.minutes")),
                     Integer.parseInt(prop.getProperty("report.editable.days")));
