@@ -7,8 +7,8 @@ import java.util.Map;
 
 public interface TrackingService extends GeneralEntityService<Tracking> {
 
-    Tracking getByProjectIdAndDate(Long projectId, LocalDate date);
+    Tracking getByProjectIdAndDate(String userToken, Long projectId, LocalDate date);
 
-    void saveTrackingData(Long projectId, String keyboardText, Double mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot);
+    void saveTrackingData(String userToken, Long projectId, String keyboardText, Double mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot);
 
 }

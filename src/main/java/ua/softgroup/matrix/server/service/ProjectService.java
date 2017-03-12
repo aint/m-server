@@ -14,7 +14,7 @@ public interface ProjectService extends GeneralEntityService<Project> {
 
     void saveEndWorkTime(String userToken, Long projectId);
 
-    TimeModel saveCheckpointTime(Long projectId, Integer idleTime);
+    TimeModel saveCheckpointTime(String userToken, Long projectId, Integer idleTime);
 
     Set<ProjectModel> getUserActiveProjects(String token);
 

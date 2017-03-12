@@ -70,10 +70,10 @@ public class WorkDay extends AbstractEntity<Long> {
         this.idleSeconds = idleSeconds;
     }
 
-    public WorkDay(Integer workSeconds, Integer idleSeconds, Project project) {
-        this.workSeconds = workSeconds;
-        this.idleSeconds = idleSeconds;
+    public WorkDay(User author, Project project, LocalDate date) {
+        this.author = author;
         this.project = project;
+        this.date = date;
     }
 
     public LocalDate getDate() {

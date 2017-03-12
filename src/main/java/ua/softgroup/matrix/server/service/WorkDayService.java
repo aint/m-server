@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
-    Optional<WorkDay> getByDateAndProject(LocalDate localDate, Project project);
+    Optional<WorkDay> getByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate);
 
     Set<WorkDay> getAllWorkDaysOf(User user, Project project);
 

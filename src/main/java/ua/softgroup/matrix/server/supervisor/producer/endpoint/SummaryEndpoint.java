@@ -77,7 +77,7 @@ public class SummaryEndpoint {
         LocalDate end = (months == 0)
                 ? LocalDate.now().plusDays(1)
                 : LocalDate.now().minusMonths(months).with(TemporalAdjusters.lastDayOfMonth());
-        return Response.ok(getSummaryBetween(start, end, project)).build();
+        return Response.ok(getSummaryBetween(start, end, user, project)).build();
     }
 
     @GET
@@ -104,13 +104,13 @@ public class SummaryEndpoint {
         LocalDate end = (days == 0)
                 ? LocalDate.now().plusDays(1)
                 : LocalDate.now();
-        return Response.ok(getSummaryBetween(start, end, project)).build();
+        return Response.ok(getSummaryBetween(start, end, user, project)).build();
     }
 
-    private List<SummaryJson> getSummaryBetween(LocalDate start, LocalDate end, Project project) {
+    private List<SummaryJson> getSummaryBetween(LocalDate start, LocalDate end, User user, Project project) {
         return Stream.iterate(start, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(start, end))
-                .map(localDate -> workDayService.getByDateAndProject(localDate, project))
+                .map(localDate -> workDayService.getByAuthorAndProjectAndDate(user, project, localDate))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(workDay -> createSummaryJson(project, workDay))

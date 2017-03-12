@@ -94,28 +94,33 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     @Override
-    //TODO useless userToken, maybe rethink project id strategy
     public void saveStartWorkTime(String userToken, Long projectId) {
-        LOG.info("Save starting work time {} of project {} ", LocalDateTime.now(), projectId);
-
+        User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
+
+        LOG.info("Start work of user {} on project {} at {}", user.getUsername(), projectId, LocalDateTime.now());
+
         project.setWorkStarted(LocalDateTime.now());
+        project.setCheckpointTime(null);
+        project.setEndDate(null);
         getRepository().save(project);
 
-        workDayService.save(workDayService.getByDateAndProject(LocalDate.now(), project)
-                                          .orElseGet(() -> new WorkDay(0, 0, project)));
+        workDayService.save(workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
+                                          .orElseGet(() -> new WorkDay(user, project, LocalDate.now())));
+        //TODO maybe create new work period
     }
 
     @Override
-    //TODO useless userToken, maybe rethink project id strategy
     public void saveEndWorkTime(String userToken, Long projectId) {
-        LOG.info("Save ending work time {} of project {} ", LocalDateTime.now(), projectId);
-
+        User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
+
+        LOG.info("End work of user {} on project {} at {}", user.getUsername(), projectId, LocalDateTime.now());
+
         LocalDateTime startedWork = Optional.ofNullable(project.getCheckpointTime()).orElse(project.getWorkStarted());
 
         int seconds = (int) Duration.between(startedWork, LocalDateTime.now()).toMillis() / 1000;
-        LOG.debug("Work period in seconds {}", seconds);
+        LOG.debug("User {} worked {} seconds on project {}", user.getUsername(), seconds, project.getId());
         project.setWorkStarted(null);
         project.setCheckpointTime(null);
         //TODO retrieve today work time from WorkDay entity
@@ -123,28 +128,40 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         project.setTodaySeconds(project.getTodaySeconds() + seconds);
         save(project);
 
-        WorkDay workDay = workDayService.getByDateAndProject(LocalDate.now(), project)
-                                        .orElseGet(() -> new WorkDay(0, 0, project));
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
+                                        .orElseGet(() -> new WorkDay(user, project, LocalDate.now()));
         workDay.setWorkSeconds(workDay.getWorkSeconds() + seconds);
+        //TODO add rate and currency
         workDayService.save(workDay);
 
         workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), workDay));
     }
 
     @Override
-    public TimeModel saveCheckpointTime(Long projectId, Integer idleTime) {
+    public TimeModel saveCheckpointTime(String userToken, Long projectId, Integer idleTime) {
+        User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
+
+        LOG.info("Checkpoint of user {} on project {} at {}", user.getUsername(), projectId, LocalDateTime.now());
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime previousCheckpoint = Optional.ofNullable(project.getCheckpointTime()).orElse(project.getWorkStarted());
         int seconds = (int) Duration.between(previousCheckpoint, now).toMillis() / 1000;
+        LOG.debug("User {} worked {} seconds and idle {} seconds on project {}", user.getUsername(), seconds, idleTime, project.getId());
+
         project.setTodaySeconds(project.getTodaySeconds() + seconds);
         project.setTotalSeconds(project.getTotalSeconds() + seconds);
-        project.setCheckpointTime(now);
-
         project.setIdleSeconds(project.getIdleSeconds() + idleTime);
-
+        project.setCheckpointTime(now);
         save(project);
+
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
+                                        .orElseGet(() -> new WorkDay(user, project, LocalDate.now()));
+        workDay.setWorkSeconds(workDay.getWorkSeconds() + seconds);
+        workDay.setIdleSeconds(workDay.getIdleSeconds() + idleTime);
+        //TODO add rate and currency
+        workDayService.save(workDay);
+
 
         double downtimePercent = Math.floor(project.getIdleSeconds() * 100 / Double.valueOf(project.getTotalSeconds()) * 100) / 100;
         return new TimeModel(project.getTotalSeconds(), project.getTodaySeconds(), downtimePercent);

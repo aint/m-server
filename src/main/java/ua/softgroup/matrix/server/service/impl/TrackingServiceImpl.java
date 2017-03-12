@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Tracking;
+import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.repository.TrackingRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.TrackingService;
+import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 
 import javax.annotation.Nonnull;
@@ -34,31 +36,35 @@ public class TrackingServiceImpl extends AbstractEntityTransactionalService<Trac
     private static final String FILE_EXTENSION = "png";
 
     private final ProjectService projectService;
+    private final UserService userService;
     private final WorkDayService workDayService;
     private final Environment environment;
 
     @Autowired
     public TrackingServiceImpl(TrackingRepository repository, ProjectService projectService,
-                               WorkDayService workDayService, Environment environment) {
+                               UserService userService, WorkDayService workDayService,
+                               Environment environment) {
         super(repository);
         this.projectService = projectService;
+        this.userService = userService;
         this.workDayService = workDayService;
         this.environment = environment;
     }
 
     @Nonnull
     @Override
-    public Tracking getByProjectIdAndDate(Long projectId, LocalDate date) {
+    public Tracking getByProjectIdAndDate(String userToken, Long projectId, LocalDate date) {
+        User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
-        WorkDay workDay = workDayService.getByDateAndProject(date, project).orElseThrow(NoSuchElementException::new);
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, date).orElseThrow(NoSuchElementException::new);
         Tracking tracking = getRepository().findByWorkDay(workDay);
         return tracking != null ? tracking : new Tracking(workDay);
     }
 
     @Override
     @Transactional
-    public void saveTrackingData(Long projectId, String keyboardText, Double mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot) {
-        Tracking trackingData = getByProjectIdAndDate(projectId, LocalDate.now());
+    public void saveTrackingData(String userToken, Long projectId, String keyboardText, Double mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot) {
+        Tracking trackingData = getByProjectIdAndDate(userToken, projectId, LocalDate.now());
         logger.debug("KeyboardLog {}", keyboardText);
         trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
 

@@ -65,7 +65,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 projectService.getUserActiveProjects(token),
                 clientSettings.getStartDowntimeAfterInMinutes(),
                 clientSettings.getScreenshotUpdateFrequentlyInMinutes(),
-                10);
+                10); //TODO implement checkPointFrequency
         return new ResponseModel<>(initializeModel);
     }
 
@@ -104,6 +104,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         CheckPointModel checkPointModel = requestModel.getDataContainer().or(throwException());
 
         trackingService.saveTrackingData(
+                requestModel.getToken(),
                 requestModel.getProjectId(),
                 checkPointModel.getKeyboardLogs(),
                 checkPointModel.getMouseFootage(),
@@ -111,7 +112,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 checkPointModel.getScreenshot());
 
 
-        TimeModel timeModel = projectService.saveCheckpointTime(requestModel.getProjectId(), (int) checkPointModel.getIdleTime());
+        TimeModel timeModel = projectService.saveCheckpointTime(requestModel.getToken(), requestModel.getProjectId(), checkPointModel.getIdleTime());
         return new ResponseModel<>(timeModel);
     }
 

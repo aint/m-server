@@ -53,8 +53,8 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
-    public Optional<WorkDay> getByDateAndProject(LocalDate localDate, Project project) {
-        return Optional.ofNullable(getRepository().findByDateAndProject(localDate, project));
+    public Optional<WorkDay> getByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate) {
+        return Optional.ofNullable(getRepository().findByAuthorAndProjectAndDate(author, project, localDate));
     }
 
     @Override

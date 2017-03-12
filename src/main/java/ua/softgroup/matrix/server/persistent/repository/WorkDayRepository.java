@@ -10,7 +10,7 @@ import java.util.Set;
 
 public interface WorkDayRepository extends CrudRepository<WorkDay, Long> {
 
-    WorkDay findByDateAndProject(LocalDate localDate, Project project);
+//    WorkDay findByDateAndProject(LocalDate localDate, Project project);
 
     Set<WorkDay> findByAuthorAndProject(User author, Project project);
 

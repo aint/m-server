@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ua.softgroup.matrix.server.persistent.entity.Project;
+import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 
 import javax.sql.DataSource;
@@ -34,15 +35,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class WorkDayRepositoryTest {
 
     private static final String WORK_DAY_TABLE = "work_day";
-    private static final String WORK_TIME_TABLE = "work_time";
     private static final String PROJECT_TABLE = "project";
+    private static final String USER_TABLE = "user";
 
     private static final int WORK_DAYS_COUNT = 20;
 
     private static final Operation DELETE_ALL = sequenceOf(
-            deleteAllFrom(WORK_DAY_TABLE, PROJECT_TABLE));
+            deleteAllFrom(WORK_DAY_TABLE, PROJECT_TABLE, USER_TABLE));
 
     private static final Operation INSERT_DATA = sequenceOf(
+            insertInto(USER_TABLE)
+                    .columns("id", "trackerToken", "username", "password",
+                            "externalHourlyRate", "externalHourlyRateCurrencyId",
+                            "internalHourlyRate", "internalHourlyRateCurrencyId")
+                    .values(1L, "tracker-token", "user-1", "1111",
+                            4, 1, 4, 2)
+                    .build(),
             insertInto(PROJECT_TABLE)
                     .columns("id", "supervisor_id", "title", "description", "author_name", "start_date", "end_date",
                              "rate", "rate_currency_id", "work_started", "checkpoint_time", "today_minutes", "total_minutes",
@@ -77,18 +85,22 @@ public class WorkDayRepositoryTest {
 
     @Test
     public void findByDateAndWorkTime() {
+        User user = new User();
+        user.setId(1L);
         Project project = new Project(1L);
         project.setSupervisorId(1L);
-        WorkDay workDay = workDayRepository.findByDateAndProject(LocalDate.parse("2016-12-03"), project);
+        WorkDay workDay = workDayRepository.findByAuthorAndProjectAndDate(user, project, LocalDate.parse("2016-12-03"));
         assertThat(workDay.getWorkSeconds()).isEqualTo(200);
         assertThat(workDay.getIdleSeconds()).isEqualTo(20);
     }
 
     @Test
     public void findByDateAndWorkTime_NotFound() {
+        User user = new User();
+        user.setId(1L);
         Project project = new Project(1L);
         project.setSupervisorId(1L);
-        WorkDay workDay = workDayRepository.findByDateAndProject(LocalDate.parse("2015-01-01"), project);
+        WorkDay workDay = workDayRepository.findByAuthorAndProjectAndDate(user, project, LocalDate.parse("2015-01-01"));
         assertThat(workDay).isNull();
     }
 

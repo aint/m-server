@@ -105,7 +105,8 @@ public class TimesEndpoint {
         project.setTotalSeconds(project.getTotalSeconds() + timeJson.getTotalMinutes());
         projectService.save(project);
 
-        WorkDay workDay = workDayService.getByDateAndProject(timeJson.getDate(), project).orElse(new WorkDay(0, 0, project));
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, timeJson.getDate())
+                                        .orElse(new WorkDay(user, project, timeJson.getDate()));
         workDay.setWorkSeconds(workDay.getWorkSeconds() + timeJson.getTotalMinutes());
         workDayService.save(workDay);
 
