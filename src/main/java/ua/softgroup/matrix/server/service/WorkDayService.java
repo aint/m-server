@@ -16,6 +16,10 @@ import java.util.Set;
  */
 public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
+    int getTotalWorkSeconds(User author, Project project);
+
+    int getCurrentMonthIdleSeconds(User author, Project project);
+
     Optional<WorkDay> getByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate);
 
     Set<WorkDay> getAllWorkDaysOf(User user, Project project);

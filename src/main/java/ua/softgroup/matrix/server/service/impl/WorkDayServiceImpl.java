@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
 import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.persistent.entity.Project;
@@ -18,9 +17,9 @@ import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 
 import javax.validation.Validator;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -53,6 +52,16 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
+    public int getTotalWorkSeconds(User author, Project project) {
+        return getRepository().getTotalWorkSeconds(author.getId(), project.getId());
+    }
+
+    @Override
+    public int getCurrentMonthIdleSeconds(User author, Project project) {
+        return getRepository().getCurrentMonthIdleSeconds(author.getId(), project.getId());
+    }
+
+    @Override
     public Optional<WorkDay> getByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate) {
         return Optional.ofNullable(getRepository().findByAuthorAndProjectAndDate(author, project, localDate));
     }
@@ -76,22 +85,22 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
-    @Transactional
-    //TODO check is report editable via repository
     //TODO maybe throw exception instead of return status?
     public ResponseStatus saveReportOrUpdate(String userToken, ReportModel reportModel) {
         User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = Optional.ofNullable(projectRepository.findOne(reportModel.getProjectId()))
                                                                .orElseThrow(NoSuchElementException::new);
 
-        //TODO use id for repo, not objects
-        WorkDay workDay = Optional.ofNullable(getRepository().findByAuthorAndProjectAndDate(user, project, reportModel.getDate()))
-                                                             .orElseThrow(NoSuchElementException::new);
+        WorkDay workDay = reportModel.getId() != 0L
+                ? getRepository().findOne(reportModel.getId())
+                : Optional.ofNullable(getRepository()
+                          .findByAuthorAndProjectAndDate(user, project, reportModel.getDate())) //TODO use id for repo, not objects
+                          .orElseThrow(NoSuchElementException::new);
 
-        long hours = Duration.between(workDay.getDate(), LocalDate.now()).toHours();
-        long editablePeriod = Long.parseLong(environment.getProperty("report.editable.days")) * 24;
-        if (hours > editablePeriod || workDay.isChecked()) {
-            logger.warn("Report {} created {} hours ago is expired or checked", workDay.getId(), hours);
+        long days = ChronoUnit.DAYS.between(workDay.getDate(), LocalDate.now());
+        long editablePeriod = Long.parseLong(environment.getProperty("report.editable.days"));
+        if (days > editablePeriod || workDay.isChecked()) {
+            logger.warn("Report {} of user '{}' created {} days ago is expired or checked", workDay.getId(), user.getUsername(), days);
             return ResponseStatus.REPORT_EXPIRED;
         }
 
@@ -111,7 +120,6 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
-    @Transactional
     public ReportJson convertEntityToJson(WorkDay workDay) {
         return new ReportJson(
                 workDay.getId(),

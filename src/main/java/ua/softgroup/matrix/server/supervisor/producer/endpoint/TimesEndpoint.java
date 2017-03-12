@@ -34,6 +34,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.time.LocalDate;
+import java.util.NoSuchElementException;
+
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
 /**
@@ -77,7 +80,10 @@ public class TimesEndpoint {
 
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
-        return Response.ok(new TimeJson(project.getTodaySeconds(), project.getTotalSeconds())).build();
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(project.getUser(), project, LocalDate.now())
+                                        .orElseThrow(NoSuchElementException::new);
+        int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
+        return Response.ok(new TimeJson(workDay.getWorkSeconds(), totalWorkSeconds)).build();
     }
 
     @POST
@@ -102,8 +108,6 @@ public class TimesEndpoint {
         LOG.info("POST JSON {}", timeJson);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
         Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
-        project.setTotalSeconds(project.getTotalSeconds() + timeJson.getTotalMinutes());
-        projectService.save(project);
 
         WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, timeJson.getDate())
                                         .orElse(new WorkDay(user, project, timeJson.getDate()));
@@ -114,7 +118,9 @@ public class TimesEndpoint {
         User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
         timeAuditRepository.save(new TimeAudit(timeJson.getTotalMinutes(), timeJson.getReason(), principal, workDay));
 
-        return Response.ok(new TimeJson(project.getTodaySeconds(), project.getTotalSeconds())).build();
+        int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
+
+        return Response.ok(new TimeJson(workDay.getWorkSeconds(), totalWorkSeconds)).build();
     }
 
 }

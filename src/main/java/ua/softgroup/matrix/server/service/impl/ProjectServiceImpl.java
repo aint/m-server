@@ -123,9 +123,6 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         LOG.debug("User {} worked {} seconds on project {}", user.getUsername(), seconds, project.getId());
         project.setWorkStarted(null);
         project.setCheckpointTime(null);
-        //TODO retrieve today work time from WorkDay entity
-        project.setTotalSeconds(project.getTotalSeconds() + seconds);
-        project.setTodaySeconds(project.getTodaySeconds() + seconds);
         save(project);
 
         WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
@@ -149,9 +146,6 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         int seconds = (int) Duration.between(previousCheckpoint, now).toMillis() / 1000;
         LOG.debug("User {} worked {} seconds and idle {} seconds on project {}", user.getUsername(), seconds, idleTime, project.getId());
 
-        project.setTodaySeconds(project.getTodaySeconds() + seconds);
-        project.setTotalSeconds(project.getTotalSeconds() + seconds);
-        project.setIdleSeconds(project.getIdleSeconds() + idleTime);
         project.setCheckpointTime(now);
         save(project);
 
@@ -162,9 +156,9 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         //TODO add rate and currency
         workDayService.save(workDay);
 
-
-        double downtimePercent = Math.floor(project.getIdleSeconds() * 100 / Double.valueOf(project.getTotalSeconds()) * 100) / 100;
-        return new TimeModel(project.getTotalSeconds(), project.getTodaySeconds(), downtimePercent);
+        int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
+        double downtimePercent = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
+        return new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), downtimePercent);
     }
 
 
@@ -221,8 +215,13 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         projectModel.setEndDate(project.getEndDate());
         projectModel.setRate(project.getRate());
         projectModel.setRateCurrency(currencyMap.get(project.getRateCurrencyId()));
-        double downtimePercent = Math.floor(project.getIdleSeconds() * 100 / Double.valueOf(project.getTotalSeconds()) * 100) / 100;
-        projectModel.setProjectTime(new TimeModel(project.getTotalSeconds(), project.getTodaySeconds(), downtimePercent));
+
+        int totalWorkSeconds = workDayService.getTotalWorkSeconds(project.getUser(), project);
+        int currentMonthIdleSeconds = workDayService.getCurrentMonthIdleSeconds(project.getUser(), project);
+        double downtimePercent = calculateIdlePercent(totalWorkSeconds, currentMonthIdleSeconds);
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(project.getUser(), project, LocalDate.now())
+                                        .orElseThrow(NoSuchElementException::new);
+        projectModel.setProjectTime(new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), downtimePercent));
 
         return projectModel;
     }
@@ -230,5 +229,11 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     @Override
     protected ProjectRepository getRepository() {
         return (ProjectRepository) repository;
+    }
+
+    private double calculateIdlePercent(int workSeconds, int idleSeconds) {
+        return idleSeconds != 0
+                ? Math.floor(idleSeconds * 100 / workSeconds * 100) / 100
+                : 0.0;
     }
 }

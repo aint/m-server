@@ -43,15 +43,6 @@ public class Project extends AbstractEntity<Long>  {
     @Column
     private LocalDateTime checkpointTime;
 
-    @Column
-    private Integer todaySeconds = 0;
-
-    @Column
-    private Integer totalSeconds = 0;
-
-    @Column
-    private Integer idleSeconds = 0;
-
     @ManyToOne
     private User user;
 
@@ -145,30 +136,6 @@ public class Project extends AbstractEntity<Long>  {
         this.checkpointTime = checkpointTime;
     }
 
-    public Integer getTodaySeconds() {
-        return todaySeconds;
-    }
-
-    public void setTodaySeconds(Integer todayMinutes) {
-        this.todaySeconds = todayMinutes;
-    }
-
-    public Integer getTotalSeconds() {
-        return totalSeconds;
-    }
-
-    public void setTotalSeconds(Integer totalMinutes) {
-        this.totalSeconds = totalMinutes;
-    }
-
-    public Integer getIdleSeconds() {
-        return idleSeconds;
-    }
-
-    public void setIdleSeconds(Integer idleMinutes) {
-        this.idleSeconds = idleMinutes;
-    }
-
     public User getUser() {
         return user;
     }
@@ -199,9 +166,6 @@ public class Project extends AbstractEntity<Long>  {
                 ", rateCurrencyId=" + rateCurrencyId +
                 ", workStarted=" + workStarted +
                 ", checkpointTime=" + checkpointTime +
-                ", todaySeconds=" + todaySeconds +
-                ", totalSeconds=" + totalSeconds +
-                ", idleSeconds=" + idleSeconds +
                 '}';
     }
 }
