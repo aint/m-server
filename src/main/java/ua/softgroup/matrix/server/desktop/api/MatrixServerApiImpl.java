@@ -17,9 +17,9 @@ import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
-import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.TrackingService;
 import ua.softgroup.matrix.server.service.UserService;
+import ua.softgroup.matrix.server.service.WorkDayService;
 
 import java.util.NoSuchElementException;
 
@@ -31,20 +31,19 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private static final Logger LOG = LoggerFactory.getLogger(MatrixServerApiImpl.class);
 
     private final UserService userService;
-    private final ReportService reportService;
     private final ProjectService projectService;
+    private final WorkDayService workDayService;
     private final ClientSettingsService clientSettingsService;
     private final TrackingService trackingService;
 
     @Autowired
     public MatrixServerApiImpl(UserService userService,
-                               ReportService reportService,
                                ProjectService projectService,
-                               ClientSettingsService clientSettingsService,
+                               WorkDayService workDayService, ClientSettingsService clientSettingsService,
                                TrackingService trackingService) {
         this.userService = userService;
-        this.reportService = reportService;
         this.projectService = projectService;
+        this.workDayService = workDayService;
         this.clientSettingsService = clientSettingsService;
         this.trackingService = trackingService;
     }
@@ -75,7 +74,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         Long projectId = requestModel.getProjectId();
         String token = requestModel.getToken();
 
-        return new ResponseModel<>(new ReportsContainerDataModel(reportService.getReportsOf(token, projectId)));
+        return new ResponseModel<>(new ReportsContainerDataModel(workDayService.getWorkDaysOf(token, projectId)));
     }
 
     @Override
@@ -83,7 +82,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         ReportModel reportModel = reportRequestModel.getDataContainer().or(throwException());
         String token = reportRequestModel.getToken();
 
-        return new ResponseModel<>(reportService.saveOrUpdate(token, reportModel));
+        return new ResponseModel<>(workDayService.saveReportOrUpdate(token, reportModel));
     }
 
     @Override

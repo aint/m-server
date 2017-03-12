@@ -7,7 +7,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -55,9 +54,6 @@ public class Project extends AbstractEntity<Long>  {
 
     @ManyToOne
     private User user;
-
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Report> reports = new HashSet<>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkDay> workDays;
@@ -171,14 +167,6 @@ public class Project extends AbstractEntity<Long>  {
 
     public void setIdleSeconds(Integer idleMinutes) {
         this.idleSeconds = idleMinutes;
-    }
-
-    public Set<Report> getReports() {
-        return reports;
-    }
-
-    public void setReports(Set<Report> reports) {
-        this.reports = reports;
     }
 
     public User getUser() {

@@ -10,10 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.persistent.entity.Project;
-import ua.softgroup.matrix.server.persistent.entity.Report;
 import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.service.ProjectService;
-import ua.softgroup.matrix.server.service.ReportService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
@@ -51,14 +50,12 @@ public class ReportsEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(ReportsEndpoint.class);
 
     private final ProjectService projectService;
-    private final ReportService reportService;
     private final UserService userService;
     private final WorkDayService workDayService;
 
     @Autowired
-    public ReportsEndpoint(ProjectService projectService, ReportService reportService, UserService userService, WorkDayService workDayService) {
+    public ReportsEndpoint(ProjectService projectService, UserService userService, WorkDayService workDayService) {
         this.projectService = projectService;
-        this.reportService = reportService;
         this.userService = userService;
         this.workDayService = workDayService;
     }
@@ -81,8 +78,8 @@ public class ReportsEndpoint {
 
         Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        List<ReportJson> reports = reportService.getAllReportsOf(user, project).stream()
-                .map(reportService::convertEntityToJson)
+        List<ReportJson> reports = workDayService.getAllWorkDaysOf(user, project).stream()
+                .map(workDayService::convertEntityToJson)
                 .collect(Collectors.toList());
         return Response.ok(reports).build();
     }
@@ -103,10 +100,9 @@ public class ReportsEndpoint {
     public Response updateReport(@Min(0) @PathParam("report_id") Long reportId,
                                  @JsonView(JsonViewType.IN.class) ReportJson reportJson) {
         LOG.info("PUT JSON {}", reportJson);
-        Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
-        report.setTitle(reportJson.getTitle());
-        report.setDescription(reportJson.getDescription());
-        return Response.ok(reportService.convertEntityToJson(reportService.save(report))).build();
+        WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
+        workDay.setReportText(reportJson.getTitle());
+        return Response.ok(workDayService.convertEntityToJson(workDayService.save(workDay))).build();
     }
 
     @POST
@@ -128,12 +124,11 @@ public class ReportsEndpoint {
 
         Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
-        Report report = reportService.getById(reportId).orElseThrow(NotFoundException::new);
-        report.getWorkDay().setChecker(principal);
-        report.getWorkDay().setChecked(true);
-        report.getWorkDay().setCoefficient(coefficient);
-        workDayService.save(report.getWorkDay());
-        return Response.ok(reportService.convertEntityToJson(reportService.save(report))).build();
+        WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
+        workDay.setChecker(principal);
+        workDay.setChecked(true);
+        workDay.setCoefficient(coefficient);
+        return Response.ok(workDayService.convertEntityToJson(workDayService.save(workDay))).build();
     }
 
 

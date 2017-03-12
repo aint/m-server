@@ -2,6 +2,7 @@ package ua.softgroup.matrix.server.supervisor.producer.json;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -13,7 +14,7 @@ public class ReportJson {
     private Long id;
 
     @JsonView(JsonViewType.OUT.class)
-    private LocalDateTime creationDate;
+    private LocalDate creationDate;
 
     @JsonView(JsonViewType.OUT.class)
     private LocalDateTime updateDate;
@@ -30,7 +31,7 @@ public class ReportJson {
     @JsonView(JsonViewType.OUT.class)
     private boolean checked;
 
-    public ReportJson(Long id, LocalDateTime creationDate, LocalDateTime updateDate, String title, String description, Integer workMinutes, boolean checked) {
+    public ReportJson(Long id, LocalDate creationDate, LocalDateTime updateDate, String description, Integer workMinutes, boolean checked) {
         this.id = id;
         this.creationDate = creationDate;
         this.updateDate = updateDate;
@@ -48,11 +49,11 @@ public class ReportJson {
         this.id = id;
     }
 
-    public LocalDateTime getCreationDate() {
+    public LocalDate getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
+    public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }
 

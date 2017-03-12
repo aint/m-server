@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
@@ -29,14 +30,20 @@ public class WorkDay extends AbstractEntity<Long> {
     @Column
     private Integer idleSeconds = 0;
 
+    @Column(columnDefinition = "TEXT")
+    private String reportText;
+
+    @ManyToOne
+    private User author;
+
+    @Column
+    private LocalDateTime reportUpdated;
+
     @Column
     private boolean checked;
 
     @Column
     private Double coefficient = 1.0;
-
-    @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Report report;
 
     @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Tracking tracking;
@@ -52,6 +59,11 @@ public class WorkDay extends AbstractEntity<Long> {
 
     public WorkDay() {
     }
+
+    public WorkDay(Long id) {
+        setId(id);
+    }
+
 
     public WorkDay(Integer workSeconds, Integer idleSeconds) {
         this.workSeconds = workSeconds;
@@ -88,6 +100,30 @@ public class WorkDay extends AbstractEntity<Long> {
         this.idleSeconds = idleTimeMinutes;
     }
 
+    public String getReportText() {
+        return reportText;
+    }
+
+    public void setReportText(String reportText) {
+        this.reportText = reportText;
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
+    }
+
+    public LocalDateTime getReportUpdated() {
+        return reportUpdated;
+    }
+
+    public void setReportUpdated(LocalDateTime reportUpdated) {
+        this.reportUpdated = reportUpdated;
+    }
+
     public boolean isChecked() {
         return checked;
     }
@@ -102,14 +138,6 @@ public class WorkDay extends AbstractEntity<Long> {
 
     public void setCoefficient(Double coefficient) {
         this.coefficient = coefficient;
-    }
-
-    public Report getReport() {
-        return report;
-    }
-
-    public void setReport(Report report) {
-        this.report = report;
     }
 
     public Tracking getTracking() {
