@@ -86,9 +86,9 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
 
     @Override
     //TODO maybe throw exception instead of return status?
-    public ResponseStatus saveReportOrUpdate(String userToken, ReportModel reportModel) {
+    public ResponseStatus saveReportOrUpdate(String userToken, Long projectId, ReportModel reportModel) {
         User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
-        Project project = Optional.ofNullable(projectRepository.findOne(reportModel.getProjectId()))
+        Project project = Optional.ofNullable(projectRepository.findOne(projectId))
                                                                .orElseThrow(NoSuchElementException::new);
 
         WorkDay workDay = reportModel.getId() != 0L
@@ -139,7 +139,9 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     private ReportModel convertEntityToDto(WorkDay workDay) {
         ReportModel reportModel = new ReportModel();
         reportModel.setId(workDay.getId());
-        reportModel.setProjectId(workDay.getProject().getId()); // TODO it really needed
+        reportModel.setRate(workDay.getProject().getRate());
+        reportModel.setCurrency(workDay.getProject().getRateCurrencyId() == 1 ? "USD" : "UAH");
+        reportModel.setCoefficient(workDay.getCoefficient());
         reportModel.setText(workDay.getReportText());
         reportModel.setDate(workDay.getDate());
         reportModel.setChecked(workDay.isChecked());

@@ -81,8 +81,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public ResponseModel saveReport(RequestModel<ReportModel> reportRequestModel) {
         ReportModel reportModel = reportRequestModel.getDataContainer().or(throwException());
         String token = reportRequestModel.getToken();
+        Long projectId = reportRequestModel.getProjectId();
 
-        return new ResponseModel<>(workDayService.saveReportOrUpdate(token, reportModel));
+        return new ResponseModel<>(workDayService.saveReportOrUpdate(token, projectId, reportModel));
     }
 
     @Override

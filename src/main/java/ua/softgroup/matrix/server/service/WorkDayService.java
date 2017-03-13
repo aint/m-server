@@ -26,7 +26,7 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
     Set<ReportModel> getWorkDaysOf(String userToken, Long projectId);
 
-    ResponseStatus saveReportOrUpdate(String userToken, ReportModel reportModel);
+    ResponseStatus saveReportOrUpdate(String userToken, Long projectId, ReportModel reportModel);
 
     ReportJson convertEntityToJson(WorkDay workDay);
 
