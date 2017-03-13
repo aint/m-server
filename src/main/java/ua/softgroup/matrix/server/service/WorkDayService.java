@@ -1,7 +1,7 @@
 package ua.softgroup.matrix.server.service;
 
-import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
-import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus;
+import ua.softgroup.matrix.api.model.datamodels.ReportModel;
+import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;

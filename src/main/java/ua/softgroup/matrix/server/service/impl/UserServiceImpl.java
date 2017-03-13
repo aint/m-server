@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
-import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
+import ua.softgroup.matrix.api.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.repository.UserRepository;
 import ua.softgroup.matrix.server.service.UserService;

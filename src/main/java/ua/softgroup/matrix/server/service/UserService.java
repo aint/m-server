@@ -1,6 +1,6 @@
 package ua.softgroup.matrix.server.service;
 
-import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
+import ua.softgroup.matrix.api.model.datamodels.AuthModel;
 import ua.softgroup.matrix.server.persistent.entity.User;
 
 import java.util.Optional;

@@ -5,15 +5,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.CheckPointModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.ReportsContainerDataModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.TimeModel;
-import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
-import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
-import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus;
+import ua.softgroup.matrix.api.model.datamodels.AuthModel;
+import ua.softgroup.matrix.api.model.datamodels.CheckPointModel;
+import ua.softgroup.matrix.api.model.datamodels.InitializeModel;
+import ua.softgroup.matrix.api.model.datamodels.ReportModel;
+import ua.softgroup.matrix.api.model.datamodels.ReportsContainerDataModel;
+import ua.softgroup.matrix.api.model.datamodels.TimeModel;
+import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
+import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
+import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
 import ua.softgroup.matrix.server.service.ClientSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
@@ -23,7 +23,7 @@ import ua.softgroup.matrix.server.service.WorkDayService;
 
 import java.util.NoSuchElementException;
 
-import static ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseStatus.SUCCESS;
+import static ua.softgroup.matrix.api.model.responsemodels.ResponseStatus.SUCCESS;
 
 @SuppressWarnings("rawtypes")
 @Service

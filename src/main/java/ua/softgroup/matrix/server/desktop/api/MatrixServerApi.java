@@ -1,13 +1,13 @@
 package ua.softgroup.matrix.server.desktop.api;
 
-import ua.softgroup.matrix.server.desktop.model.datamodels.AuthModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.CheckPointModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.InitializeModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.ReportModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.ReportsContainerDataModel;
-import ua.softgroup.matrix.server.desktop.model.datamodels.TimeModel;
-import ua.softgroup.matrix.server.desktop.model.requestmodels.RequestModel;
-import ua.softgroup.matrix.server.desktop.model.responsemodels.ResponseModel;
+import ua.softgroup.matrix.api.model.datamodels.AuthModel;
+import ua.softgroup.matrix.api.model.datamodels.CheckPointModel;
+import ua.softgroup.matrix.api.model.datamodels.InitializeModel;
+import ua.softgroup.matrix.api.model.datamodels.ReportModel;
+import ua.softgroup.matrix.api.model.datamodels.ReportsContainerDataModel;
+import ua.softgroup.matrix.api.model.datamodels.TimeModel;
+import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
+import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
 
 @SuppressWarnings("rawtypes")
 public interface MatrixServerApi {
