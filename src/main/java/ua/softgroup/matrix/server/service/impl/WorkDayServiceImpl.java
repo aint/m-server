@@ -28,6 +28,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
+
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
@@ -64,7 +67,9 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
 
     @Override
     public int getCurrentMonthIdleSeconds(User author, Project project) {
-        return Optional.ofNullable(getRepository().getCurrentMonthIdleSeconds(author.getId(), project.getId()))
+        LocalDate start = LocalDate.now().with(firstDayOfMonth());
+        LocalDate end = LocalDate.now().with(lastDayOfMonth());
+        return Optional.ofNullable(getRepository().getCurrentMonthIdleSeconds(author.getId(), project.getId(), start, end))
                        .orElse(0);
     }
 

@@ -19,7 +19,11 @@ public interface WorkDayRepository extends CrudRepository<WorkDay, Long> {
     @Query(value = "SELECT sum(work_seconds) FROM work_day WHERE project_id = :projectId and author_id = :userId", nativeQuery = true)
     Integer getTotalWorkSeconds(@Param("userId") Long userId, @Param("projectId") Long projectId);
 
-    @Query(value = "SELECT sum(idle_seconds) FROM work_day WHERE project_id = :projectId and author_id = :userId", nativeQuery = true)
-    Integer getCurrentMonthIdleSeconds(@Param("userId") Long userId, @Param("projectId") Long projectId);
+    @Query(value = "SELECT sum(idle_seconds) FROM work_day "
+                                          + "WHERE project_id = :projectId "
+                                                 + "AND author_id = :userId "
+                                                 + "AND date BETWEEN :startDate AND :endDate", nativeQuery = true)
+    Integer getCurrentMonthIdleSeconds(@Param("userId") Long userId, @Param("projectId") Long projectId,
+                                       @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 }
