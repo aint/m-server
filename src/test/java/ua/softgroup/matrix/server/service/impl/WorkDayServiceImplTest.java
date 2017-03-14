@@ -1,6 +1,7 @@
 package ua.softgroup.matrix.server.service.impl;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.env.Environment;
@@ -10,6 +11,7 @@ import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
+import ua.softgroup.matrix.server.persistent.repository.WorkTimePeriodRepository;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 
@@ -35,6 +37,8 @@ public class WorkDayServiceImplTest {
     @MockBean
     private ProjectRepository projectRepository;
     @MockBean
+    private WorkTimePeriodRepository workTimePeriodRepository;
+    @MockBean
     private Validator validator;
     @MockBean
     private Environment environment;
@@ -49,10 +53,10 @@ public class WorkDayServiceImplTest {
         when(userService.getByTrackerToken(TOKEN)).thenReturn(Optional.of(user));
         when(projectRepository.findOne(PROJECT_ID)).thenReturn(project);
 
-        workDayService = new WorkDayServiceImpl(repository, projectRepository, userService, validator, environment);
+        workDayService = new WorkDayServiceImpl(repository, projectRepository, workTimePeriodRepository, userService, validator, environment);
     }
 
-//    @Test
+    @Test
     public void getByDateAndProject() throws Exception {
 
     }

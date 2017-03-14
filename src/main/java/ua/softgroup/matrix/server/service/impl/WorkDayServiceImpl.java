@@ -10,8 +10,10 @@ import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
+import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository;
 import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
+import ua.softgroup.matrix.server.persistent.repository.WorkTimePeriodRepository;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
@@ -35,17 +37,20 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     private static final Logger logger = LoggerFactory.getLogger(WorkDayServiceImpl.class);
 
     private final ProjectRepository projectRepository;
+    private final WorkTimePeriodRepository workTimePeriodRepository;
     private final UserService userService;
     private final Validator validator;
     private final Environment environment;
 
     public WorkDayServiceImpl(CrudRepository<WorkDay, Long> repository,
                               ProjectRepository projectRepository,
+                              WorkTimePeriodRepository workTimePeriodRepository,
                               UserService userService,
                               Validator validator,
                               Environment environment) {
         super(repository);
         this.projectRepository = projectRepository;
+        this.workTimePeriodRepository = workTimePeriodRepository;
         this.userService = userService;
         this.validator = validator;
         this.environment = environment;
@@ -117,6 +122,13 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
         getRepository().save(workDay);
 
         return ResponseStatus.SUCCESS;
+    }
+
+    @Override
+    public LocalDateTime getStartWorkOf(WorkDay workDay) {
+        return Optional.ofNullable(workTimePeriodRepository.findTopByWorkDayOrderByStartAsc(workDay))
+                       .orElseGet(WorkTimePeriod::new)
+                       .getStart();
     }
 
     @Override

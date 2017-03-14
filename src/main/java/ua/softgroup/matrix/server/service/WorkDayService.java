@@ -8,6 +8,7 @@ import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +28,8 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
     Set<ReportModel> getWorkDaysOf(String userToken, Long projectId);
 
     ResponseStatus saveReportOrUpdate(String userToken, Long projectId, ReportModel reportModel);
+
+    LocalDateTime getStartWorkOf(WorkDay workDay);
 
     ReportJson convertEntityToJson(WorkDay workDay);
 

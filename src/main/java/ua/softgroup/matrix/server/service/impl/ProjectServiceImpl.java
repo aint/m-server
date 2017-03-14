@@ -180,7 +180,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
             projectStream = getRepository().findByUser(user).stream();
         }
         return projectStream
-                .filter(project -> project.getEndDate() == null || LocalDate.now().isBefore(project.getEndDate()))
+                .filter(project -> project.getEndDate() == null || LocalDate.now().isBefore(project.getEndDate())) //TODO maybe remove this
                 .peek(project ->  LOG.debug("User {}, {}", user.getUsername(), project))
                 .map(this::convertProjectEntityToModel)
                 .collect(Collectors.toCollection(HashSet::new));
@@ -220,8 +220,9 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         int currentMonthIdleSeconds = workDayService.getCurrentMonthIdleSeconds(project.getUser(), project);
         double downtimePercent = calculateIdlePercent(totalWorkSeconds, currentMonthIdleSeconds);
         WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(project.getUser(), project, LocalDate.now())
-                                        .orElseThrow(NoSuchElementException::new);
-        projectModel.setProjectTime(new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), downtimePercent));
+                                        .orElseGet(WorkDay::new);
+        LocalDateTime arrivalTime = workDayService.getStartWorkOf(workDay);
+        projectModel.setProjectTime(new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), arrivalTime, downtimePercent));
 
         return projectModel;
     }
