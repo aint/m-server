@@ -84,6 +84,11 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
+    public Set<WorkDay> getAllWorkDaysOf(User user, LocalDate localDate) {
+        return getRepository().findByAuthorAndDate(user, localDate);
+    }
+
+    @Override
     public Set<ReportModel> getWorkDaysOf(String userToken, Long projectId) {
         User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = Optional.ofNullable(projectRepository.findOne(projectId))
@@ -136,6 +141,13 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
         return Optional.ofNullable(workTimePeriodRepository.findTopByWorkDayOrderByStartAsc(workDay))
                        .orElseGet(WorkTimePeriod::new)
                        .getStart();
+    }
+
+    @Override
+    public LocalDateTime getEndWorkOf(WorkDay workDay) {
+        return Optional.ofNullable(workTimePeriodRepository.findTopByWorkDayOrderByEndDesc(workDay))
+                       .orElseGet(WorkTimePeriod::new)
+                       .getEnd();
     }
 
     @Override
