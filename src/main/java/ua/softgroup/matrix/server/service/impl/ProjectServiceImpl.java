@@ -94,7 +94,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
     }
 
     @Override
-    public void saveStartWorkTime(String userToken, Long projectId) {
+    public TimeModel saveStartWorkTime(String userToken, Long projectId) {
         User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
 
@@ -105,13 +105,17 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         project.setEndDate(null);
         getRepository().save(project);
 
-        workDayService.save(workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
-                                          .orElseGet(() -> new WorkDay(user, project, LocalDate.now())));
-        //TODO maybe create new work period
+        WorkDay workDay = workDayService.save(workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
+                                                            .orElseGet(() -> new WorkDay(user, project, LocalDate.now())));
+
+        LocalDateTime arrivalTime = workDayService.getStartWorkOf(workDay) == null
+                ? project.getWorkStarted()
+                : workDayService.getStartWorkOf(workDay);
+        return new TimeModel(0, 0, arrivalTime, 0);
     }
 
     @Override
-    public void saveEndWorkTime(String userToken, Long projectId) {
+    public TimeModel saveEndWorkTime(String userToken, Long projectId) {
         User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = getById(projectId).orElseThrow(NoSuchElementException::new);
 
@@ -132,6 +136,10 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         workDayService.save(workDay);
 
         workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), workDay));
+
+        int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
+        double downtimePercent = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
+        return new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), downtimePercent);
     }
 
     @Override
@@ -158,7 +166,10 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
 
         int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
         double downtimePercent = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
-        return new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), downtimePercent);
+        LocalDateTime arrivalTime = workDayService.getStartWorkOf(workDay) == null
+                ? project.getWorkStarted()
+                : workDayService.getStartWorkOf(workDay);
+        return new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), arrivalTime, downtimePercent);
     }
 
 
@@ -221,7 +232,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         double downtimePercent = calculateIdlePercent(totalWorkSeconds, currentMonthIdleSeconds);
         WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(project.getUser(), project, LocalDate.now())
                                         .orElseGet(WorkDay::new);
-        LocalDateTime arrivalTime = workDayService.getStartWorkOf(workDay);
+        LocalDateTime arrivalTime = workDayService.getStartWorkOf(workDay.isNew() ? null : workDay);
         projectModel.setProjectTime(new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), arrivalTime, downtimePercent));
 
         return projectModel;

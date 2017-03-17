@@ -10,9 +10,9 @@ import java.util.Set;
 
 public interface ProjectService extends GeneralEntityService<Project> {
 
-    void saveStartWorkTime(String userToken, Long projectId);
+    TimeModel saveStartWorkTime(String userToken, Long projectId);
 
-    void saveEndWorkTime(String userToken, Long projectId);
+    TimeModel saveEndWorkTime(String userToken, Long projectId);
 
     TimeModel saveCheckpointTime(String userToken, Long projectId, Integer idleTime);
 

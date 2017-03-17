@@ -23,8 +23,6 @@ import ua.softgroup.matrix.server.service.WorkDayService;
 
 import java.util.NoSuchElementException;
 
-import static ua.softgroup.matrix.api.model.responsemodels.ResponseStatus.SUCCESS;
-
 @SuppressWarnings("rawtypes")
 @Service
 public class MatrixServerApiImpl implements MatrixServerApi {
@@ -65,7 +63,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 projectService.getUserActiveProjects(token),
                 clientSettings.getStartDowntimeAfterInMinutes(),
                 clientSettings.getScreenshotUpdateFrequentlyInMinutes(),
-                10); //TODO implement checkPointFrequency
+                120); //TODO implement checkPointFrequency
         return new ResponseModel<>(initializeModel);
     }
 
@@ -88,16 +86,19 @@ public class MatrixServerApiImpl implements MatrixServerApi {
 
     @Override
     public ResponseModel startWork(RequestModel requestModel) {
-        projectService.saveStartWorkTime(requestModel.getToken(), requestModel.getProjectId());
+        String token = requestModel.getToken();
+        Long projectId = requestModel.getProjectId();
 
-        return new ResponseModel<>(SUCCESS);
+        TimeModel timeModel = projectService.saveStartWorkTime(token, projectId);
+        return new ResponseModel<>(timeModel);
     }
 
     @Override
     public ResponseModel endWork(RequestModel requestModel) {
-        projectService.saveEndWorkTime(requestModel.getToken(), requestModel.getProjectId());
+        String token = requestModel.getToken();
+        Long projectId = requestModel.getProjectId();
 
-        return new ResponseModel<>(SUCCESS);
+        return new ResponseModel<>(projectService.saveEndWorkTime(token, projectId));
     }
 
     @Override
