@@ -16,8 +16,11 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.DayJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.ExecutorJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.ExecutorReportJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.SummaryDayJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.SummaryJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.SummaryProjectJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.WorkPeriod;
 
 import javax.validation.constraints.Min;
@@ -60,6 +63,67 @@ public class SummaryEndpoint {
         this.projectService = projectService;
         this.userService = userService;
         this.workDayService = workDayService;
+    }
+
+    @GET
+    @Path("/projects/{projectId}/")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public Response getEntityWorkingDays(@PathParam("projectId") Long projectId,
+                                         @QueryParam("fromDate") String fromDate,
+                                         @QueryParam("toDate") String toDate) {
+
+        LocalDate from = LocalDate.parse(fromDate, formatter);
+        LocalDate to = LocalDate.parse(toDate, formatter);
+        if (to.isAfter(LocalDate.now())) {
+            to = LocalDate.now().plusDays(1);
+        }
+
+        List<SummaryProjectJson> result = Stream.iterate(from, date -> date.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(from, to))
+                .map(localDate -> workDayService.getAllWorkDaysOf(projectId, localDate))
+                .filter(not(Set::isEmpty))
+                .map(this::createProjectSummary)
+                .collect(Collectors.toList());
+
+        return Response.ok(result).build();
+    }
+
+    private SummaryProjectJson createProjectSummary(Set<WorkDay> workDays) {
+        SummaryProjectJson summaryProjectJson = new SummaryProjectJson();
+        LocalDate date = workDays.stream()
+                                 .map(WorkDay::getDate)
+                                 .findFirst()
+                                 .orElse(null);
+        summaryProjectJson.setDate(date);
+        int totalWorkSeconds = workDays.stream()
+                                       .mapToInt(WorkDay::getWorkSeconds)
+                                       .sum();
+        summaryProjectJson.setTotalWorkSeconds(totalWorkSeconds);
+        int totalIdleSeconds = workDays.stream()
+                                       .mapToInt(WorkDay::getIdleSeconds)
+                                       .sum();
+        summaryProjectJson.setTotalIdleSeconds(totalIdleSeconds);
+        summaryProjectJson.setTotalIdlePercentage(calculateIdlePercent(totalWorkSeconds, totalIdleSeconds));
+        summaryProjectJson.setExecutors(workDays.stream()
+                .map(workDay -> new ExecutorJson(
+                        workDay.getAuthor().getId(),
+                        workDayService.getStartWorkOf(workDay).toLocalTime().toString(),
+                        workDayService.getEndWorkOf(workDay).toLocalTime().toString(),
+                        workDay.getWorkSeconds(),
+                        workDay.getIdleSeconds(),
+                        calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds()),
+                        new ExecutorReportJson(
+                                workDay.getId(),
+                                workDay.isChecked(),
+                                workDay.getChecker() == null ? 0 : workDay.getChecker().getId(),
+                                workDay.getCoefficient(),
+                                workDay.getReportText(),
+                                workDay.getProject().getRate(),                 //TODO move rate to work day
+                                workDay.getProject().getRateCurrencyId())))     //TODO move currency to work day
+                .collect(Collectors.toSet()));
+
+        return summaryProjectJson;
     }
 
     @GET

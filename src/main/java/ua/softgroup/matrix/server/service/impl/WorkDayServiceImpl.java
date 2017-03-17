@@ -89,6 +89,16 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
+    public Set<WorkDay> getAllWorkDaysOf(Long projectId, LocalDate date) {
+        return getRepository().findByProjectIdAndDate(projectId, date);
+    }
+
+    @Override
+    public Set<WorkDay> getAllWorkDaysOf(Long projectId, LocalDate from, LocalDate to) {
+        return getRepository().findByProjectIdAndDateBetween(projectId, from, to);
+    }
+
+    @Override
     public Set<ReportModel> getWorkDaysOf(String userToken, Long projectId) {
         User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
         Project project = Optional.ofNullable(projectRepository.findOne(projectId))

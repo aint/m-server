@@ -16,6 +16,10 @@ public interface WorkDayRepository extends CrudRepository<WorkDay, Long> {
 
     Set<WorkDay> findByAuthorAndDate(User author, LocalDate date);
 
+    Set<WorkDay> findByProjectIdAndDate(Long projectId, LocalDate date);
+
+    Set<WorkDay> findByProjectIdAndDateBetween(Long projectId, LocalDate from, LocalDate to);
+
     WorkDay findByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate);
 
     @Query(value = "SELECT sum(work_seconds) FROM work_day WHERE project_id = :projectId and author_id = :userId", nativeQuery = true)

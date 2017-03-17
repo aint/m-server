@@ -27,6 +27,10 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
     Set<WorkDay> getAllWorkDaysOf(User user, LocalDate localDate);
 
+    Set<WorkDay> getAllWorkDaysOf(Long projectId, LocalDate date);
+
+    Set<WorkDay> getAllWorkDaysOf(Long projectId, LocalDate from, LocalDate to);
+
     Set<ReportModel> getWorkDaysOf(String userToken, Long projectId);
 
     ResponseStatus saveReportOrUpdate(String userToken, Long projectId, ReportModel reportModel);
