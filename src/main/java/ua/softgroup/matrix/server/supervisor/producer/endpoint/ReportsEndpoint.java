@@ -18,6 +18,7 @@ import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.ReportResponse;
 
 import javax.servlet.ServletContext;
 import javax.validation.constraints.DecimalMin;
@@ -32,9 +33,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +53,8 @@ import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthent
 public class ReportsEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(ReportsEndpoint.class);
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
     private final ProjectService projectService;
     private final UserService userService;
     private final WorkDayService workDayService;
@@ -59,6 +65,85 @@ public class ReportsEndpoint {
         this.userService = userService;
         this.workDayService = workDayService;
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getReports(@QueryParam("fromDate") String fromDate,
+                               @QueryParam("toDate") String toDate) {
+
+        LocalDate from = LocalDate.parse(fromDate, formatter);
+        LocalDate to = LocalDate.parse(toDate, formatter);
+
+        List<ReportResponse> reports = workDayService.getWorkDaysBetween(from, to).stream()
+                .map(this::convertWorkDayToReportJson)
+                .collect(Collectors.toList());
+
+        return Response.ok(reports).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getReport(@Min(0) @PathParam("id") Long id) {
+        WorkDay workDay = workDayService.getById(id)
+                                        .orElseThrow(NotFoundException::new);
+
+        return Response.ok(convertWorkDayToReportJson(workDay)).build();
+    }
+
+    private ReportResponse convertWorkDayToReportJson(WorkDay workDay) {
+        return new ReportResponse(
+                workDay.getId(),
+                workDay.getDate(),
+                workDay.getReportUpdated(),
+                workDay.getAuthor().getId(),
+                workDay.getProject().getId(),
+                workDay.getChecker().getId(),
+                workDay.isChecked(),
+                workDay.getCoefficient(),
+                workDay.getReportText(),
+                workDay.getWorkSeconds(),
+                workDay.getProject().getRate(),
+                workDay.getProject().getRateCurrencyId()
+        );
+    }
+
+    @GET
+    @Path("/projects")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getReportsOfProjects(@QueryParam("projectIds") List<Long> projectIds,
+                                         @QueryParam("fromDate") String fromDate,
+                                         @QueryParam("toDate") String toDate) {
+
+        LocalDate from = LocalDate.parse(fromDate, formatter);
+        LocalDate to = LocalDate.parse(toDate, formatter);
+
+        List<ReportResponse> reports = projectIds.stream()
+                .flatMap(projectId -> workDayService.getProjectWorkDaysBetween(projectId, from, to).stream())
+                .map(this::convertWorkDayToReportJson)
+                .collect(Collectors.toList());
+
+        return Response.ok(reports).build();
+    }
+
+    @GET
+    @Path("/users")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getReportsOfUsers(@QueryParam("usersIds") List<Long> usersIds,
+                                      @QueryParam("fromDate") String fromDate,
+                                      @QueryParam("toDate") String toDate) {
+
+        LocalDate from = LocalDate.parse(fromDate, formatter);
+        LocalDate to = LocalDate.parse(toDate, formatter);
+
+        List<ReportResponse> reports = usersIds.stream()
+                .flatMap(userId -> workDayService.getUserWorkDaysBetween(userId, from, to).stream())
+                .map(this::convertWorkDayToReportJson)
+                .collect(Collectors.toList());
+
+        return Response.ok(reports).build();
+    }
+
 
     @GET
     @Path("/{user_id}/{project_id}")

@@ -94,8 +94,18 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
-    public Set<WorkDay> getAllWorkDaysOf(Long projectId, LocalDate from, LocalDate to) {
-        return getRepository().findByProjectIdAndDateBetween(projectId, from, to);
+    public Set<WorkDay> getUserWorkDaysBetween(Long userId, LocalDate from, LocalDate to) {
+        return getRepository().findByAuthorIdAndDateBetween(userId, from, to);
+    }
+
+    @Override
+    public Set<WorkDay> getWorkDaysBetween(LocalDate from, LocalDate to) {
+        return getRepository().findByDateBetween(from, to);
+    }
+
+    @Override
+    public Set<WorkDay> getProjectWorkDaysBetween(Long projectSupervisorId, LocalDate from, LocalDate to) {
+        return getRepository().findByProjectSupervisorIdAndDateBetween(projectSupervisorId, from, to);
     }
 
     @Override
