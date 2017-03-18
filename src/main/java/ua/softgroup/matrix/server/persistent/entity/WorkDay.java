@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -55,7 +56,7 @@ public class WorkDay extends AbstractEntity<Long> {
     private Project project;
 
     @OneToMany(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<WorkTimePeriod> workTimePeriods;
+    private Set<WorkTimePeriod> workTimePeriods = new HashSet<>();
 
     public WorkDay() {
     }

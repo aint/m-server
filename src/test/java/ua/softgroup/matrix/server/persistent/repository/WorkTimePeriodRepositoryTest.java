@@ -15,7 +15,7 @@ import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import java.time.LocalDateTime;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -28,9 +28,9 @@ public class WorkTimePeriodRepositoryTest {
     private static final int WORK_PERIOD_COUNT = 10;
 
     @Autowired
-    private WorkTimePeriodRepository workTimePeriodRepository;
+    WorkTimePeriodRepository workTimePeriodRepository;
     @Autowired
-    private TestEntityManager entityManager;
+    TestEntityManager entityManager;
 
     private WorkDay workDay;
     private LocalDateTime startTime;
@@ -45,7 +45,8 @@ public class WorkTimePeriodRepositoryTest {
         IntStream.rangeClosed(0, WORK_PERIOD_COUNT - 1)
                  .forEach(i -> entityManager.persist(new WorkTimePeriod(startTime.plusMinutes(i),
                                                                         startTime.plusMinutes(i * 2),
-                                                                        workDay)));
+                                                                        workDay))
+                 );
     }
 
     @After
@@ -56,7 +57,20 @@ public class WorkTimePeriodRepositoryTest {
     @Test
     public void findTopByWorkDayOrderStartDesc() throws Exception {
         WorkTimePeriod minWorkPeriod = workTimePeriodRepository.findTopByWorkDayOrderByStartAsc(workDay);
-        assertTrue(minWorkPeriod.getStart().equals(startTime));
+        assertThat(minWorkPeriod.getStart()).isEqualTo(startTime);
+    }
+
+//    @Test
+    public void findTopByWorkDayOrderByEndDesc() throws Exception {
+        WorkTimePeriod minWorkPeriod = workTimePeriodRepository.findTopByWorkDayOrderByEndDesc(workDay);
+
+        LocalDateTime dateTime = workDay.getWorkTimePeriods().stream()
+                .map(WorkTimePeriod::getEnd)
+                .peek(System.out::println)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+
+        assertThat(minWorkPeriod.getEnd()).isEqualTo(dateTime);
     }
 
 }
