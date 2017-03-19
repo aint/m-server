@@ -144,6 +144,104 @@ public class ReportsEndpoint {
         return Response.ok(reports).build();
     }
 
+    @POST
+    @Path("/check")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Checks all unchecked reports (with default coefficient)")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "When all unchecked reports has been successfully checked"),
+            @ApiResponse(code = 404, message = "When principal not found", response = ErrorJson.class)
+    })
+    public Response checkAllReports(@Context ServletContext context) {
+
+        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
+
+        workDayService.getAllNotCheckedWorkDays()
+                .forEach(workDay -> {
+                    workDay.setChecker(principal);
+                    workDay.setChecked(true);
+                    workDayService.save(workDay);
+                });
+
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/check/{reportId}")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Checks a report and set coefficient")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "When report has been successfully checked"),
+            @ApiResponse(code = 400, message = "When report id or coefficient < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When report or principal not found", response = ErrorJson.class)
+    })
+    public Response checkReport(@Context ServletContext context,
+                                @Min(0) @PathParam("reportId") Long reportId,
+                                @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
+
+        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
+        WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
+        workDay.setChecker(principal);
+        workDay.setChecked(true);
+        workDay.setCoefficient(coefficient);
+        workDayService.save(workDay);
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/check/users")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Checks all unchecked reports (with default coefficient) of the specified users")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "When reports of the specified users has been successfully checked"),
+            @ApiResponse(code = 404, message = "When principal not found", response = ErrorJson.class)
+    })
+    public Response checkReportsOfUsers(@Context ServletContext context,
+                                        @FormParam("userIds") List<Long> userIds) {
+
+        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
+
+        userIds.stream()
+                .flatMap(userId -> workDayService.getUserNotCheckedWorkDays(userId).stream())
+                .forEach(workDay -> {
+                    workDay.setChecker(principal);
+                    workDay.setChecked(true);
+                    workDayService.save(workDay);
+                });
+
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/check/projects")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Checks all unchecked reports (with default coefficient) of the specified projects")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "When reports of the specified projects has been successfully checked"),
+            @ApiResponse(code = 404, message = "When principal not found", response = ErrorJson.class)
+    })
+    public Response checkReportsOfProject(@Context ServletContext context,
+                                          @FormParam("projectIds") List<Long> usersIds) {
+
+        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
+
+        usersIds.stream()
+                .flatMap(projectId -> workDayService.getProjectNotCheckedWorkDays(projectId).stream())
+                .forEach(workDay -> {
+                    workDay.setChecker(principal);
+                    workDay.setChecked(true);
+                    workDayService.save(workDay);
+                });
+
+        return Response.ok().build();
+    }
 
     @GET
     @Path("/{user_id}/{project_id}")
@@ -187,32 +285,6 @@ public class ReportsEndpoint {
         LOG.info("PUT JSON {}", reportJson);
         WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
         workDay.setReportText(reportJson.getTitle());
-        return Response.ok(workDayService.convertEntityToJson(workDayService.save(workDay))).build();
-    }
-
-    @POST
-    @Path("/{report_id}/check")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @JsonView(JsonViewType.OUT.class)
-    @ApiOperation(
-            value = "Checks a report and set coefficient",
-            response = ReportJson.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 400, message = "When report id or coefficient < 0", response = ErrorJson.class),
-            @ApiResponse(code = 404, message = "When report or principal not found", response = ErrorJson.class)
-    })
-    public Response checkReport(@Context ServletContext context,
-                                @Min(0) @PathParam("report_id") Long reportId,
-                                @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
-
-        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
-        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
-        WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
-        workDay.setChecker(principal);
-        workDay.setChecked(true);
-        workDay.setCoefficient(coefficient);
         return Response.ok(workDayService.convertEntityToJson(workDayService.save(workDay))).build();
     }
 

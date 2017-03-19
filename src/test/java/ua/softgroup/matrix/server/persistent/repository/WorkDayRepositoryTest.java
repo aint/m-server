@@ -65,6 +65,7 @@ public class WorkDayRepositoryTest {
                      entityManager.persist(workDay);
                      workDay.setIdleSeconds(i + 1);
                      workDay.setDate(localDate);
+                     workDay.setChecked(i % 2 == 0);
                      entityManager.persist(workDay);
                  });
     }
@@ -133,4 +134,13 @@ public class WorkDayRepositoryTest {
         assertThat(workDays).hasSize(dayCounts);
     }
 
+    @Test
+    public void findByCheckedFalse() throws Exception {
+        int count = (int) IntStream.rangeClosed(1, WORK_DAYS_COUNT)
+                                   .filter(i -> i % 2 == 0)
+                                   .count();
+
+        Set<WorkDay> workDays = workDayRepository.findByCheckedFalse();
+        assertThat(workDays).hasSize(count);
+    }
 }

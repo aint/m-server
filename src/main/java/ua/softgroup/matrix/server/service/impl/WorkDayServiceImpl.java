@@ -99,6 +99,21 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
+    public Set<WorkDay> getUserNotCheckedWorkDays(Long userId) {
+        return getRepository().findByAuthorIdAndCheckedFalse(userId);
+    }
+
+    @Override
+    public Set<WorkDay> getProjectNotCheckedWorkDays(Long projectSupervisorId) {
+        return getRepository().findByProjectSupervisorIdAndCheckedFalse(projectSupervisorId);
+    }
+
+    @Override
+    public Set<WorkDay> getAllNotCheckedWorkDays() {
+        return getRepository().findByCheckedFalse();
+    }
+
+    @Override
     public Set<WorkDay> getWorkDaysBetween(LocalDate from, LocalDate to) {
         return getRepository().findByDateBetween(from, to);
     }
