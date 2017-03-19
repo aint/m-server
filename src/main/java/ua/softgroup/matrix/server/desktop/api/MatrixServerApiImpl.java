@@ -61,9 +61,9 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         InitializeModel initializeModel = new InitializeModel(
                 token,
                 projectService.getUserActiveProjects(token),
-                clientSettings.getStartDowntimeAfterInMinutes(),
-                clientSettings.getScreenshotUpdateFrequentlyInMinutes(),
-                120); //TODO implement checkPointFrequency
+                clientSettings.getStartIdleAfterSeconds(),
+                clientSettings.getScreenshotFrequentlyInSeconds(),
+                clientSettings.getCheckpointFrequentlyInSeconds());
         return new ResponseModel<>(initializeModel);
     }
 

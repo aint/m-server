@@ -8,10 +8,13 @@ public class ClientSettings extends AbstractEntity<Long> {
     private static final long serialVersionUID = -4678740217747959072L;
 
     @Column
-    private Integer screenshotUpdateFrequentlyInMinutes;
+    private Integer checkpointFrequentlyInSeconds;
 
     @Column
-    private Integer startDowntimeAfterInMinutes;
+    private Integer screenshotFrequentlyInSeconds;
+
+    @Column
+    private Integer startIdleAfterSeconds;
 
     @Column
     private Integer reportEditablePeriodInDays;
@@ -19,28 +22,36 @@ public class ClientSettings extends AbstractEntity<Long> {
     public ClientSettings() {
     }
 
-    public ClientSettings(Integer screenshotUpdateFrequentlyInMinutes,
-                          Integer startDowntimeAfterInMinutes,
-                          Integer reportEditablePeriodInDays) {
-        this.screenshotUpdateFrequentlyInMinutes = screenshotUpdateFrequentlyInMinutes;
-        this.startDowntimeAfterInMinutes = startDowntimeAfterInMinutes;
+    public ClientSettings(Integer checkpointFrequentlyInSeconds, Integer screenshotFrequentlyInSeconds,
+                          Integer startIdleAfterSeconds, Integer reportEditablePeriodInDays) {
+        this.checkpointFrequentlyInSeconds = checkpointFrequentlyInSeconds;
+        this.screenshotFrequentlyInSeconds = screenshotFrequentlyInSeconds;
+        this.startIdleAfterSeconds = startIdleAfterSeconds;
         this.reportEditablePeriodInDays = reportEditablePeriodInDays;
     }
 
-    public Integer getScreenshotUpdateFrequentlyInMinutes() {
-        return screenshotUpdateFrequentlyInMinutes;
+    public Integer getCheckpointFrequentlyInSeconds() {
+        return checkpointFrequentlyInSeconds;
     }
 
-    public void setScreenshotUpdateFrequentlyInMinutes(Integer screenshotUpdateFrequentlyInMinutes) {
-        this.screenshotUpdateFrequentlyInMinutes = screenshotUpdateFrequentlyInMinutes;
+    public void setCheckpointFrequentlyInSeconds(Integer checkpointFrequentlyInSeconds) {
+        this.checkpointFrequentlyInSeconds = checkpointFrequentlyInSeconds;
     }
 
-    public Integer getStartDowntimeAfterInMinutes() {
-        return startDowntimeAfterInMinutes;
+    public Integer getScreenshotFrequentlyInSeconds() {
+        return screenshotFrequentlyInSeconds;
     }
 
-    public void setStartDowntimeAfterInMinutes(Integer startDowntimeAfterInMinutes) {
-        this.startDowntimeAfterInMinutes = startDowntimeAfterInMinutes;
+    public void setScreenshotFrequentlyInSeconds(Integer screenshotFrequentlyInSeconds) {
+        this.screenshotFrequentlyInSeconds = screenshotFrequentlyInSeconds;
+    }
+
+    public Integer getStartIdleAfterSeconds() {
+        return startIdleAfterSeconds;
+    }
+
+    public void setStartIdleAfterSeconds(Integer startIdleAfterSeconds) {
+        this.startIdleAfterSeconds = startIdleAfterSeconds;
     }
 
     public Integer getReportEditablePeriodInDays() {
@@ -54,9 +65,9 @@ public class ClientSettings extends AbstractEntity<Long> {
     @Override
     public String toString() {
         return "ClientSettings{" +
-                "id=" + super.getId() +
-                ", screenshotUpdateFrequentlyInMinutes=" + screenshotUpdateFrequentlyInMinutes +
-                ", startDowntimeAfterInMinutes=" + startDowntimeAfterInMinutes +
+                "checkpointFrequentlyInSeconds=" + checkpointFrequentlyInSeconds +
+                ", screenshotFrequentlyInSeconds=" + screenshotFrequentlyInSeconds +
+                ", startIdleAfterSeconds=" + startIdleAfterSeconds +
                 ", reportEditablePeriodInDays=" + reportEditablePeriodInDays +
                 '}';
     }
