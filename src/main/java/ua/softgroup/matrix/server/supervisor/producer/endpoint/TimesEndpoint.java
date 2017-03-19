@@ -19,7 +19,9 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
+import ua.softgroup.matrix.server.supervisor.producer.json.UserProjectTimeResponse;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.UserTimeResponse;
 
 import javax.servlet.ServletContext;
 import javax.validation.constraints.Min;
@@ -33,9 +35,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
@@ -60,6 +63,64 @@ public class TimesEndpoint {
         this.projectService = projectService;
         this.userService = userService;
         this.workDayService = workDayService;
+    }
+
+    @GET
+    @Path("/{projectId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Returns users' work time stats of the specified project",
+            response = UserProjectTimeResponse.class,
+            responseContainer = "List"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When project id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When project not found", response = ErrorJson.class)
+    })
+    public Response getProjectWorkTime(@Min(0) @PathParam("projectId") Long projectId) {
+        List<UserTimeResponse> timeList = projectService.getBySupervisorId(projectId).stream()
+                .map(project -> {
+                    User user = project.getUser();
+                    int workSeconds = workDayService.getTotalWorkSeconds(user, project);
+                    int idleSeconds = workDayService.getCurrentMonthIdleSeconds(user, project); //TODO return total idle?
+                    double idlePercentage = calculatePercent(workSeconds, idleSeconds);
+                    return new UserTimeResponse(project.getId(), workSeconds, idleSeconds, idlePercentage);
+                })
+                .collect(Collectors.toList());
+
+        return Response.ok(timeList).build();
+    }
+
+    @GET
+    @Path("/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Returns work time stats of the user",
+            response = UserTimeResponse.class,
+            responseContainer = "List"
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "When user id < 0", response = ErrorJson.class),
+            @ApiResponse(code = 404, message = "When user not found", response = ErrorJson.class)
+    })
+    public Response getUserWorkTime(@Min(0) @PathParam("userId") Long userId) {
+        List<UserTimeResponse> timeList = projectService.getUserActiveProjects(userId).stream()
+                .map(project -> {
+                    User user = project.getUser();
+                    int workSeconds = workDayService.getTotalWorkSeconds(user, project);
+                    int idleSeconds = workDayService.getCurrentMonthIdleSeconds(user, project); //TODO return total idle?
+                    double idlePercentage = calculatePercent(workSeconds, idleSeconds);
+                    return new UserTimeResponse(user.getId(), workSeconds, idleSeconds, idlePercentage);
+                })
+                .collect(Collectors.toList());
+
+        return Response.ok(timeList).build();
+    }
+
+    private double calculatePercent(int workSeconds, int idleSeconds) {
+        return idleSeconds != 0
+                ? idleSeconds / workSeconds * 100
+                : 0.0;
     }
 
     @GET

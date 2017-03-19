@@ -20,4 +20,8 @@ public interface ProjectService extends GeneralEntityService<Project> {
 
     Optional<Project> getBySupervisorIdAndUser(Long supervisorId, User user);
 
+    Set<Project> getBySupervisorId(Long supervisorId);
+
+    Set<Project> getUserActiveProjects(Long userId);
+
 }

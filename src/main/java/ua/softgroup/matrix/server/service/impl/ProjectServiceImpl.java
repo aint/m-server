@@ -202,6 +202,16 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         return Optional.ofNullable(getRepository().findBySupervisorIdAndUser(supervisorId, user));
     }
 
+    @Override
+    public Set<Project> getBySupervisorId(Long supervisorId) {
+        return getRepository().findBySupervisorId(supervisorId);
+    }
+
+    @Override
+    public Set<Project> getUserActiveProjects(Long userId) {
+        return getRepository().findByUserId(userId);
+    }
+
     private Project addUserAndSaveProject(ProjectJson projectJson, User user) {
         Project project = getBySupervisorIdAndUser(projectJson.getId(), user).orElseGet(Project::new);
         project.setSupervisorId(projectJson.getId());
