@@ -1,6 +1,5 @@
-package ua.softgroup.matrix.server.supervisor.producer.endpoint;
+package ua.softgroup.matrix.server.supervisor.producer.resources;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -9,15 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
-import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
-import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.ReportResponse;
 
 import javax.servlet.ServletContext;
@@ -29,7 +25,6 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -50,8 +45,8 @@ import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthent
 @Component
 @Path("/reports")
 @Api("/reports")
-public class ReportsEndpoint {
-    private static final Logger LOG = LoggerFactory.getLogger(ReportsEndpoint.class);
+public class ReportResource {
+    private static final Logger LOG = LoggerFactory.getLogger(ReportResource.class);
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -60,14 +55,32 @@ public class ReportsEndpoint {
     private final WorkDayService workDayService;
 
     @Autowired
-    public ReportsEndpoint(ProjectService projectService, UserService userService, WorkDayService workDayService) {
+    public ReportResource(ProjectService projectService, UserService userService, WorkDayService workDayService) {
         this.projectService = projectService;
         this.userService = userService;
         this.workDayService = workDayService;
     }
 
     @GET
+    @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "9. getReport - метод для отримання звіту користувача",
+            response = ReportResponse.class)
+    public Response getReport(@Min(0) @PathParam("id") Long id) {
+        WorkDay workDay = workDayService.getById(id)
+                .orElseThrow(NotFoundException::new);
+
+        return Response.ok(convertWorkDayToReportJson(workDay)).build();
+    }
+
+    @GET
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "12. getAllReports - метод для отримання всіх звітів",
+            response = ReportResponse.class,
+            responseContainer = "List")
     public Response getReports(@QueryParam("fromDate") String fromDate,
                                @QueryParam("toDate") String toDate) {
 
@@ -82,35 +95,13 @@ public class ReportsEndpoint {
     }
 
     @GET
-    @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getReport(@Min(0) @PathParam("id") Long id) {
-        WorkDay workDay = workDayService.getById(id)
-                                        .orElseThrow(NotFoundException::new);
-
-        return Response.ok(convertWorkDayToReportJson(workDay)).build();
-    }
-
-    private ReportResponse convertWorkDayToReportJson(WorkDay workDay) {
-        return new ReportResponse(
-                workDay.getId(),
-                workDay.getDate(),
-                workDay.getReportUpdated(),
-                workDay.getAuthor().getId(),
-                workDay.getProject().getId(),
-                workDay.getChecker().getId(),
-                workDay.isChecked(),
-                workDay.getCoefficient(),
-                workDay.getReportText(),
-                workDay.getWorkSeconds(),
-                workDay.getProject().getRate(),
-                workDay.getProject().getRateCurrencyId()
-        );
-    }
-
-    @GET
     @Path("/projects")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "11. getEntitiesReports - метод для отримання звітів",
+            response = ReportResponse.class,
+            responseContainer = "List")
     public Response getReportsOfProjects(@QueryParam("projectIds") List<Long> projectIds,
                                          @QueryParam("fromDate") String fromDate,
                                          @QueryParam("toDate") String toDate) {
@@ -128,15 +119,20 @@ public class ReportsEndpoint {
 
     @GET
     @Path("/users")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getReportsOfUsers(@QueryParam("usersIds") List<Long> usersIds,
+    @ApiOperation(
+            value = "10. getUsersReports - метод для отримання звітів користувачів",
+            response = ReportResponse.class,
+            responseContainer = "List")
+    public Response getReportsOfUsers(@QueryParam("userIds") List<Long> userIds,
                                       @QueryParam("fromDate") String fromDate,
                                       @QueryParam("toDate") String toDate) {
 
         LocalDate from = LocalDate.parse(fromDate, formatter);
         LocalDate to = LocalDate.parse(toDate, formatter);
 
-        List<ReportResponse> reports = usersIds.stream()
+        List<ReportResponse> reports = userIds.stream()
                 .flatMap(userId -> workDayService.getUserWorkDaysBetween(userId, from, to).stream())
                 .map(this::convertWorkDayToReportJson)
                 .collect(Collectors.toList());
@@ -144,10 +140,28 @@ public class ReportsEndpoint {
         return Response.ok(reports).build();
     }
 
+    private ReportResponse convertWorkDayToReportJson(WorkDay workDay) {
+        return new ReportResponse(
+                workDay.getId(),
+                workDay.getDate(),
+                workDay.getReportUpdated(),
+                workDay.getAuthor().getId(),
+                workDay.getProject().getId(),
+                workDay.getChecker() == null ? 0 : workDay.getChecker().getId(),
+                workDay.isChecked(),
+                workDay.getCoefficient(),
+                workDay.getReportText(),
+                workDay.getWorkSeconds(),
+                workDay.getProject().getRate(),
+                workDay.getProject().getRateCurrencyId()
+        );
+    }
+
     @POST
     @Path("/check")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks all unchecked reports (with default coefficient)")
+    @ApiOperation(
+            value = "16. checkAllReports - перевірити всі звіти\nChecks all unchecked reports (with default coefficient)")
     @ApiResponses({
             @ApiResponse(code = 200, message = "When all unchecked reports has been successfully checked"),
             @ApiResponse(code = 404, message = "When principal not found", response = ErrorJson.class)
@@ -171,7 +185,7 @@ public class ReportsEndpoint {
     @Path("/check/{reportId}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks a report and set coefficient")
+    @ApiOperation(value = "13. checkSingleReport - перевірити звіт\nChecks a report and set coefficient")
     @ApiResponses({
             @ApiResponse(code = 200, message = "When report has been successfully checked"),
             @ApiResponse(code = 400, message = "When report id or coefficient < 0", response = ErrorJson.class),
@@ -193,15 +207,15 @@ public class ReportsEndpoint {
 
     @POST
     @Path("/check/users")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks all unchecked reports (with default coefficient) of the specified users")
+    @ApiOperation(value = "14. checkAllUsersReports - перевірити звіти вказаних користувачів\nChecks all unchecked reports (with default coefficient) of the specified users")
     @ApiResponses({
             @ApiResponse(code = 200, message = "When reports of the specified users has been successfully checked"),
             @ApiResponse(code = 404, message = "When principal not found", response = ErrorJson.class)
     })
     public Response checkReportsOfUsers(@Context ServletContext context,
-                                        @FormParam("userIds") List<Long> userIds) {
+                                        List<Long> userIds) {
 
         Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
@@ -219,15 +233,15 @@ public class ReportsEndpoint {
 
     @POST
     @Path("/check/projects")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks all unchecked reports (with default coefficient) of the specified projects")
+    @ApiOperation(value = "15. checkAllEntitiesReports - перевірити звіти вказаних проектів\nChecks all unchecked reports (with default coefficient) of the specified projects")
     @ApiResponses({
             @ApiResponse(code = 200, message = "When reports of the specified projects has been successfully checked"),
             @ApiResponse(code = 404, message = "When principal not found", response = ErrorJson.class)
     })
     public Response checkReportsOfProject(@Context ServletContext context,
-                                          @FormParam("projectIds") List<Long> usersIds) {
+                                          List<Long> usersIds) {
 
         Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
@@ -242,51 +256,5 @@ public class ReportsEndpoint {
 
         return Response.ok().build();
     }
-
-    @GET
-    @Path("/{user_id}/{project_id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @JsonView(JsonViewType.OUT.class)
-    @ApiOperation(
-            value = "Returns reports of the user's project",
-            response = ReportJson.class,
-            responseContainer = "List"
-    )
-    @ApiResponses({
-            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
-            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
-    })
-    public Response getReports(@Min(0) @PathParam("user_id") Long userId,
-                               @Min(0) @PathParam("project_id") Long projectId) {
-
-        Project project = projectService.getById(projectId).orElseThrow(NotFoundException::new);
-        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        List<ReportJson> reports = workDayService.getAllWorkDaysOf(user, project).stream()
-                .map(workDayService::convertEntityToJson)
-                .collect(Collectors.toList());
-        return Response.ok(reports).build();
-    }
-
-    @PUT
-    @Path("/{report_id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            value = "Update a report by id",
-            notes = "Showing not relevant request json due to Swagger bug",
-            response = ReportJson.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 400, message = "When report id < 0", response = ErrorJson.class),
-            @ApiResponse(code = 404, message = "When report not found", response = ErrorJson.class)
-    })
-    public Response updateReport(@Min(0) @PathParam("report_id") Long reportId,
-                                 @JsonView(JsonViewType.IN.class) ReportJson reportJson) {
-        LOG.info("PUT JSON {}", reportJson);
-        WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
-        workDay.setReportText(reportJson.getTitle());
-        return Response.ok(workDayService.convertEntityToJson(workDayService.save(workDay))).build();
-    }
-
 
 }

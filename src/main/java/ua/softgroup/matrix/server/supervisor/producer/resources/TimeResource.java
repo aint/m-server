@@ -1,4 +1,4 @@
-package ua.softgroup.matrix.server.supervisor.producer.endpoint;
+package ua.softgroup.matrix.server.supervisor.producer.resources;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
@@ -19,8 +19,8 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
-import ua.softgroup.matrix.server.supervisor.producer.json.UserProjectTimeResponse;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.UserProjectTimeResponse;
 import ua.softgroup.matrix.server.supervisor.producer.json.UserTimeResponse;
 
 import javax.servlet.ServletContext;
@@ -35,9 +35,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
@@ -48,8 +46,8 @@ import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthent
 @Component
 @Path("/times")
 @Api("times")
-public class TimesEndpoint {
-    private static final Logger LOG = LoggerFactory.getLogger(TimesEndpoint.class);
+public class TimeResource {
+    private static final Logger LOG = LoggerFactory.getLogger(TimeResource.class);
 
     private final ProjectService projectService;
     private final UserService userService;
@@ -59,18 +57,18 @@ public class TimesEndpoint {
     private TimeAuditRepository timeAuditRepository;
 
     @Autowired
-    public TimesEndpoint(ProjectService projectService, UserService userService, WorkDayService workDayService) {
+    public TimeResource(ProjectService projectService, UserService userService, WorkDayService workDayService) {
         this.projectService = projectService;
         this.userService = userService;
         this.workDayService = workDayService;
     }
 
     @GET
-    @Path("/{projectId}")
+    @Path("/projects/{projectId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
-            value = "Returns users' work time stats of the specified project",
-            response = UserProjectTimeResponse.class,
+            value = "17. getEntityCommonStatistic - метод для отримання загальної статистики по працівниках на проекті.\nReturns users' work time stats of the specified project",
+            response = UserTimeResponse.class,
             responseContainer = "List"
     )
     @ApiResponses({
@@ -84,7 +82,7 @@ public class TimesEndpoint {
                     int workSeconds = workDayService.getTotalWorkSeconds(user, project);
                     int idleSeconds = workDayService.getCurrentMonthIdleSeconds(user, project); //TODO return total idle?
                     double idlePercentage = calculatePercent(workSeconds, idleSeconds);
-                    return new UserTimeResponse(project.getId(), workSeconds, idleSeconds, idlePercentage);
+                    return new UserTimeResponse(user.getId(), workSeconds, idleSeconds, idlePercentage);
                 })
                 .collect(Collectors.toList());
 
@@ -92,11 +90,11 @@ public class TimesEndpoint {
     }
 
     @GET
-    @Path("/{userId}")
+    @Path("/users/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
-            value = "Returns work time stats of the user",
-            response = UserTimeResponse.class,
+            value = "6. getUserCommonStatistic - метод для отримання загальної статистики по роботі працівника.\nReturns work time stats of the user",
+            response = UserProjectTimeResponse.class,
             responseContainer = "List"
     )
     @ApiResponses({
@@ -104,13 +102,13 @@ public class TimesEndpoint {
             @ApiResponse(code = 404, message = "When user not found", response = ErrorJson.class)
     })
     public Response getUserWorkTime(@Min(0) @PathParam("userId") Long userId) {
-        List<UserTimeResponse> timeList = projectService.getUserActiveProjects(userId).stream()
+        List<UserProjectTimeResponse> timeList = projectService.getUserActiveProjects(userId).stream()
                 .map(project -> {
                     User user = project.getUser();
                     int workSeconds = workDayService.getTotalWorkSeconds(user, project);
                     int idleSeconds = workDayService.getCurrentMonthIdleSeconds(user, project); //TODO return total idle?
                     double idlePercentage = calculatePercent(workSeconds, idleSeconds);
-                    return new UserTimeResponse(user.getId(), workSeconds, idleSeconds, idlePercentage);
+                    return new UserProjectTimeResponse(project.getId(), workSeconds, idleSeconds, idlePercentage);
                 })
                 .collect(Collectors.toList());
 
@@ -121,30 +119,6 @@ public class TimesEndpoint {
         return idleSeconds != 0
                 ? idleSeconds / workSeconds * 100
                 : 0.0;
-    }
-
-    @GET
-    @Path("/{user_id}/{project_id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @JsonView(JsonViewType.OUT.class)
-    @ApiOperation(
-            value = "Returns a today/total work time of the user's project",
-            notes = "Showing not relevant response json due to Swagger bug",
-            response = TimeJson.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
-            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
-    })
-    public Response getWorkTime(@Min(0) @PathParam("user_id") Long userId,
-                                @Min(0) @PathParam("project_id") Long projectId) {
-
-        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
-        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(project.getUser(), project, LocalDate.now())
-                                        .orElseThrow(NoSuchElementException::new);
-        int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
-        return Response.ok(new TimeJson(workDay.getWorkSeconds(), totalWorkSeconds)).build();
     }
 
     @POST
