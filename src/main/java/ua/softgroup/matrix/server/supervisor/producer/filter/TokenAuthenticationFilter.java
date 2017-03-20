@@ -4,14 +4,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.token.TokenHelper;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -38,14 +42,14 @@ public class TokenAuthenticationFilter implements ContainerRequestFilter {
         if (SWAGGER_JSON.equals(requestContext.getUriInfo().getPath())) return;
         logIpAddress();
 
-//        String token = Optional.ofNullable(requestContext.getHeaderString(TOKEN))
-//                               .orElseThrow(() -> new NotAuthorizedException(new ErrorJson("Authorization header must be provided")));
-//
-//        if (!tokenHelper.validateToken(token)) {
-//            requestContext.abortWith(
-//                    Response.status(Status.FORBIDDEN).entity(new ErrorJson("Token is not valid")).build());
-//        }
-//        setPrincipalAttribute(token);
+        String token = Optional.ofNullable(requestContext.getHeaderString(TOKEN))
+                               .orElseThrow(() -> new NotAuthorizedException(new ErrorJson("Authorization header must be provided")));
+
+        if (!tokenHelper.validateToken(token)) {
+            requestContext.abortWith(
+                    Response.status(Response.Status.FORBIDDEN).entity(new ErrorJson("Token is not valid")).build());
+        }
+        setPrincipalAttribute(token);
     }
 
     private void setPrincipalAttribute(String token) {

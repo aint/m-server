@@ -241,12 +241,12 @@ public class ReportResource {
             @ApiResponse(code = 404, message = "When principal not found", response = ErrorJson.class)
     })
     public Response checkReportsOfProject(@Context ServletContext context,
-                                          List<Long> usersIds) {
+                                          List<Long> projectIds) {
 
         Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
 
-        usersIds.stream()
+        projectIds.stream()
                 .flatMap(projectId -> workDayService.getProjectNotCheckedWorkDays(projectId).stream())
                 .forEach(workDay -> {
                     workDay.setChecker(principal);
