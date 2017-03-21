@@ -44,13 +44,13 @@ public class WorkDay extends AbstractEntity<Long> {
     private boolean checked;
 
     @Column
+    private Long jailerId;
+
+    @Column
     private Double coefficient = 1.0;
 
     @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Tracking tracking;
-
-    @ManyToOne
-    private User checker;
 
     @ManyToOne
     private Project project;
@@ -133,6 +133,14 @@ public class WorkDay extends AbstractEntity<Long> {
         this.checked = checked;
     }
 
+    public Long getJailerId() {
+        return jailerId;
+    }
+
+    public void setJailerId(Long jailerId) {
+        this.jailerId = jailerId;
+    }
+
     public Double getCoefficient() {
         return coefficient;
     }
@@ -147,14 +155,6 @@ public class WorkDay extends AbstractEntity<Long> {
 
     public void setTracking(Tracking tracking) {
         this.tracking = tracking;
-    }
-
-    public User getChecker() {
-        return checker;
-    }
-
-    public void setChecker(User checker) {
-        this.checker = checker;
     }
 
     public Project getProject() {

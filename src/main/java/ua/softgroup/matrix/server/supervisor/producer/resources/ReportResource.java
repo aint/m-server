@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
@@ -147,7 +146,7 @@ public class ReportResource {
                 workDay.getReportUpdated(),
                 workDay.getAuthor().getId(),
                 workDay.getProject().getId(),
-                workDay.getChecker() == null ? 0 : workDay.getChecker().getId(),
+                workDay.getJailerId(),
                 workDay.isChecked(),
                 workDay.getCoefficient(),
                 workDay.getReportText(),
@@ -167,13 +166,9 @@ public class ReportResource {
             @ApiResponse(code = 404, message = "When principal not found", response = ErrorJson.class)
     })
     public Response checkAllReports(@Context ServletContext context) {
-
-        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
-        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
-
         workDayService.getAllNotCheckedWorkDays()
                 .forEach(workDay -> {
-                    workDay.setChecker(principal);
+                    workDay.setJailerId((Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE));
                     workDay.setChecked(true);
                     workDayService.save(workDay);
                 });
@@ -195,10 +190,8 @@ public class ReportResource {
                                 @Min(0) @PathParam("reportId") Long reportId,
                                 @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
-        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
-        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
         WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
-        workDay.setChecker(principal);
+        workDay.setJailerId((Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE));
         workDay.setChecked(true);
         workDay.setCoefficient(coefficient);
         workDayService.save(workDay);
@@ -217,13 +210,10 @@ public class ReportResource {
     public Response checkReportsOfUsers(@Context ServletContext context,
                                         List<Long> userIds) {
 
-        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
-        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
-
         userIds.stream()
                 .flatMap(userId -> workDayService.getUserNotCheckedWorkDays(userId).stream())
                 .forEach(workDay -> {
-                    workDay.setChecker(principal);
+                    workDay.setJailerId((Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE));
                     workDay.setChecked(true);
                     workDayService.save(workDay);
                 });
@@ -243,13 +233,10 @@ public class ReportResource {
     public Response checkReportsOfProject(@Context ServletContext context,
                                           List<Long> projectIds) {
 
-        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
-        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
-
         projectIds.stream()
                 .flatMap(projectId -> workDayService.getProjectNotCheckedWorkDays(projectId).stream())
                 .forEach(workDay -> {
-                    workDay.setChecker(principal);
+                    workDay.setJailerId((Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE));
                     workDay.setChecked(true);
                     workDayService.save(workDay);
                 });

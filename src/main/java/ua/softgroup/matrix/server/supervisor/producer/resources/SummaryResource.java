@@ -1,7 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.producer.resources;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +63,6 @@ public class SummaryResource {
     @Path("/projects/{projectId}/")
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    @ApiOperation("2. getEntityWorkingDays - повертає робочі дні елемента ('project', ...) за заданий період")
     public Response getEntityWorkingDays(@PathParam("projectId") Long projectId,
                                          @QueryParam("fromDate") String fromDate,
                                          @QueryParam("toDate") String toDate) {
@@ -112,7 +110,7 @@ public class SummaryResource {
                         new ExecutorReportJson(
                                 workDay.getId(),
                                 workDay.isChecked(),
-                                workDay.getChecker() == null ? 0 : workDay.getChecker().getId(),
+                                workDay.getJailerId(),
                                 workDay.getCoefficient(),
                                 workDay.getReportText(),
                                 workDay.getProject().getRate(),                 //TODO move rate to work day
@@ -126,7 +124,6 @@ public class SummaryResource {
     @Path("/users/{userId}/")
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    @ApiOperation("1. getUserWorkingDays - вертає робочі дні працівника з статистикою по них за заданий період")
     public Response getUserWorkingDays(@PathParam("userId") Long userId,
                                        @QueryParam("fromDate") String fromDate,
                                        @QueryParam("toDate") String toDate) {
@@ -169,7 +166,7 @@ public class SummaryResource {
                         workDay.getIdleSeconds(),
                         calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds()),
                         workDay.isChecked(),
-                        workDay.getChecker() == null ? 0 : workDay.getChecker().getId(),
+                        workDay.getJailerId(),
                         workDay.getCoefficient(),
                         workDay.getReportText(),
                         workDay.getProject().getRate(),           //TODO move rate to work day
