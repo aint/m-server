@@ -89,4 +89,8 @@ public class TokenHelper {
         }
     }
 
+//    public static void main(String[] args) throws IOException, GeneralSecurityException, JOSEException {
+//        System.out.println(new TokenHelper().generateToken("1", "sg", null));
+//    }
+
 }
