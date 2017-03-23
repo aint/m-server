@@ -8,8 +8,9 @@ import java.util.Set;
  */
 public class DayJson {
 
-    private Long id;
+    private long id;
     private String entityType = "project"; //TODO use enum
+    private long projectId;
     private LocalDate date;
     private String start;
     private String end;
@@ -17,9 +18,9 @@ public class DayJson {
     private int idleSeconds;
     private double idlePercentage;
     private boolean checked;
-    private Long jailerId;
+    private long checkerId;
     private double coefficient = 1.0f;
-    private String reportText;
+    private String reportText = "";
     private int rate;
     private int currencyId;
     private Set<WorkPeriod> workPeriods;
@@ -27,10 +28,11 @@ public class DayJson {
     public DayJson() {
     }
 
-    public DayJson(Long id, LocalDate date, String start, String end, int workSeconds, int idleSeconds,
-                   double idlePercentage, boolean checked, Long jailerId, double coefficient, String reportText,
+    public DayJson(long id, long projectId, LocalDate date, String start, String end, int workSeconds, int idleSeconds,
+                   double idlePercentage, boolean checked, long checkerId, double coefficient, String reportText,
                    int rate, int currencyId, Set<WorkPeriod> workPeriods) {
         this.id = id;
+        this.projectId = projectId;
         this.date = date;
         this.start = start;
         this.end = end;
@@ -38,7 +40,7 @@ public class DayJson {
         this.idleSeconds = idleSeconds;
         this.idlePercentage = idlePercentage;
         this.checked = checked;
-        this.jailerId = jailerId;
+        this.checkerId = checkerId;
         this.coefficient = coefficient;
         this.reportText = reportText;
         this.rate = rate;
@@ -60,6 +62,14 @@ public class DayJson {
 
     public void setEntityType(String entityType) {
         this.entityType = entityType;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
     }
 
     public LocalDate getDate() {
@@ -118,12 +128,12 @@ public class DayJson {
         this.checked = checked;
     }
 
-    public Long getJailerId() {
-        return jailerId;
+    public long getCheckerId() {
+        return checkerId;
     }
 
-    public void setJailerId(Long jailerId) {
-        this.jailerId = jailerId;
+    public void setCheckerId(long checkerId) {
+        this.checkerId = checkerId;
     }
 
     public double getCoefficient() {

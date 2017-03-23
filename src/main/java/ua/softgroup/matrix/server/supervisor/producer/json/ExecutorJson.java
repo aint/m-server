@@ -5,7 +5,7 @@ package ua.softgroup.matrix.server.supervisor.producer.json;
  */
 public class ExecutorJson {
 
-    private Long id;
+    private long id;
     private String start;
     private String end;
     private int workSeconds;
@@ -27,11 +27,11 @@ public class ExecutorJson {
         this.executorReport = executorReport;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

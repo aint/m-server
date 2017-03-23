@@ -5,9 +5,9 @@ package ua.softgroup.matrix.server.supervisor.producer.json;
  */
 public class ExecutorReportJson {
 
-    private Long id;
+    private long id;
     private boolean checked;
-    private Long jailerId;
+    private long checkerId;
     private double coefficient = 1.0f;
     private String reportText;
     private int rate;
@@ -16,22 +16,22 @@ public class ExecutorReportJson {
     public ExecutorReportJson() {
     }
 
-    public ExecutorReportJson(Long id, boolean checked, Long jailerId, double coefficient,
+    public ExecutorReportJson(Long id, boolean checked, long checkerId, double coefficient,
                               String reportText, int rate, int currencyId) {
         this.id = id;
         this.checked = checked;
-        this.jailerId = jailerId;
+        this.checkerId = checkerId;
         this.coefficient = coefficient;
         this.reportText = reportText;
         this.rate = rate;
         this.currencyId = currencyId;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -43,12 +43,12 @@ public class ExecutorReportJson {
         this.checked = checked;
     }
 
-    public Long getJailerId() {
-        return jailerId;
+    public long getCheckerId() {
+        return checkerId;
     }
 
-    public void setJailerId(Long jailerId) {
-        this.jailerId = jailerId;
+    public void setCheckerId(long checkerId) {
+        this.checkerId = checkerId;
     }
 
     public double getCoefficient() {

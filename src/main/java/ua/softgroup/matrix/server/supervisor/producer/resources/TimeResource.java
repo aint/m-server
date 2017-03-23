@@ -66,11 +66,7 @@ public class TimeResource {
     @GET
     @Path("/projects/{projectId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            value = "17. getEntityCommonStatistic - метод для отримання загальної статистики по працівниках на проекті.\nReturns users' work time stats of the specified project",
-            response = UserTimeResponse.class,
-            responseContainer = "List"
-    )
+    @ApiOperation(value = "17) getEntityCommonStatistic", response = UserTimeResponse.class, responseContainer = "List")
     @ApiResponses({
             @ApiResponse(code = 400, message = "When project id < 0", response = ErrorJson.class),
             @ApiResponse(code = 404, message = "When project not found", response = ErrorJson.class)
@@ -92,11 +88,7 @@ public class TimeResource {
     @GET
     @Path("/users/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            value = "6. getUserCommonStatistic - метод для отримання загальної статистики по роботі працівника.\nReturns work time stats of the user",
-            response = UserProjectTimeResponse.class,
-            responseContainer = "List"
-    )
+    @ApiOperation(value = "6) getUserCommonStatistic", response = UserProjectTimeResponse.class, responseContainer = "List")
     @ApiResponses({
             @ApiResponse(code = 400, message = "When user id < 0", response = ErrorJson.class),
             @ApiResponse(code = 404, message = "When user not found", response = ErrorJson.class)

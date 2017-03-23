@@ -14,7 +14,7 @@ public class ReportResponse {
     private LocalDateTime updatedDateTime;
     private long authorId;
     private long projectId;
-    private long jailerId;
+    private long checkerId;
     private boolean checked;
     private double coefficient;
     private String text;
@@ -26,14 +26,14 @@ public class ReportResponse {
     }
 
     public ReportResponse(long id, LocalDate date, LocalDateTime updatedDateTime, long authorId, long projectId,
-                          long jailerId, boolean checked, double coefficient, String text, int workTimeSeconds,
+                          long checkerId, boolean checked, double coefficient, String text, int workTimeSeconds,
                           int rate, int currencyId) {
         this.id = id;
         this.date = date;
         this.updatedDateTime = updatedDateTime;
         this.authorId = authorId;
         this.projectId = projectId;
-        this.jailerId = jailerId;
+        this.checkerId = checkerId;
         this.checked = checked;
         this.coefficient = coefficient;
         this.text = text;
@@ -90,12 +90,12 @@ public class ReportResponse {
         this.projectId = projectId;
     }
 
-    public long getJailerId() {
-        return jailerId;
+    public long getCheckerId() {
+        return checkerId;
     }
 
-    public void setJailerId(long jailerId) {
-        this.jailerId = jailerId;
+    public void setCheckerId(long checkerId) {
+        this.checkerId = checkerId;
     }
 
     public boolean isChecked() {

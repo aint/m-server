@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter;
 import ua.softgroup.matrix.server.supervisor.producer.resources.ReportResource;
 import ua.softgroup.matrix.server.supervisor.producer.resources.SummaryResource;
 import ua.softgroup.matrix.server.supervisor.producer.resources.TimeResource;
@@ -23,7 +22,7 @@ import javax.ws.rs.ApplicationPath;
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 @Component
-@ApplicationPath("/api/v1")
+@ApplicationPath("/api/v2")
 public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
@@ -34,7 +33,7 @@ public class JerseyConfig extends ResourceConfig {
         register(GenericExceptionMapper.class);
         register(ValidationExceptionMapper.class);
         register(ValidationConfigurationContextResolver.class);
-        register(TokenAuthenticationFilter.class);
+//        register(TokenAuthenticationFilter.class);
 
         configureSwagger();
     }
@@ -46,8 +45,8 @@ public class JerseyConfig extends ResourceConfig {
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setTitle("Matrix REST API");
         beanConfig.setDescription("Make Matrix Great Again");
-        beanConfig.setVersion("1.0");
-        beanConfig.setBasePath("/api/v1");
+        beanConfig.setVersion("2.0");
+        beanConfig.setBasePath("/api/v2");
         beanConfig.setResourcePackage("ua.softgroup.matrix.server.supervisor.producer");
         beanConfig.setScan(true);
     }

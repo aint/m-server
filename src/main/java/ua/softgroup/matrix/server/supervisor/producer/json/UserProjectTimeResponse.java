@@ -6,6 +6,7 @@ package ua.softgroup.matrix.server.supervisor.producer.json;
 public class UserProjectTimeResponse extends TimeResponse {
 
     private long projectId;
+    private String entityType = "project";
 
     public UserProjectTimeResponse() {
     }
@@ -25,4 +26,11 @@ public class UserProjectTimeResponse extends TimeResponse {
         this.projectId = projectId;
     }
 
+    public String getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
 }
