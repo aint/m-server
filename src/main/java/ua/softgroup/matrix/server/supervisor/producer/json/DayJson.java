@@ -1,6 +1,7 @@
 package ua.softgroup.matrix.server.supervisor.producer.json;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Set;
 
 /**
@@ -12,8 +13,8 @@ public class DayJson {
     private String entityType = "project"; //TODO use enum
     private long projectId;
     private LocalDate date;
-    private String start;
-    private String end;
+    private LocalTime start;
+    private LocalTime end;
     private int workSeconds;
     private int idleSeconds;
     private double idlePercentage;
@@ -28,7 +29,7 @@ public class DayJson {
     public DayJson() {
     }
 
-    public DayJson(long id, long projectId, LocalDate date, String start, String end, int workSeconds, int idleSeconds,
+    public DayJson(long id, long projectId, LocalDate date, LocalTime start, LocalTime end, int workSeconds, int idleSeconds,
                    double idlePercentage, boolean checked, long checkerId, double coefficient, String reportText,
                    int rate, int currencyId, Set<WorkPeriod> workPeriods) {
         this.id = id;
@@ -80,19 +81,19 @@ public class DayJson {
         this.date = date;
     }
 
-    public String getStart() {
+    public LocalTime getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(LocalTime start) {
         this.start = start;
     }
 
-    public String getEnd() {
+    public LocalTime getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(LocalTime end) {
         this.end = end;
     }
 

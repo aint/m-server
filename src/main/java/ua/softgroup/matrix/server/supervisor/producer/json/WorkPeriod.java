@@ -1,34 +1,36 @@
 package ua.softgroup.matrix.server.supervisor.producer.json;
 
+import java.time.LocalTime;
+
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 public class WorkPeriod {
 
-    private String start;
-    private String end;
+    private LocalTime start;
+    private LocalTime end;
 
     public WorkPeriod() {
     }
 
-    public WorkPeriod(String start, String end) {
+    public WorkPeriod(LocalTime start, LocalTime end) {
         this.start = start;
         this.end = end;
     }
 
-    public String getStart() {
+    public LocalTime getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(LocalTime start) {
         this.start = start;
     }
 
-    public String getEnd() {
+    public LocalTime getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(LocalTime end) {
         this.end = end;
     }
 

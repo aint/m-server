@@ -153,8 +153,8 @@ public class SummaryResource {
                         workDay.getId(),
                         workDay.getProject().getId(),
                         workDay.getDate(),
-                        workDayService.getStartWorkOf(workDay).toString(),
-                        workDayService.getEndWorkOf(workDay).toString(),
+                        workDayService.getStartWorkOf(workDay).toLocalTime(),
+                        workDayService.getEndWorkOf(workDay).toLocalTime(),
                         workDay.getWorkSeconds(),
                         workDay.getIdleSeconds(),
                         calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds()),
@@ -165,7 +165,7 @@ public class SummaryResource {
                         workDay.getProject().getRate(),           //TODO move rate to work day
                         workDay.getProject().getRateCurrencyId(), //TODO move currency to work day
                         workDay.getWorkTimePeriods().stream()
-                                .map(wp -> new WorkPeriod(wp.getStart().toString(), wp.getEnd().toString()))
+                                .map(wp -> new WorkPeriod(wp.getStart().toLocalTime(), wp.getEnd().toLocalTime()))
                                 .collect(Collectors.toSet())))
                 .collect(Collectors.toSet()));
         return summaryDayJson;
