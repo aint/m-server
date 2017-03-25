@@ -8,6 +8,7 @@ import retrofit2.http.POST;
 import ua.softgroup.matrix.server.supervisor.consumer.json.ActiveProjectsJson;
 import ua.softgroup.matrix.server.supervisor.consumer.json.CurrenciesJson;
 import ua.softgroup.matrix.server.supervisor.consumer.json.LoginJson;
+import ua.softgroup.matrix.server.supervisor.consumer.json.SettingsJson;
 
 public interface SupervisorEndpoint {
 
@@ -20,4 +21,7 @@ public interface SupervisorEndpoint {
 
     @POST("currency/get-currencies")
     Call<CurrenciesJson> getCurrencies(@Header("tracker-token") String trackerToken);
+
+    @POST("setting/get-tracker-settings")
+    Call<SettingsJson> getTrackerSettings(@Header("tracker-token") String trackerToken);
 }
