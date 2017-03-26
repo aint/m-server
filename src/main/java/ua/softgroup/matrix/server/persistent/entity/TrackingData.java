@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -7,10 +8,12 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -25,9 +28,8 @@ public class TrackingData extends AbstractEntity<Long> {
     @Column
     private Double mouseFootage = 0.0;
 
-    @ElementCollection
-    @CollectionTable(name = "tracking_screenshots")
-    private List<String> screenshots;
+    @OneToMany(mappedBy = "trackingData", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Screenshot> screenshots = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "tracking_window_time")
@@ -62,11 +64,11 @@ public class TrackingData extends AbstractEntity<Long> {
         this.mouseFootage = mouseFootage;
     }
 
-    public List<String> getScreenshots() {
+    public Set<Screenshot> getScreenshots() {
         return screenshots;
     }
 
-    public void setScreenshots(List<String> screenshots) {
+    public void setScreenshots(Set<Screenshot> screenshots) {
         this.screenshots = screenshots;
     }
 

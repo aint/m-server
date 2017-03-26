@@ -3,11 +3,10 @@ package ua.softgroup.matrix.server.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.persistent.entity.Project;
+import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.TrackingData;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
@@ -17,76 +16,51 @@ import ua.softgroup.matrix.server.service.TrackingDataService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 
-import javax.annotation.Nonnull;
-import javax.imageio.ImageIO;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
-@PropertySource("classpath:desktop.properties")
 public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<TrackingData> implements TrackingDataService {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackingDataServiceImpl.class);
 
-    private static final String CWD = System.getProperty("user.dir");
-    private static final String FILE_EXTENSION = "png";
-
     private final ProjectService projectService;
     private final UserService userService;
     private final WorkDayService workDayService;
-    private final Environment environment;
 
     @Autowired
     public TrackingDataServiceImpl(TrackingDataRepository repository, ProjectService projectService,
-                                   UserService userService, WorkDayService workDayService,
-                                   Environment environment) {
+                                   UserService userService, WorkDayService workDayService) {
         super(repository);
         this.projectService = projectService;
         this.userService = userService;
         this.workDayService = workDayService;
-        this.environment = environment;
-    }
-
-    @Nonnull
-    @Override
-    public TrackingData getByProjectIdAndDate(String userToken, Long projectId, LocalDate date) {
-        User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
-        Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
-        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, date).orElseThrow(NoSuchElementException::new);
-        TrackingData trackingData = getRepository().findByWorkDay(workDay);
-        return trackingData != null ? trackingData : new TrackingData(workDay);
     }
 
     @Override
     @Transactional
     public void saveTrackingData(String userToken, Long projectId, String keyboardText, Double mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot) {
-        TrackingData trackingDataData = getByProjectIdAndDate(userToken, projectId, LocalDate.now());
-        logger.debug("KeyboardLog {}", keyboardText);
-        trackingDataData.setKeyboardText(trackingDataData.getKeyboardText() + keyboardText);
+        logger.info("Saving tracking data: symbols {}, mouse {}, windows {}", keyboardText.length(), mouseFootage, windowsTimeMap.size());
 
-        logger.debug("MouseFootage {}", mouseFootage);
-        trackingDataData.setMouseFootage(trackingDataData.getMouseFootage() + mouseFootage);
-
-        logger.debug("ActiveWindows {}", windowsTimeMap);
+        TrackingData trackingData = getTrackingDataOf(userToken, projectId, LocalDate.now());
+        trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
+        trackingData.setMouseFootage(trackingData.getMouseFootage() + mouseFootage);
+        trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), trackingData));
         //TODO use entity graph to fetch map in one query
-        trackingDataData.getWindowTimeMap().forEach((k, v) -> windowsTimeMap.merge(k, v, Integer::sum));
-        trackingDataData.setWindowTimeMap(windowsTimeMap);
+        trackingData.getWindowTimeMap().forEach((k, v) -> windowsTimeMap.merge(k, v, Integer::sum));
+        trackingData.setWindowTimeMap(windowsTimeMap);
 
-        try (InputStream is = new ByteArrayInputStream(screenshot)) {
-            String filePath = CWD + environment.getProperty("screenshot.path") + System.currentTimeMillis() + "." + FILE_EXTENSION;
-            File screenshotFile = new File(filePath);
-            screenshotFile.getParentFile().mkdirs();
-            ImageIO.write(ImageIO.read(is), FILE_EXTENSION, screenshotFile);
-//            trackingDataData.getScreenshots().add(filePath);
-        } catch (Exception e) {
-            logger.error("Failed to save screenshot", e);
-        }
+        save(trackingData);
+    }
 
-        save(trackingDataData);
+    private TrackingData getTrackingDataOf(String userToken, Long projectId, LocalDate date) {
+        User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
+        Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, date).orElseThrow(NoSuchElementException::new);
+        TrackingData trackingData = getRepository().findByWorkDay(workDay);
+        return trackingData != null ? trackingData : new TrackingData(workDay);
     }
 
     @Override
