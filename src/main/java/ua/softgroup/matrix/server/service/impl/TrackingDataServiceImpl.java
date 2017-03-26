@@ -9,6 +9,7 @@ import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.TrackingData;
 import ua.softgroup.matrix.server.persistent.entity.User;
+import ua.softgroup.matrix.server.persistent.entity.WindowTime;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.repository.TrackingDataRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
@@ -48,9 +49,9 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
         trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
         trackingData.setMouseFootage(trackingData.getMouseFootage() + mouseFootage);
         trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), trackingData));
-        //TODO use entity graph to fetch map in one query
-        trackingData.getWindowTimeMap().forEach((k, v) -> windowsTimeMap.merge(k, v, Integer::sum));
-        trackingData.setWindowTimeMap(windowsTimeMap);
+        windowsTimeMap.entrySet().stream()
+                .map(entry -> new WindowTime(entry.getKey(), entry.getValue(), trackingData))
+                .forEach(windowTime -> trackingData.getActiveWindows().add(windowTime));
 
         save(trackingData);
     }

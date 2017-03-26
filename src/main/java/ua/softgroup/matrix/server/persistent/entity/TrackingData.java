@@ -1,18 +1,15 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -31,11 +28,8 @@ public class TrackingData extends AbstractEntity<Long> {
     @OneToMany(mappedBy = "trackingData", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Screenshot> screenshots = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(name = "tracking_window_time")
-    @MapKeyColumn(name = "window_title")
-    @Column(name = "time_seconds")
-    private Map<String, Integer> windowTimeMap = new LinkedHashMap<>();
+    @OneToMany(mappedBy = "trackingData", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WindowTime> activeWindows = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_day_id")
@@ -72,12 +66,12 @@ public class TrackingData extends AbstractEntity<Long> {
         this.screenshots = screenshots;
     }
 
-    public Map<String, Integer> getWindowTimeMap() {
-        return windowTimeMap;
+    public List<WindowTime> getActiveWindows() {
+        return activeWindows;
     }
 
-    public void setWindowTimeMap(Map<String, Integer> windowTimeMap) {
-        this.windowTimeMap = windowTimeMap;
+    public void setActiveWindows(List<WindowTime> activeWindows) {
+        this.activeWindows = activeWindows;
     }
 
     public WorkDay getWorkDay() {
