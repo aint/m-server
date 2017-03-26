@@ -49,6 +49,12 @@ public class WorkDay extends AbstractEntity<Long> {
     @Column
     private Double coefficient = 1.0;
 
+    @Column
+    private Integer rate = 0;
+
+    @Column
+    private Integer currencyId = 0;
+
     @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private TrackingData trackingData;
 
@@ -147,6 +153,22 @@ public class WorkDay extends AbstractEntity<Long> {
 
     public void setCoefficient(Double coefficient) {
         this.coefficient = coefficient;
+    }
+
+    public Integer getRate() {
+        return rate;
+    }
+
+    public void setRate(Integer rate) {
+        this.rate = rate;
+    }
+
+    public Integer getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(Integer currencyId) {
+        this.currencyId = currencyId;
     }
 
     public TrackingData getTrackingData() {

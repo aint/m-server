@@ -131,8 +131,8 @@ public class SummaryResource {
                                 workDay.getJailerId(),
                                 workDay.getCoefficient(),
                                 workDay.getReportText(),
-                                workDay.getProject().getRate(),                 //TODO move rate to work day
-                                workDay.getProject().getRateCurrencyId())))     //TODO move currency to work day
+                                workDay.getRate(),
+                                workDay.getCurrencyId())))
                 .collect(Collectors.toSet()));
 
         return summaryProjectJson;
@@ -162,8 +162,8 @@ public class SummaryResource {
                         workDay.getJailerId(),
                         workDay.getCoefficient(),
                         workDay.getReportText(),
-                        workDay.getProject().getRate(),           //TODO move rate to work day
-                        workDay.getProject().getRateCurrencyId(), //TODO move currency to work day
+                        workDay.getRate(),
+                        workDay.getCurrencyId(),
                         workDay.getWorkTimePeriods().stream()
                                 .map(wp -> new WorkPeriod(wp.getStart().toLocalTime(), wp.getEnd().toLocalTime()))
                                 .collect(Collectors.toSet())))

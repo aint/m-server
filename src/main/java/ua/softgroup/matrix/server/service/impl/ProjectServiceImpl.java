@@ -132,7 +132,8 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
                                         .orElseGet(() -> new WorkDay(user, project, LocalDate.now()));
         workDay.setWorkSeconds(workDay.getWorkSeconds() + seconds);
-        //TODO add rate and currency
+        workDay.setRate(project.getRate());
+        workDay.setCurrencyId(project.getRateCurrencyId());
         workDayService.save(workDay);
 
         workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), workDay));
@@ -161,7 +162,8 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
                                         .orElseGet(() -> new WorkDay(user, project, LocalDate.now()));
         workDay.setWorkSeconds(workDay.getWorkSeconds() + seconds);
         workDay.setIdleSeconds(workDay.getIdleSeconds() + idleTime);
-        //TODO add rate and currency
+        workDay.setRate(project.getRate());
+        workDay.setCurrencyId(project.getRateCurrencyId());
         workDayService.save(workDay);
 
         int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
