@@ -14,14 +14,11 @@ import ua.softgroup.matrix.api.model.datamodels.TimeModel;
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
-import ua.softgroup.matrix.server.persistent.entity.ClientSettings;
-import ua.softgroup.matrix.server.service.ClientSettingsService;
+import ua.softgroup.matrix.server.service.TrackerSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.TrackingService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
-
-import java.util.NoSuchElementException;
 
 @SuppressWarnings("rawtypes")
 @Service
@@ -31,18 +28,19 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private final UserService userService;
     private final ProjectService projectService;
     private final WorkDayService workDayService;
-    private final ClientSettingsService clientSettingsService;
+    private final TrackerSettingsService trackerSettingsService;
     private final TrackingService trackingService;
 
     @Autowired
     public MatrixServerApiImpl(UserService userService,
                                ProjectService projectService,
-                               WorkDayService workDayService, ClientSettingsService clientSettingsService,
+                               WorkDayService workDayService,
+                               TrackerSettingsService trackerSettingsService,
                                TrackingService trackingService) {
         this.userService = userService;
         this.projectService = projectService;
         this.workDayService = workDayService;
-        this.clientSettingsService = clientSettingsService;
+        this.trackerSettingsService = trackerSettingsService;
         this.trackingService = trackingService;
     }
 
@@ -55,15 +53,13 @@ public class MatrixServerApiImpl implements MatrixServerApi {
         if (token == null) {
             return new ResponseModel<>(ResponseStatus.INVALID_CREDENTIALS);
         }
-        ClientSettings clientSettings = clientSettingsService.getAll().stream()
-                .findFirst()
-                .orElseThrow(NoSuchElementException::new);
+        TrackerSettingsService.TrackerSettings trackerSettings = trackerSettingsService.getTrackerSettings(token);
         InitializeModel initializeModel = new InitializeModel(
                 token,
                 projectService.getUserActiveProjects(token),
-                clientSettings.getStartIdleAfterSeconds(),
-                clientSettings.getScreenshotFrequentlyInSeconds(),
-                clientSettings.getCheckpointFrequentlyInSeconds());
+                trackerSettings.getStartIdleAfterSeconds(),
+                trackerSettings.getScreenshotPeriodFrequency(),
+                trackerSettings.getCheckpointFrequencyInSeconds());
         return new ResponseModel<>(initializeModel);
     }
 

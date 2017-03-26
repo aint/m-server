@@ -2,7 +2,6 @@ package ua.softgroup.matrix.server.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 import ua.softgroup.matrix.api.model.datamodels.ReportModel;
@@ -21,7 +20,6 @@ import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 import javax.validation.Validator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -43,20 +41,17 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     private final WorkTimePeriodRepository workTimePeriodRepository;
     private final UserService userService;
     private final Validator validator;
-    private final Environment environment;
 
     public WorkDayServiceImpl(CrudRepository<WorkDay, Long> repository,
                               ProjectRepository projectRepository,
                               WorkTimePeriodRepository workTimePeriodRepository,
                               UserService userService,
-                              Validator validator,
-                              Environment environment) {
+                              Validator validator) {
         super(repository);
         this.projectRepository = projectRepository;
         this.workTimePeriodRepository = workTimePeriodRepository;
         this.userService = userService;
         this.validator = validator;
-        this.environment = environment;
     }
 
     @Override
@@ -149,10 +144,8 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
                           .findByAuthorAndProjectAndDate(user, project, reportModel.getDate())) //TODO use id for repo, not objects
                           .orElseThrow(NoSuchElementException::new);
 
-        long days = ChronoUnit.DAYS.between(workDay.getDate(), LocalDate.now());
-        long editablePeriod = Long.parseLong(environment.getProperty("report.editable.days"));
-        if (days > editablePeriod || workDay.isChecked()) {
-            logger.warn("Report {} of user '{}' created {} days ago is expired or checked", workDay.getId(), user.getUsername(), days);
+        if (workDay.isChecked()) {
+            logger.warn("Report {} of user '{}' is checked", workDay.getId(), user.getUsername());
             return ResponseStatus.REPORT_EXPIRED;
         }
 

@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import ua.softgroup.matrix.server.config.LoadDefaultConfig;
-import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
 import ua.softgroup.matrix.api.ServerCommands;
 import ua.softgroup.matrix.api.model.datamodels.AuthModel;
 import ua.softgroup.matrix.api.model.datamodels.CheckPointModel;
@@ -15,7 +13,7 @@ import ua.softgroup.matrix.api.model.datamodels.ReportModel;
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
-import ua.softgroup.matrix.server.service.ClientSettingsService;
+import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -28,41 +26,25 @@ public class ServerSocketRunner implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(ServerSocketRunner.class);
 
     private final MatrixServerApi matrixServerApi;
-    private final ClientSettingsService clientSettingsService;
     private final Environment environment;
-    private final LoadDefaultConfig defaultConfig;
 
     private ServerSocket serverSocket;
 
     @Autowired
-    public ServerSocketRunner(MatrixServerApi matrixServerApi, ClientSettingsService clientSettingsService,
-                              Environment environment, LoadDefaultConfig defaultConfig) {
+    public ServerSocketRunner(MatrixServerApi matrixServerApi, Environment environment) {
         this.matrixServerApi = matrixServerApi;
-        this.clientSettingsService = clientSettingsService;
         this.environment = environment;
-        this.defaultConfig = defaultConfig;
     }
 
     @Override
     public void run(String... args) throws IOException {
-        createServerSocket();
-        processClientSettings();
+        serverSocket = new ServerSocket(Integer.parseInt(environment.getRequiredProperty("socket.server.port")));
 
         LOG.info("Waiting for a client...");
 
         while (true) {
             new Thread(new SocketClientRunnable(serverSocket.accept())).start();
         }
-    }
-
-    private void processClientSettings(){
-        if(clientSettingsService.getAll().isEmpty()){
-            clientSettingsService.save(defaultConfig.getClientSettings());
-        }
-    }
-
-    private void createServerSocket() throws IOException {
-        serverSocket = new ServerSocket(Integer.parseInt(environment.getRequiredProperty("socket.server.port")));
     }
 
     private class SocketClientRunnable implements Runnable {
