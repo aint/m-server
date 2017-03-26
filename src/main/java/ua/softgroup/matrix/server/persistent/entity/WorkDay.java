@@ -50,7 +50,7 @@ public class WorkDay extends AbstractEntity<Long> {
     private Double coefficient = 1.0;
 
     @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Tracking tracking;
+    private TrackingData trackingData;
 
     @ManyToOne
     private Project project;
@@ -149,12 +149,12 @@ public class WorkDay extends AbstractEntity<Long> {
         this.coefficient = coefficient;
     }
 
-    public Tracking getTracking() {
-        return tracking;
+    public TrackingData getTrackingData() {
+        return trackingData;
     }
 
-    public void setTracking(Tracking tracking) {
-        this.tracking = tracking;
+    public void setTrackingData(TrackingData trackingData) {
+        this.trackingData = trackingData;
     }
 
     public Project getProject() {

@@ -53,7 +53,7 @@ public class WorkDayServiceImplTest {
         when(userService.getByTrackerToken(TOKEN)).thenReturn(Optional.of(user));
         when(projectRepository.findOne(PROJECT_ID)).thenReturn(project);
 
-        workDayService = new WorkDayServiceImpl(repository, projectRepository, workTimePeriodRepository, userService, validator, environment);
+        workDayService = new WorkDayServiceImpl(repository, projectRepository, workTimePeriodRepository, userService, validator);
     }
 
     @Test

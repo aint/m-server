@@ -16,7 +16,7 @@ import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.service.TrackerSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
-import ua.softgroup.matrix.server.service.TrackingService;
+import ua.softgroup.matrix.server.service.TrackingDataService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 
@@ -29,19 +29,19 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     private final ProjectService projectService;
     private final WorkDayService workDayService;
     private final TrackerSettingsService trackerSettingsService;
-    private final TrackingService trackingService;
+    private final TrackingDataService trackingDataService;
 
     @Autowired
     public MatrixServerApiImpl(UserService userService,
                                ProjectService projectService,
                                WorkDayService workDayService,
                                TrackerSettingsService trackerSettingsService,
-                               TrackingService trackingService) {
+                               TrackingDataService trackingDataService) {
         this.userService = userService;
         this.projectService = projectService;
         this.workDayService = workDayService;
         this.trackerSettingsService = trackerSettingsService;
-        this.trackingService = trackingService;
+        this.trackingDataService = trackingDataService;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
     public ResponseModel<TimeModel> processCheckpoint(RequestModel<CheckPointModel> requestModel) {
         CheckPointModel checkPointModel = requestModel.getDataContainer().or(throwException());
 
-        trackingService.saveTrackingData(
+        trackingDataService.saveTrackingData(
                 requestModel.getToken(),
                 requestModel.getProjectId(),
                 checkPointModel.getKeyboardLogs(),
@@ -109,9 +109,10 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 checkPointModel.getWindowsTimeMap(),
                 checkPointModel.getScreenshot());
 
-
-        TimeModel timeModel = projectService.saveCheckpointTime(requestModel.getToken(), requestModel.getProjectId(), checkPointModel.getIdleTime());
-        return new ResponseModel<>(timeModel);
+        return new ResponseModel<>(projectService.saveCheckpointTime(requestModel.getToken(),
+                                                                     requestModel.getProjectId(),
+                                                                     checkPointModel.getIdleTime())
+        );
     }
 
     private Supplier throwException() {

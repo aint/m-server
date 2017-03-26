@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 @Entity
-public class Tracking extends AbstractEntity<Long> {
+public class TrackingData extends AbstractEntity<Long> {
     private static final long serialVersionUID = -6554909949520971201L;
 
     @Column(columnDefinition = "LONGTEXT")
@@ -39,10 +39,10 @@ public class Tracking extends AbstractEntity<Long> {
     @JoinColumn(name = "work_day_id")
     private WorkDay workDay;
 
-    public Tracking() {
+    public TrackingData() {
     }
 
-    public Tracking(WorkDay workDay) {
+    public TrackingData(WorkDay workDay) {
         this.workDay = workDay;
     }
 
