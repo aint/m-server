@@ -136,7 +136,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         workDay.setCurrencyId(project.getRateCurrencyId());
         workDayService.save(workDay);
 
-        workTimePeriodService.save(new WorkTimePeriod(startedWork, LocalDateTime.now(), workDay));
+        workTimePeriodService.save(new WorkTimePeriod(project.getWorkStarted(), LocalDateTime.now(), workDay));
 
         int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
         double downtimePercent = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
