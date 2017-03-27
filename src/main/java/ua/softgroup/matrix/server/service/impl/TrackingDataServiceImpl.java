@@ -48,7 +48,9 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
         TrackingData trackingData = getTrackingDataOf(userToken, projectId, LocalDate.now());
         trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
         trackingData.setMouseFootage(trackingData.getMouseFootage() + mouseFootage);
-        trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), trackingData));
+        if (screenshot != null) {
+            trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), trackingData));
+        }
         windowsTimeMap.entrySet().stream()
                 .map(entry -> new WindowTime(entry.getKey(), entry.getValue(), trackingData))
                 .forEach(windowTime -> trackingData.getActiveWindows().add(windowTime));
