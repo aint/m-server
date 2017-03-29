@@ -98,8 +98,8 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
-    public Set<WorkDay> getAllWorkDaysOf(Long projectId, LocalDate date) {
-        return getRepository().findByProjectIdAndDate(projectId, date);
+    public Set<WorkDay> getAllWorkDaysOf(Long projectSupervisorId, LocalDate date) {
+        return getRepository().findByProjectSupervisorIdAndDate(projectSupervisorId, date);
     }
 
     @Override

@@ -32,7 +32,7 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
     Set<WorkDay> getAllWorkDaysOf(User user, LocalDate localDate);
 
-    Set<WorkDay> getAllWorkDaysOf(Long projectId, LocalDate date);
+    Set<WorkDay> getAllWorkDaysOf(Long projectSupervisorId, LocalDate date);
 
     Set<WorkDay> getProjectWorkDaysBetween(Long projectSupervisorId, LocalDate from, LocalDate to);
 

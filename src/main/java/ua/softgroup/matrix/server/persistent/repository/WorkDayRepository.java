@@ -24,7 +24,7 @@ public interface WorkDayRepository extends CrudRepository<WorkDay, Long> {
 
     Set<WorkDay> findByAuthorAndDate(User author, LocalDate date);
 
-    Set<WorkDay> findByProjectIdAndDate(Long projectId, LocalDate date);
+    Set<WorkDay> findByProjectSupervisorIdAndDate(Long projectSupervisorId, LocalDate date);
 
     Set<WorkDay> findByProjectSupervisorIdAndDateBetween(Long supervisorId, LocalDate from, LocalDate to);
 
