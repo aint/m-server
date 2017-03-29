@@ -148,6 +148,7 @@ public class WorkDaysResource {
     @ApiOperation(value = "2) getEntityWorkingDays", response = ProjectWorkingDay.class, responseContainer = "List")
     @Transactional
     public Response getEntityWorkingDays(@ApiParam(example = "1488")       @PathParam("entityId") Long projectId,
+                                         @ApiParam(example = "projects")   @PathParam("entityType") String entityType,
                                          @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                          @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 

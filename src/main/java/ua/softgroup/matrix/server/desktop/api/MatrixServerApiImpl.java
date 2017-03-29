@@ -14,11 +14,13 @@ import ua.softgroup.matrix.api.model.datamodels.TimeModel;
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
-import ua.softgroup.matrix.server.service.TrackerSettingsService;
 import ua.softgroup.matrix.server.service.ProjectService;
+import ua.softgroup.matrix.server.service.TrackerSettingsService;
 import ua.softgroup.matrix.server.service.TrackingDataService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
+
+import java.util.HashMap;
 
 @SuppressWarnings("rawtypes")
 @Service
@@ -106,7 +108,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 requestModel.getProjectId(),
                 checkPointModel.getKeyboardLogs(),
                 checkPointModel.getMouseFootage(),
-                checkPointModel.getWindowsTimeMap(),
+                new HashMap<>(),
+//                checkPointModel.getWindowsTimeMap(),
                 checkPointModel.getScreenshot());
 
         return new ResponseModel<>(projectService.saveCheckpointTime(requestModel.getToken(),
