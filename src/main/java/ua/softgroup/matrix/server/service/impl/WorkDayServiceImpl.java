@@ -15,7 +15,6 @@ import ua.softgroup.matrix.server.persistent.repository.WorkDayRepository;
 import ua.softgroup.matrix.server.persistent.repository.WorkTimePeriodRepository;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
-import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 
 import javax.validation.Validator;
 import java.time.LocalDate;
@@ -61,11 +60,26 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
+    public int getTotalWorkSeconds(User author, LocalDate date) {
+        return getRepository().getTotalWorkSeconds(author.getId(), date);
+    }
+
+    @Override
     public int getCurrentMonthIdleSeconds(User author, Project project) {
         LocalDate start = LocalDate.now().with(firstDayOfMonth());
         LocalDate end = LocalDate.now().with(lastDayOfMonth());
         return Optional.ofNullable(getRepository().getCurrentMonthIdleSeconds(author.getId(), project.getId(), start, end))
                        .orElse(0);
+    }
+
+    @Override
+    public int getTotalIdleSeconds(User author, Project project) {
+        return getRepository().getTotalIdleSeconds(author.getId(), project.getId());
+    }
+
+    @Override
+    public int getTotalIdleSeconds(User author, LocalDate date) {
+        return getRepository().getTotalIdleSeconds(author.getId(), date);
     }
 
     @Override
@@ -176,18 +190,6 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
         return Optional.ofNullable(workTimePeriodRepository.findTopByWorkDayOrderByEndDesc(workDay))
                        .orElseGet(WorkTimePeriod::new)
                        .getEnd();
-    }
-
-    @Override
-    public ReportJson convertEntityToJson(WorkDay workDay) {
-        return new ReportJson(
-                workDay.getId(),
-                workDay.getDate(),
-                workDay.getReportUpdated(),
-                workDay.getReportText(),
-                workDay.getWorkSeconds(),
-                workDay.isChecked()
-        );
     }
 
     @Override

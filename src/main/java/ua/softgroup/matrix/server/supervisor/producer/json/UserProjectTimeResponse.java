@@ -5,25 +5,25 @@ package ua.softgroup.matrix.server.supervisor.producer.json;
  */
 public class UserProjectTimeResponse extends TimeResponse {
 
-    private long projectId;
+    private long entityId;
     private String entityType = "project";
 
     public UserProjectTimeResponse() {
     }
 
-    public UserProjectTimeResponse(long projectId, int workSeconds, int idleSeconds, double idlePercentage) {
-        this.projectId = projectId;
-        this.workSeconds = workSeconds;
-        this.idleSeconds = idleSeconds;
-        this.idlePercentage = idlePercentage;
+    public UserProjectTimeResponse(long entityId, int workSeconds, int idleSeconds, double idlePercentage) {
+        this.entityId = entityId;
+        this.totalWorkTimeSeconds = workSeconds;
+        this.totalIdleTimeSeconds = idleSeconds;
+        this.totalIdlePercentage = idlePercentage;
     }
 
-    public long getProjectId() {
-        return projectId;
+    public long getEntityId() {
+        return entityId;
     }
 
-    public void setProjectId(long projectId) {
-        this.projectId = projectId;
+    public void setEntityId(long entityId) {
+        this.entityId = entityId;
     }
 
     public String getEntityType() {

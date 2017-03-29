@@ -1,7 +1,7 @@
 package ua.softgroup.matrix.server.supervisor.producer.config;
 
 import org.hibernate.validator.internal.engine.path.PathImpl;
-import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;

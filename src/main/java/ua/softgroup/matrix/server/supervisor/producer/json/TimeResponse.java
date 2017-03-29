@@ -5,31 +5,31 @@ package ua.softgroup.matrix.server.supervisor.producer.json;
  */
 public abstract class TimeResponse {
 
-    protected int workSeconds;
-    protected int idleSeconds;
-    protected double idlePercentage;
+    protected int totalWorkTimeSeconds;
+    protected int totalIdleTimeSeconds;
+    protected double totalIdlePercentage;
 
-    public int getWorkSeconds() {
-        return workSeconds;
+    public int getTotalWorkTimeSeconds() {
+        return totalWorkTimeSeconds;
     }
 
-    public void setWorkSeconds(int workSeconds) {
-        this.workSeconds = workSeconds;
+    public void setTotalWorkTimeSeconds(int totalWorkTimeSeconds) {
+        this.totalWorkTimeSeconds = totalWorkTimeSeconds;
     }
 
-    public int getIdleSeconds() {
-        return idleSeconds;
+    public int getTotalIdleTimeSeconds() {
+        return totalIdleTimeSeconds;
     }
 
-    public void setIdleSeconds(int idleSeconds) {
-        this.idleSeconds = idleSeconds;
+    public void setTotalIdleTimeSeconds(int totalIdleTimeSeconds) {
+        this.totalIdleTimeSeconds = totalIdleTimeSeconds;
     }
 
-    public double getIdlePercentage() {
-        return idlePercentage;
+    public double getTotalIdlePercentage() {
+        return totalIdlePercentage;
     }
 
-    public void setIdlePercentage(double idlePercentage) {
-        this.idlePercentage = idlePercentage;
+    public void setTotalIdlePercentage(double totalIdlePercentage) {
+        this.totalIdlePercentage = totalIdlePercentage;
     }
 }

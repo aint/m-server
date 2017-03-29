@@ -1,4 +1,6 @@
-package ua.softgroup.matrix.server.supervisor.producer.json;
+package ua.softgroup.matrix.server.supervisor.producer.json.v2;
+
+import ua.softgroup.matrix.server.supervisor.producer.json.WorkPeriod;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

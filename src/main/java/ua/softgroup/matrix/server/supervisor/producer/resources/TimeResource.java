@@ -17,7 +17,7 @@ import ua.softgroup.matrix.server.persistent.repository.TimeAuditRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
-import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.UserProjectTimeResponse;
@@ -38,6 +38,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ua.softgroup.matrix.server.supervisor.producer.Utils.calculateIdlePercent;
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
 /**
@@ -64,20 +65,20 @@ public class TimeResource {
     }
 
     @GET
-    @Path("/projects/{projectId}")
+    @Path("/projects/{entityId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "17) getEntityCommonStatistic", response = UserTimeResponse.class, responseContainer = "List")
     @ApiResponses({
             @ApiResponse(code = 400, message = "When project id < 0", response = ErrorJson.class),
             @ApiResponse(code = 404, message = "When project not found", response = ErrorJson.class)
     })
-    public Response getProjectWorkTime(@Min(0) @PathParam("projectId") Long projectId) {
+    public Response getProjectWorkTime(@Min(0) @PathParam("entityId") Long projectId) {
         List<UserTimeResponse> timeList = projectService.getBySupervisorId(projectId).stream()
                 .map(project -> {
                     User user = project.getUser();
                     int workSeconds = workDayService.getTotalWorkSeconds(user, project);
-                    int idleSeconds = workDayService.getCurrentMonthIdleSeconds(user, project); //TODO return total idle?
-                    double idlePercentage = calculatePercent(workSeconds, idleSeconds);
+                    int idleSeconds = workDayService.getTotalIdleSeconds(user, project);
+                    double idlePercentage = calculateIdlePercent(workSeconds, idleSeconds);
                     return new UserTimeResponse(user.getId(), workSeconds, idleSeconds, idlePercentage);
                 })
                 .collect(Collectors.toList());
@@ -98,19 +99,13 @@ public class TimeResource {
                 .map(project -> {
                     User user = project.getUser();
                     int workSeconds = workDayService.getTotalWorkSeconds(user, project);
-                    int idleSeconds = workDayService.getCurrentMonthIdleSeconds(user, project); //TODO return total idle?
-                    double idlePercentage = calculatePercent(workSeconds, idleSeconds);
+                    int idleSeconds = workDayService.getTotalIdleSeconds(user, project);
+                    double idlePercentage = calculateIdlePercent(workSeconds, idleSeconds);
                     return new UserProjectTimeResponse(project.getId(), workSeconds, idleSeconds, idlePercentage);
                 })
                 .collect(Collectors.toList());
 
         return Response.ok(timeList).build();
-    }
-
-    private double calculatePercent(int workSeconds, int idleSeconds) {
-        return idleSeconds != 0
-                ? idleSeconds / workSeconds * 100
-                : 0.0;
     }
 
     @POST

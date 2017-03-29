@@ -12,9 +12,9 @@ public class UserTimeResponse extends TimeResponse {
 
     public UserTimeResponse(long userId, int workSeconds, int idleSeconds, double idlePercentage) {
         this.userId = userId;
-        this.workSeconds = workSeconds;
-        this.idleSeconds = idleSeconds;
-        this.idlePercentage = idlePercentage;
+        this.totalWorkTimeSeconds = workSeconds;
+        this.totalIdleTimeSeconds = idleSeconds;
+        this.totalIdlePercentage = idlePercentage;
     }
 
     public long getUserId() {

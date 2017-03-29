@@ -1,7 +1,6 @@
-package ua.softgroup.matrix.server.supervisor.producer.json;
+package ua.softgroup.matrix.server.supervisor.producer.json.v2;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -11,33 +10,31 @@ public class ReportResponse {
     private long id;
     private String entityType = "project";
     private LocalDate date;
-    private LocalDateTime updatedDateTime;
     private long authorId;
-    private long projectId;
-    private long checkerId;
+    private long entityId;
+    private long checkedById;
     private boolean checked;
     private double coefficient;
     private String text;
-    private int workTimeSeconds;
+    private int dayWorkTimeSeconds;
     private int rate;
     private int currencyId;
 
     public ReportResponse() {
     }
 
-    public ReportResponse(long id, LocalDate date, LocalDateTime updatedDateTime, long authorId, long projectId,
-                          long checkerId, boolean checked, double coefficient, String text, int workTimeSeconds,
+    public ReportResponse(long id, LocalDate date, long authorId, long entityId, long checkedById,
+                          boolean checked, double coefficient, String text, int dayWorkTimeSeconds,
                           int rate, int currencyId) {
         this.id = id;
         this.date = date;
-        this.updatedDateTime = updatedDateTime;
         this.authorId = authorId;
-        this.projectId = projectId;
-        this.checkerId = checkerId;
+        this.entityId = entityId;
+        this.checkedById = checkedById;
         this.checked = checked;
         this.coefficient = coefficient;
         this.text = text;
-        this.workTimeSeconds = workTimeSeconds;
+        this.dayWorkTimeSeconds = dayWorkTimeSeconds;
         this.rate = rate;
         this.currencyId = currencyId;
     }
@@ -66,14 +63,6 @@ public class ReportResponse {
         this.date = date;
     }
 
-    public LocalDateTime getUpdatedDateTime() {
-        return updatedDateTime;
-    }
-
-    public void setUpdatedDateTime(LocalDateTime updatedDateTime) {
-        this.updatedDateTime = updatedDateTime;
-    }
-
     public long getAuthorId() {
         return authorId;
     }
@@ -82,20 +71,20 @@ public class ReportResponse {
         this.authorId = authorId;
     }
 
-    public long getProjectId() {
-        return projectId;
+    public long getEntityId() {
+        return entityId;
     }
 
-    public void setProjectId(long projectId) {
-        this.projectId = projectId;
+    public void setEntityId(long entityId) {
+        this.entityId = entityId;
     }
 
-    public long getCheckerId() {
-        return checkerId;
+    public long getCheckedById() {
+        return checkedById;
     }
 
-    public void setCheckerId(long checkerId) {
-        this.checkerId = checkerId;
+    public void setCheckedById(long checkedById) {
+        this.checkedById = checkedById;
     }
 
     public boolean isChecked() {
@@ -122,12 +111,12 @@ public class ReportResponse {
         this.text = text;
     }
 
-    public int getWorkTimeSeconds() {
-        return workTimeSeconds;
+    public int getDayWorkTimeSeconds() {
+        return dayWorkTimeSeconds;
     }
 
-    public void setWorkTimeSeconds(int workTimeSeconds) {
-        this.workTimeSeconds = workTimeSeconds;
+    public void setDayWorkTimeSeconds(int dayWorkTimeSeconds) {
+        this.dayWorkTimeSeconds = dayWorkTimeSeconds;
     }
 
     public int getRate() {

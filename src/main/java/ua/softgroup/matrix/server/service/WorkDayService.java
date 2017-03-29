@@ -5,7 +5,6 @@ import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
-import ua.softgroup.matrix.server.supervisor.producer.json.ReportJson;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,7 +18,13 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
     int getTotalWorkSeconds(User author, Project project);
 
+    int getTotalWorkSeconds(User author, LocalDate date);
+
     int getCurrentMonthIdleSeconds(User author, Project project);
+
+    int getTotalIdleSeconds(User author, Project project);
+
+    int getTotalIdleSeconds(User author, LocalDate date);
 
     Optional<WorkDay> getByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate);
 
@@ -48,7 +53,5 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
     LocalDateTime getStartWorkOf(WorkDay workDay);
 
     LocalDateTime getEndWorkOf(WorkDay workDay);
-
-    ReportJson convertEntityToJson(WorkDay workDay);
 
 }

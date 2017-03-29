@@ -1,5 +1,7 @@
 package ua.softgroup.matrix.server.supervisor.producer.json;
 
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.DayJson;
+
 import java.time.LocalDate;
 import java.util.Set;
 

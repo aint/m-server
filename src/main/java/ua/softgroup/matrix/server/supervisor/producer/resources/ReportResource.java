@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.service.WorkDayService;
-import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
-import ua.softgroup.matrix.server.supervisor.producer.json.ReportResponse;
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.ReportResponse;
 
 import javax.servlet.ServletContext;
 import javax.validation.constraints.DecimalMin;
@@ -66,7 +66,6 @@ public class ReportResource {
 
     @GET
     @Path("/users")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "10) getUsersReports", response = ReportResponse.class, responseContainer = "List")
     public Response getReportsOfUsers(@ApiParam(example = "[1, 2, 13]") @QueryParam("userIds") List<Long> userIds,
@@ -86,10 +85,9 @@ public class ReportResource {
 
     @GET
     @Path("/projects")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "11) getEntitiesReports", response = ReportResponse.class, responseContainer = "List")
-    public Response getReportsOfProjects(@ApiParam(example = "[1, 2, 13]") @QueryParam("projectIds") List<Long> projectIds,
+    public Response getReportsOfProjects(@ApiParam(example = "[1, 2, 13]") @QueryParam("entityIds") List<Long> projectIds,
                                          @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                          @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
@@ -105,7 +103,6 @@ public class ReportResource {
     }
 
     @GET
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "12) getAllReports", response = ReportResponse.class, responseContainer = "List")
     public Response getReports(@ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
@@ -125,7 +122,6 @@ public class ReportResource {
         return new ReportResponse(
                 workDay.getId(),
                 workDay.getDate(),
-                workDay.getReportUpdated(),
                 workDay.getAuthor().getId(),
                 workDay.getProject().getId(),
                 workDay.getJailerId(),

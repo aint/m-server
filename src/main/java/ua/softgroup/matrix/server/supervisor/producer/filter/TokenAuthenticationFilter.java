@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.token.TokenHelper;
 
 import javax.servlet.ServletContext;

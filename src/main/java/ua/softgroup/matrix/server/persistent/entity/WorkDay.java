@@ -32,7 +32,7 @@ public class WorkDay extends AbstractEntity<Long> {
     private Integer idleSeconds = 0;
 
     @Column(columnDefinition = "TEXT")
-    private String reportText;
+    private String reportText = "";
 
     @ManyToOne
     private User author;

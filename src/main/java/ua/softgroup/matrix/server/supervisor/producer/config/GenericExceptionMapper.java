@@ -4,7 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.softgroup.matrix.server.supervisor.producer.exception.JwtException;
-import ua.softgroup.matrix.server.supervisor.producer.json.ErrorJson;
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
