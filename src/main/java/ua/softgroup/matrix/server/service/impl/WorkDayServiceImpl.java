@@ -61,7 +61,8 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
 
     @Override
     public int getTotalWorkSeconds(User author, LocalDate date) {
-        return getRepository().getTotalWorkSeconds(author.getId(), date);
+        return Optional.ofNullable(getRepository().getTotalWorkSeconds(author.getId(), date))
+                       .orElse(0);
     }
 
     @Override
@@ -74,12 +75,14 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
 
     @Override
     public int getTotalIdleSeconds(User author, Project project) {
-        return getRepository().getTotalIdleSeconds(author.getId(), project.getId());
+        return Optional.ofNullable(getRepository().getTotalIdleSeconds(author.getId(), project.getId()))
+                       .orElse(0);
     }
 
     @Override
     public int getTotalIdleSeconds(User author, LocalDate date) {
-        return getRepository().getTotalIdleSeconds(author.getId(), date);
+        return Optional.ofNullable(getRepository().getTotalIdleSeconds(author.getId(), date))
+                       .orElse(0);
     }
 
     @Override
