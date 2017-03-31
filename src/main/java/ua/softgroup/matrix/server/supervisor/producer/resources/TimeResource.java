@@ -73,6 +73,10 @@ public class TimeResource {
             @ApiResponse(code = 404, message = "When project not found", response = ErrorJson.class)
     })
     public Response getProjectWorkTime(@Min(0) @PathParam("entityId") Long projectId) {
+        if (projectService.getBySupervisorId(projectId).isEmpty()) {
+            throw new NotFoundException();
+        }
+
         List<UserTimeResponse> timeList = projectService.getBySupervisorId(projectId).stream()
                 .map(project -> {
                     User user = project.getUser();
@@ -95,6 +99,7 @@ public class TimeResource {
             @ApiResponse(code = 404, message = "When user not found", response = ErrorJson.class)
     })
     public Response getUserWorkTime(@Min(0) @PathParam("userId") Long userId) {
+        userService.getById(userId).orElseThrow(NotFoundException::new);
         List<UserProjectTimeResponse> timeList = projectService.getUserActiveProjects(userId).stream()
                 .map(project -> {
                     User user = project.getUser();

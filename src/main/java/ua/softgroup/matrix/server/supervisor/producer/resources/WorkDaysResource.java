@@ -17,6 +17,7 @@ import ua.softgroup.matrix.server.supervisor.producer.json.v2.Period;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.Report;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.UserWorkingDay;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
@@ -66,7 +67,7 @@ public class WorkDaysResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "1) getUserWorkingDays", response = UserWorkingDay.class, responseContainer = "List")
     @Transactional
-    public Response userWorkingDaysDno(@ApiParam(example = "1488")       @PathParam("userId") Long userId,
+    public Response userWorkingDaysDno(@ApiParam(example = "14") @Min(0) @PathParam("userId") Long userId,
                                        @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                        @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
@@ -147,7 +148,7 @@ public class WorkDaysResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "2) getEntityWorkingDays", response = ProjectWorkingDay.class, responseContainer = "List")
     @Transactional
-    public Response getEntityWorkingDays(@ApiParam(example = "1488")       @PathParam("entityId") Long projectId,
+    public Response getEntityWorkingDays(@ApiParam(example = "14") @Min(0) @PathParam("entityId") Long projectId,
                                          @ApiParam(example = "projects")   @PathParam("entityType") String entityType,
                                          @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                          @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {

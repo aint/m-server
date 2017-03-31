@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
+import ua.softgroup.matrix.server.service.ProjectService;
+import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.ReportResponse;
@@ -33,6 +35,7 @@ import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
@@ -48,10 +51,14 @@ public class ReportResource {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    private final UserService userService;
+    private final ProjectService projectService;
     private final WorkDayService workDayService;
 
     @Autowired
-    public ReportResource(WorkDayService workDayService) {
+    public ReportResource(UserService userService, ProjectService projectService, WorkDayService workDayService) {
+        this.userService = userService;
+        this.projectService = projectService;
         this.workDayService = workDayService;
     }
 
@@ -75,6 +82,16 @@ public class ReportResource {
         LocalDate from = LocalDate.parse(fromDate, formatter);
         LocalDate to = LocalDate.parse(toDate, formatter);
 
+        long userCount = userIds.stream()
+                .map(userService::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .count();
+
+        if ((userCount == 0) && (!userIds.isEmpty())) {
+            throw new NotFoundException();
+        }
+
         List<ReportResponse> reports = userIds.stream()
                 .flatMap(userId -> workDayService.getUserWorkDaysBetween(userId, from, to).stream())
                 .map(this::convertWorkDayToReportJson)
@@ -93,6 +110,16 @@ public class ReportResource {
 
         LocalDate from = LocalDate.parse(fromDate, formatter);
         LocalDate to = LocalDate.parse(toDate, formatter);
+
+        long projectCount = projectIds.stream()
+                .map(projectService::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .count();
+
+        if ((projectCount == 0) && (!projectIds.isEmpty())) {
+            throw new NotFoundException();
+        }
 
         List<ReportResponse> reports = projectIds.stream()
                 .flatMap(projectId -> workDayService.getProjectWorkDaysBetween(projectId, from, to).stream())
@@ -165,7 +192,8 @@ public class ReportResource {
                                 @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
         WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
-        workDay.setJailerId((Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE));
+        Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        workDay.setJailerId(checkerId == null ? 0L : checkerId);
         workDay.setChecked(true);
         workDay.setCoefficient(coefficient);
         workDayService.save(workDay);
