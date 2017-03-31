@@ -10,4 +10,6 @@ public interface WorkTimePeriodRepository extends CrudRepository<WorkTimePeriod,
 
     WorkTimePeriod findTopByWorkDayOrderByEndDesc(WorkDay workDay);
 
+    WorkTimePeriod findTopByWorkDayOrderByStartDesc(WorkDay workDay);
+
 }

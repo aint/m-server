@@ -109,6 +109,8 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         WorkDay workDay = workDayService.save(workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
                                                             .orElseGet(() -> new WorkDay(user, project, LocalDate.now())));
 
+        workTimePeriodService.save(new WorkTimePeriod(project.getWorkStarted().toLocalTime(), LocalTime.now(), workDay));
+
         LocalTime arrivalTime = workDayService.getStartWorkOf(workDay) == null
                 ? project.getWorkStarted().toLocalTime()
                 : workDayService.getStartWorkOf(workDay);
@@ -134,7 +136,9 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         workDay.setCurrencyId(project.getRateCurrencyId());
         workDayService.save(workDay);
 
-        workTimePeriodService.save(new WorkTimePeriod(project.getWorkStarted().toLocalTime(), LocalTime.now(), workDay));
+        WorkTimePeriod workTimePeriod = workTimePeriodService.getLatestPeriodOf(workDay).orElseThrow(NoSuchElementException::new);
+        workTimePeriod.setEnd(LocalTime.now());
+        workTimePeriodService.save(workTimePeriod);
 
         project.setWorkStarted(null);
         project.setCheckpointTime(null);
@@ -167,6 +171,10 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         workDay.setRate(project.getRate());
         workDay.setCurrencyId(project.getRateCurrencyId());
         workDayService.save(workDay);
+
+        WorkTimePeriod workTimePeriod = workTimePeriodService.getLatestPeriodOf(workDay).orElseThrow(NoSuchElementException::new);
+        workTimePeriod.setEnd(LocalTime.now());
+        workTimePeriodService.save(workTimePeriod);
 
         int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
         double downtimePercent = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());

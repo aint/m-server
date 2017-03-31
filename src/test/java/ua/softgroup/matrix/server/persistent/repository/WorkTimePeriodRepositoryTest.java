@@ -73,4 +73,9 @@ public class WorkTimePeriodRepositoryTest {
         assertThat(minWorkPeriod.getEnd()).isEqualTo(dateTime);
     }
 
+//    @Test
+    public void findTopByWorkDayOrderByStartDesc() throws Exception {
+        WorkTimePeriod wtp = workTimePeriodRepository.findTopByWorkDayOrderByStartDesc(workDay);
+    }
+
 }
