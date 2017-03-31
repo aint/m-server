@@ -126,9 +126,6 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
 
         int seconds = (int) Duration.between(startedWork, LocalDateTime.now()).toMillis() / 1000;
         LOG.debug("User {} worked {} seconds on project {}", user.getUsername(), seconds, project.getId());
-        project.setWorkStarted(null);
-        project.setCheckpointTime(null);
-        save(project);
 
         WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
                                         .orElseGet(() -> new WorkDay(user, project, LocalDate.now()));
@@ -138,6 +135,10 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         workDayService.save(workDay);
 
         workTimePeriodService.save(new WorkTimePeriod(project.getWorkStarted().toLocalTime(), LocalTime.now(), workDay));
+
+        project.setWorkStarted(null);
+        project.setCheckpointTime(null);
+        save(project);
 
         int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
         double downtimePercent = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());

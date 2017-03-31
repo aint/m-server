@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.softgroup.matrix.api.model.datamodels.ActiveWindowModel;
 import ua.softgroup.matrix.server.persistent.entity.Project;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
 import ua.softgroup.matrix.server.persistent.entity.TrackingData;
@@ -19,7 +20,7 @@ import ua.softgroup.matrix.server.service.WorkDayService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -42,8 +43,10 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
 
     @Override
     @Transactional
-    public void saveTrackingData(String userToken, Long projectId, String keyboardText, Double mouseFootage, Map<String, Integer> windowsTimeMap, byte[] screenshot) {
-        logger.info("Saving tracking data: symbols {}, mouse {}, windows {}", keyboardText.length(), mouseFootage, windowsTimeMap.size());
+    public void saveTrackingData(String userToken, Long projectId, String keyboardText, Double mouseFootage,
+                                 List<ActiveWindowModel> activeWindowList, byte[] screenshot) {
+
+        logger.info("Saving tracking data: symbols {}, mouse {}, windows {}", keyboardText.length(), mouseFootage, activeWindowList.size());
 
         TrackingData trackingData = getTrackingDataOf(userToken, projectId, LocalDate.now());
         trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
@@ -51,8 +54,8 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
         if (screenshot != null) {
             trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), trackingData));
         }
-        windowsTimeMap.entrySet().stream()
-                .map(entry -> new WindowTime(entry.getKey(), entry.getValue(), trackingData))
+        activeWindowList.stream()
+                .map(entry -> new WindowTime(entry.getWindowTitle(), entry.getStartTime(), entry.getWorkingPeriodSeconds(), trackingData))
                 .forEach(windowTime -> trackingData.getActiveWindows().add(windowTime));
 
         save(trackingData);

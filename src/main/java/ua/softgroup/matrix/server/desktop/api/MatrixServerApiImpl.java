@@ -20,8 +20,6 @@ import ua.softgroup.matrix.server.service.TrackingDataService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 
-import java.util.HashMap;
-
 @SuppressWarnings("rawtypes")
 @Service
 public class MatrixServerApiImpl implements MatrixServerApi {
@@ -108,8 +106,7 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 requestModel.getProjectId(),
                 checkPointModel.getKeyboardLogs(),
                 checkPointModel.getMouseFootage(),
-                new HashMap<>(),
-//                checkPointModel.getWindowsTimeMap(),
+                checkPointModel.getActiveWindows(),
                 checkPointModel.getScreenshot());
 
         return new ResponseModel<>(projectService.saveCheckpointTime(requestModel.getToken(),

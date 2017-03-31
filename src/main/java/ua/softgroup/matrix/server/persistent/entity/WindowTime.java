@@ -3,6 +3,7 @@ package ua.softgroup.matrix.server.persistent.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import java.time.LocalTime;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -15,6 +16,9 @@ public class WindowTime extends AbstractEntity<Long> {
     private String windowTitle;
 
     @Column
+    private LocalTime startTime;
+
+    @Column
     private Integer time = 0;
 
     @ManyToOne
@@ -23,8 +27,9 @@ public class WindowTime extends AbstractEntity<Long> {
     public WindowTime() {
     }
 
-    public WindowTime(String windowTitle, Integer time, TrackingData trackingData) {
+    public WindowTime(String windowTitle, LocalTime startTime, Integer time, TrackingData trackingData) {
         this.windowTitle = windowTitle;
+        this.startTime = startTime;
         this.time = time;
         this.trackingData = trackingData;
     }
@@ -37,11 +42,27 @@ public class WindowTime extends AbstractEntity<Long> {
         this.windowTitle = windowTitle;
     }
 
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
     public Integer getTime() {
         return time;
     }
 
     public void setTime(Integer time) {
         this.time = time;
+    }
+
+    public TrackingData getTrackingData() {
+        return trackingData;
+    }
+
+    public void setTrackingData(TrackingData trackingData) {
+        this.trackingData = trackingData;
     }
 }
