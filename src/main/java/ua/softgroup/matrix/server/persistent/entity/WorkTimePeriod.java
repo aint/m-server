@@ -3,17 +3,17 @@ package ua.softgroup.matrix.server.persistent.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 public class WorkTimePeriod extends AbstractEntity<Long> {
     private static final long serialVersionUID = 2140610419978157701L;
 
     @Column
-    private LocalDateTime start;
+    private LocalTime start;
 
     @Column
-    private LocalDateTime end;
+    private LocalTime end;
 
     @ManyToOne
     private WorkDay workDay;
@@ -21,25 +21,25 @@ public class WorkTimePeriod extends AbstractEntity<Long> {
     public WorkTimePeriod() {
     }
 
-    public WorkTimePeriod(LocalDateTime start, LocalDateTime end, WorkDay workDay) {
+    public WorkTimePeriod(LocalTime start, LocalTime end, WorkDay workDay) {
         this.start = start;
         this.end = end;
         this.workDay = workDay;
     }
 
-    public LocalDateTime getStart() {
+    public LocalTime getStart() {
         return start;
     }
 
-    public void setStart(LocalDateTime start) {
+    public void setStart(LocalTime start) {
         this.start = start;
     }
 
-    public LocalDateTime getEnd() {
+    public LocalTime getEnd() {
         return end;
     }
 
-    public void setEnd(LocalDateTime end) {
+    public void setEnd(LocalTime end) {
         this.end = end;
     }
 

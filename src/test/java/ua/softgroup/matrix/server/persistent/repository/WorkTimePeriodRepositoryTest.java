@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,14 +33,14 @@ public class WorkTimePeriodRepositoryTest {
     TestEntityManager entityManager;
 
     private WorkDay workDay;
-    private LocalDateTime startTime;
+    private LocalTime startTime;
 
     @Before
     public void setUp() throws Exception {
         workDay = new WorkDay();
         entityManager.persist(workDay);
 
-        startTime = LocalDateTime.now();
+        startTime = LocalTime.now();
 
         IntStream.rangeClosed(0, WORK_PERIOD_COUNT - 1)
                  .forEach(i -> entityManager.persist(new WorkTimePeriod(startTime.plusMinutes(i),
@@ -64,10 +64,10 @@ public class WorkTimePeriodRepositoryTest {
     public void findTopByWorkDayOrderByEndDesc() throws Exception {
         WorkTimePeriod minWorkPeriod = workTimePeriodRepository.findTopByWorkDayOrderByEndDesc(workDay);
 
-        LocalDateTime dateTime = workDay.getWorkTimePeriods().stream()
+        LocalTime dateTime = workDay.getWorkTimePeriods().stream()
                 .map(WorkTimePeriod::getEnd)
                 .peek(System.out::println)
-                .max(LocalDateTime::compareTo)
+                .max(LocalTime::compareTo)
                 .orElse(null);
 
         assertThat(minWorkPeriod.getEnd()).isEqualTo(dateTime);

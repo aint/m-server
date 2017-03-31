@@ -92,8 +92,8 @@ public class DesktopResource {
                         workDay.getId(),
                         workDay.getProject().getId(),
                         workDay.getDate(),
-                        workDayService.getStartWorkOf(workDay).toLocalTime(),
-                        workDayService.getEndWorkOf(workDay).toLocalTime(),
+                        workDayService.getStartWorkOf(workDay),
+                        workDayService.getEndWorkOf(workDay),
                         workDay.getWorkSeconds(),
                         workDay.getIdleSeconds(),
                         calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds()),
@@ -104,7 +104,7 @@ public class DesktopResource {
                         workDay.getRate(),
                         workDay.getCurrencyId(),
                         workDay.getWorkTimePeriods().stream()
-                                .map(wp -> new WorkPeriod(wp.getStart().toLocalTime(), wp.getEnd().toLocalTime()))
+                                .map(wp -> new WorkPeriod(wp.getStart(), wp.getEnd()))
                                 .collect(Collectors.toSet())))
                 .collect(Collectors.toSet()));
         return summaryDayJson;

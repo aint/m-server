@@ -1,13 +1,15 @@
 package ua.softgroup.matrix.server.supervisor.producer.json.v2;
 
+import java.time.LocalTime;
+
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 public class Executor {
 
-    private long id;
-    private String start;
-    private String end;
+    private Long id;
+    private LocalTime start;
+    private LocalTime end;
     private int dayWorkTimeSeconds;
     private int idleTimeSeconds;
     private double idlePercentage;
@@ -16,7 +18,7 @@ public class Executor {
     public Executor() {
     }
 
-    public Executor(Long id, String start, String end, int dayWorkTimeSeconds, int idleTimeSeconds,
+    public Executor(Long id, LocalTime start, LocalTime end, int dayWorkTimeSeconds, int idleTimeSeconds,
                     double idlePercentage, Report reports) {
         this.id = id;
         this.start = start;
@@ -27,27 +29,27 @@ public class Executor {
         this.reports = reports;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getStart() {
+    public LocalTime getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(LocalTime start) {
         this.start = start;
     }
 
-    public String getEnd() {
+    public LocalTime getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(LocalTime end) {
         this.end = end;
     }
 

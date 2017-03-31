@@ -19,6 +19,7 @@ import ua.softgroup.matrix.server.service.WorkDayService;
 import javax.validation.Validator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -182,14 +183,14 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
-    public LocalDateTime getStartWorkOf(WorkDay workDay) {
+    public LocalTime getStartWorkOf(WorkDay workDay) {
         return Optional.ofNullable(workTimePeriodRepository.findTopByWorkDayOrderByStartAsc(workDay))
                        .orElseGet(WorkTimePeriod::new)
                        .getStart();
     }
 
     @Override
-    public LocalDateTime getEndWorkOf(WorkDay workDay) {
+    public LocalTime getEndWorkOf(WorkDay workDay) {
         return Optional.ofNullable(workTimePeriodRepository.findTopByWorkDayOrderByEndDesc(workDay))
                        .orElseGet(WorkTimePeriod::new)
                        .getEnd();

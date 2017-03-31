@@ -7,12 +7,12 @@ import java.time.LocalDate;
  */
 public class ReportResponse {
 
-    private long id;
+    private Long id;
     private String entityType = "project";
     private LocalDate date;
-    private long authorId;
-    private long entityId;
-    private long checkedById;
+    private Long authorId;
+    private Long entityId;
+    private Long checkedById;
     private boolean checked;
     private double coefficient;
     private String text;
@@ -23,7 +23,7 @@ public class ReportResponse {
     public ReportResponse() {
     }
 
-    public ReportResponse(long id, LocalDate date, long authorId, long entityId, long checkedById,
+    public ReportResponse(Long id, LocalDate date, Long authorId, Long entityId, Long checkedById,
                           boolean checked, double coefficient, String text, int dayWorkTimeSeconds,
                           int rate, int currencyId) {
         this.id = id;
@@ -39,11 +39,11 @@ public class ReportResponse {
         this.currencyId = currencyId;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -63,27 +63,27 @@ public class ReportResponse {
         this.date = date;
     }
 
-    public long getAuthorId() {
+    public Long getAuthorId() {
         return authorId;
     }
 
-    public void setAuthorId(long authorId) {
+    public void setAuthorId(Long authorId) {
         this.authorId = authorId;
     }
 
-    public long getEntityId() {
+    public Long getEntityId() {
         return entityId;
     }
 
-    public void setEntityId(long entityId) {
+    public void setEntityId(Long entityId) {
         this.entityId = entityId;
     }
 
-    public long getCheckedById() {
+    public Long getCheckedById() {
         return checkedById;
     }
 
-    public void setCheckedById(long checkedById) {
+    public void setCheckedById(Long checkedById) {
         this.checkedById = checkedById;
     }
 

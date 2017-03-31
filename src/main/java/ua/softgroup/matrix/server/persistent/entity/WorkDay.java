@@ -44,7 +44,7 @@ public class WorkDay extends AbstractEntity<Long> {
     private boolean checked;
 
     @Column
-    private Long jailerId = 0L;
+    private Long jailerId;
 
     @Column
     private Double coefficient = 1.0;

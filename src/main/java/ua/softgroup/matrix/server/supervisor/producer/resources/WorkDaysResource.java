@@ -11,9 +11,9 @@ import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
-import ua.softgroup.matrix.server.supervisor.producer.json.v2.ProjectWorkingDay;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.Executor;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.Period;
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.ProjectWorkingDay;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.Report;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.UserWorkingDay;
 
@@ -27,7 +27,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -95,8 +94,8 @@ public class WorkDaysResource {
         Set<Period> periods = workDaySet.stream()
                 .flatMap(workDay -> workDay.getWorkTimePeriods().stream())
                 .map(wtp -> new Period(
-                        wtp.getStart().toLocalTime().toString(),
-                        wtp.getEnd().toLocalTime().toString(),
+                        wtp.getStart(),
+                        wtp.getEnd(),
                         wtp.getWorkDay().getWorkSeconds(),
                         wtp.getWorkDay().getIdleSeconds(),
                         calculateIdlePercent(wtp.getWorkDay().getWorkSeconds(), wtp.getWorkDay().getIdleSeconds()),
@@ -126,13 +125,11 @@ public class WorkDaysResource {
                 workDaySet.stream()
                         .map(workDayService::getStartWorkOf)
                         .filter(Objects::nonNull)
-                        .map(LocalDateTime::toLocalTime)
                         .min(LocalTime::compareTo)
                         .orElse(null),
                 workDaySet.stream()
                         .map(workDayService::getEndWorkOf)
                         .filter(Objects::nonNull)
-                        .map(LocalDateTime::toLocalTime)
                         .max(LocalTime::compareTo)
                         .orElse(null),
                 totalWorkSeconds,
@@ -190,8 +187,8 @@ public class WorkDaysResource {
         projectWorkingDay.setExecutors(workDays.stream()
                 .map(workDay -> new Executor(
                         workDay.getAuthor().getId(),
-                        workDayService.getStartWorkOf(workDay).toLocalTime().toString(),
-                        workDayService.getEndWorkOf(workDay).toLocalTime().toString(),
+                        workDayService.getStartWorkOf(workDay),
+                        workDayService.getEndWorkOf(workDay),
                         workDay.getWorkSeconds(),
                         workDay.getIdleSeconds(),
                         calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds()),

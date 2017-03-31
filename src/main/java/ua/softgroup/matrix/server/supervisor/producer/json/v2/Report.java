@@ -5,11 +5,11 @@ package ua.softgroup.matrix.server.supervisor.producer.json.v2;
  */
 public class Report {
 
-    private long id;
-    private long entityId;
+    private Long id;
+    private Long entityId;
     private String entityType = "project";
     private boolean checked;
-    private long checkedById;
+    private Long checkedById;
     private double coefficient = 1.0f;
     private String text;
     private int dayWorkTimeSeconds;
@@ -19,7 +19,7 @@ public class Report {
     public Report() {
     }
 
-    public Report(long id, long entityId, boolean checked, long checkedById, double coefficient,
+    public Report(Long id, Long entityId, boolean checked, Long checkedById, double coefficient,
                   String text, int dayWorkTimeSeconds, int rate, int currencyId) {
         this.id = id;
         this.entityId = entityId;
@@ -32,19 +32,19 @@ public class Report {
         this.currencyId = currencyId;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public long getEntityId() {
+    public Long getEntityId() {
         return entityId;
     }
 
-    public void setEntityId(long entityId) {
+    public void setEntityId(Long entityId) {
         this.entityId = entityId;
     }
 
@@ -64,11 +64,11 @@ public class Report {
         this.checked = checked;
     }
 
-    public long getCheckedById() {
+    public Long getCheckedById() {
         return checkedById;
     }
 
-    public void setCheckedById(long checkedById) {
+    public void setCheckedById(Long checkedById) {
         this.checkedById = checkedById;
     }
 

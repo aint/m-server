@@ -1,16 +1,18 @@
 package ua.softgroup.matrix.server.supervisor.producer.json.v2;
 
+import java.time.LocalTime;
+
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
 public class Period {
 
-    private String start;
-    private String end;
+    private LocalTime start;
+    private LocalTime end;
     private int workTimeSeconds;
     private int idleTimeSeconds;
     private double idlePercentage;
-    private long entityId;
+    private Long entityId;
     private String entityType= "project";
     private int rate;
     private int currencyId;
@@ -18,7 +20,7 @@ public class Period {
     public Period() {
     }
 
-    public Period(String start, String end, int workTimeSeconds, int idleTimeSeconds, double idlePercentage,
+    public Period(LocalTime start, LocalTime end, int workTimeSeconds, int idleTimeSeconds, double idlePercentage,
                   long entityId, int rate, int currencyId) {
         this.start = start;
         this.end = end;
@@ -30,19 +32,19 @@ public class Period {
         this.currencyId = currencyId;
     }
 
-    public String getStart() {
+    public LocalTime getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(LocalTime start) {
         this.start = start;
     }
 
-    public String getEnd() {
+    public LocalTime getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(LocalTime end) {
         this.end = end;
     }
 
@@ -70,11 +72,11 @@ public class Period {
         this.idlePercentage = idlePercentage;
     }
 
-    public long getEntityId() {
+    public Long getEntityId() {
         return entityId;
     }
 
-    public void setEntityId(long entityId) {
+    public void setEntityId(Long entityId) {
         this.entityId = entityId;
     }
 

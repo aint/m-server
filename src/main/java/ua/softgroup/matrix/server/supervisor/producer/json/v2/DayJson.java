@@ -11,9 +11,9 @@ import java.util.Set;
  */
 public class DayJson {
 
-    private long id;
+    private Long id;
     private String entityType = "project"; //TODO use enum
-    private long projectId;
+    private Long projectId;
     private LocalDate date;
     private LocalTime start;
     private LocalTime end;
@@ -21,7 +21,7 @@ public class DayJson {
     private int idleSeconds;
     private double idlePercentage;
     private boolean checked;
-    private long checkerId;
+    private Long checkerId;
     private double coefficient = 1.0f;
     private String reportText = "";
     private int rate;
@@ -31,8 +31,8 @@ public class DayJson {
     public DayJson() {
     }
 
-    public DayJson(long id, long projectId, LocalDate date, LocalTime start, LocalTime end, int workSeconds, int idleSeconds,
-                   double idlePercentage, boolean checked, long checkerId, double coefficient, String reportText,
+    public DayJson(Long id, Long projectId, LocalDate date, LocalTime start, LocalTime end, int workSeconds, int idleSeconds,
+                   double idlePercentage, boolean checked, Long checkerId, double coefficient, String reportText,
                    int rate, int currencyId, Set<WorkPeriod> workPeriods) {
         this.id = id;
         this.projectId = projectId;
@@ -67,11 +67,11 @@ public class DayJson {
         this.entityType = entityType;
     }
 
-    public long getProjectId() {
+    public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(long projectId) {
+    public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
 
@@ -131,11 +131,11 @@ public class DayJson {
         this.checked = checked;
     }
 
-    public long getCheckerId() {
+    public Long getCheckerId() {
         return checkerId;
     }
 
-    public void setCheckerId(long checkerId) {
+    public void setCheckerId(Long checkerId) {
         this.checkerId = checkerId;
     }
 

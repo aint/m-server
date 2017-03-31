@@ -7,7 +7,7 @@ import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -50,8 +50,8 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
     ResponseStatus saveReportOrUpdate(String userToken, Long projectId, ReportModel reportModel);
 
-    LocalDateTime getStartWorkOf(WorkDay workDay);
+    LocalTime getStartWorkOf(WorkDay workDay);
 
-    LocalDateTime getEndWorkOf(WorkDay workDay);
+    LocalTime getEndWorkOf(WorkDay workDay);
 
 }

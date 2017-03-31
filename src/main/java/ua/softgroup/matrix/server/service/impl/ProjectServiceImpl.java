@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -108,8 +109,8 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         WorkDay workDay = workDayService.save(workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now())
                                                             .orElseGet(() -> new WorkDay(user, project, LocalDate.now())));
 
-        LocalDateTime arrivalTime = workDayService.getStartWorkOf(workDay) == null
-                ? project.getWorkStarted()
+        LocalTime arrivalTime = workDayService.getStartWorkOf(workDay) == null
+                ? project.getWorkStarted().toLocalTime()
                 : workDayService.getStartWorkOf(workDay);
         return new TimeModel(0, 0, arrivalTime, 0);
     }
@@ -136,7 +137,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         workDay.setCurrencyId(project.getRateCurrencyId());
         workDayService.save(workDay);
 
-        workTimePeriodService.save(new WorkTimePeriod(project.getWorkStarted(), LocalDateTime.now(), workDay));
+        workTimePeriodService.save(new WorkTimePeriod(project.getWorkStarted().toLocalTime(), LocalTime.now(), workDay));
 
         int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
         double downtimePercent = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
@@ -168,8 +169,8 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
 
         int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
         double downtimePercent = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
-        LocalDateTime arrivalTime = workDayService.getStartWorkOf(workDay) == null
-                ? project.getWorkStarted()
+        LocalTime arrivalTime = workDayService.getStartWorkOf(workDay) == null
+                ? project.getWorkStarted().toLocalTime()
                 : workDayService.getStartWorkOf(workDay);
         return new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), arrivalTime, downtimePercent);
     }
@@ -244,7 +245,7 @@ public class ProjectServiceImpl extends AbstractEntityTransactionalService<Proje
         double downtimePercent = calculateIdlePercent(totalWorkSeconds, currentMonthIdleSeconds);
         WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(project.getUser(), project, LocalDate.now())
                                         .orElseGet(WorkDay::new);
-        LocalDateTime arrivalTime = workDayService.getStartWorkOf(workDay.isNew() ? null : workDay);
+        LocalTime arrivalTime = workDayService.getStartWorkOf(workDay.isNew() ? null : workDay);
         projectModel.setProjectTime(new TimeModel(totalWorkSeconds, workDay.getWorkSeconds(), arrivalTime, downtimePercent));
 
         return projectModel;
