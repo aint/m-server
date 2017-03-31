@@ -6,6 +6,6 @@ import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 
 public interface TrackingDataRepository extends CrudRepository<TrackingData, Long> {
 
-    TrackingData findByWorkDay(WorkDay workDay);
+    TrackingData findByWorkTimePeriodWorkDay(WorkDay workDay);
 
 }

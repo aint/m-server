@@ -32,14 +32,14 @@ public class TrackingData extends AbstractEntity<Long> {
     private List<WindowTime> activeWindows = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_day_id")
-    private WorkDay workDay;
+    @JoinColumn(name = "work_period_id")
+    private WorkTimePeriod workTimePeriod;
 
     public TrackingData() {
     }
 
-    public TrackingData(WorkDay workDay) {
-        this.workDay = workDay;
+    public TrackingData(WorkTimePeriod workTimePeriod) {
+        this.workTimePeriod = workTimePeriod;
     }
 
     public String getKeyboardText() {
@@ -74,11 +74,11 @@ public class TrackingData extends AbstractEntity<Long> {
         this.activeWindows = activeWindows;
     }
 
-    public WorkDay getWorkDay() {
-        return workDay;
+    public WorkTimePeriod getWorkTimePeriod() {
+        return workTimePeriod;
     }
 
-    public void setWorkDay(WorkDay workDay) {
-        this.workDay = workDay;
+    public void setWorkTimePeriod(WorkTimePeriod workTimePeriod) {
+        this.workTimePeriod = workTimePeriod;
     }
 }

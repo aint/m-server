@@ -5,10 +5,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -54,9 +52,6 @@ public class WorkDay extends AbstractEntity<Long> {
 
     @Column
     private Integer currencyId = 0;
-
-    @OneToOne(mappedBy = "workDay", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private TrackingData trackingData;
 
     @ManyToOne
     private Project project;
@@ -169,14 +164,6 @@ public class WorkDay extends AbstractEntity<Long> {
 
     public void setCurrencyId(Integer currencyId) {
         this.currencyId = currencyId;
-    }
-
-    public TrackingData getTrackingData() {
-        return trackingData;
-    }
-
-    public void setTrackingData(TrackingData trackingData) {
-        this.trackingData = trackingData;
     }
 
     public Project getProject() {

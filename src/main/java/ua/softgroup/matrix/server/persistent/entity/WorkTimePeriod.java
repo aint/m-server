@@ -1,8 +1,11 @@
 package ua.softgroup.matrix.server.persistent.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import java.time.LocalTime;
 
 @Entity
@@ -15,10 +18,20 @@ public class WorkTimePeriod extends AbstractEntity<Long> {
     @Column
     private LocalTime end;
 
+    @OneToOne(mappedBy = "workTimePeriod", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private TrackingData trackingData = new TrackingData();
+
     @ManyToOne
     private WorkDay workDay;
 
     public WorkTimePeriod() {
+    }
+
+    public WorkTimePeriod(LocalTime start, LocalTime end, TrackingData trackingData, WorkDay workDay) {
+        this.start = start;
+        this.end = end;
+        this.trackingData = trackingData;
+        this.workDay = workDay;
     }
 
     public WorkTimePeriod(LocalTime start, LocalTime end, WorkDay workDay) {
@@ -41,6 +54,14 @@ public class WorkTimePeriod extends AbstractEntity<Long> {
 
     public void setEnd(LocalTime end) {
         this.end = end;
+    }
+
+    public TrackingData getTrackingData() {
+        return trackingData;
+    }
+
+    public void setTrackingData(TrackingData trackingData) {
+        this.trackingData = trackingData;
     }
 
     public WorkDay getWorkDay() {
