@@ -162,22 +162,6 @@ public class ReportResource {
     }
 
     @POST
-    @Path("/check")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("16) checkAllReports")
-    @ApiResponses(@ApiResponse(code = 200, message = "When all unchecked reports has been successfully checked"))
-    public Response checkAllReports(@Context ServletContext context) {
-        workDayService.getAllNotCheckedWorkDays()
-                .forEach(workDay -> {
-                    workDay.setJailerId((Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE));
-                    workDay.setChecked(true);
-                    workDayService.save(workDay);
-                });
-
-        return Response.ok().build();
-    }
-
-    @POST
     @Path("/check/{reportId}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
@@ -209,10 +193,11 @@ public class ReportResource {
     public Response checkReportsOfUsers(@Context ServletContext context,
                                         @ApiParam(example = "[1, 2]") List<Long> userIds) {
 
+        Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         userIds.stream()
                 .flatMap(userId -> workDayService.getUserNotCheckedWorkDays(userId).stream())
                 .forEach(workDay -> {
-                    workDay.setJailerId((Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE));
+                    workDay.setJailerId(checkerId == null ? 0L : checkerId);
                     workDay.setChecked(true);
                     workDayService.save(workDay);
                 });
@@ -229,10 +214,28 @@ public class ReportResource {
     public Response checkReportsOfProject(@Context ServletContext context,
                                           @ApiParam(example = "[1, 2]") List<Long> projectIds) {
 
+        Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         projectIds.stream()
                 .flatMap(projectId -> workDayService.getProjectNotCheckedWorkDays(projectId).stream())
                 .forEach(workDay -> {
-                    workDay.setJailerId((Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE));
+                    workDay.setJailerId(checkerId == null ? 0L : checkerId);
+                    workDay.setChecked(true);
+                    workDayService.save(workDay);
+                });
+
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/check")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("16) checkAllReports")
+    @ApiResponses(@ApiResponse(code = 200, message = "When all unchecked reports has been successfully checked"))
+    public Response checkAllReports(@Context ServletContext context) {
+        Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        workDayService.getAllNotCheckedWorkDays()
+                .forEach(workDay -> {
+                    workDay.setJailerId(checkerId == null ? 0L : checkerId);
                     workDay.setChecked(true);
                     workDayService.save(workDay);
                 });
