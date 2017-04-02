@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import ua.softgroup.matrix.server.persistent.entity.TrackingData;
 import ua.softgroup.matrix.server.supervisor.producer.resources.DesktopResource;
 import ua.softgroup.matrix.server.supervisor.producer.resources.ReportResource;
 import ua.softgroup.matrix.server.supervisor.producer.resources.WorkDaysResource;
@@ -30,6 +31,7 @@ public class JerseyConfig extends ResourceConfig {
         register(ReportResource.class);
         register(WorkDaysResource.class);
         register(TimeResource.class);
+        register(TrackingDataResource.class);
         register(DesktopResource.class);
 
         register(GenericExceptionMapper.class);

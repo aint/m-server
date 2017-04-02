@@ -28,7 +28,7 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
     Optional<WorkDay> getByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate);
 
-    Set<WorkDay> getAllWorkDaysOf(User user, Project project);
+    Set<WorkDay> getAllWorkDaysOf(Long userId, Long projectSupervisorId, LocalDate from, LocalDate to);
 
     Set<WorkDay> getAllWorkDaysOf(User user, LocalDate localDate);
 
