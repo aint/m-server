@@ -107,7 +107,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 checkPointModel.getKeyboardLogs(),
                 checkPointModel.getMouseFootage(),
                 checkPointModel.getActiveWindows(),
-                checkPointModel.getScreenshot());
+                checkPointModel.getScreenshot(),
+                checkPointModel.getScreenshotWindowTitle());
 
         return new ResponseModel<>(projectService.saveCheckpointTime(requestModel.getToken(),
                                                                      requestModel.getProjectId(),

@@ -16,12 +16,12 @@ public class TrackingPeriodJson {
     public TrackingPeriodJson() {
     }
 
-    public TrackingPeriodJson(LocalTime start, LocalTime end, String windowName, String keyLogger, String screenshot) {
+    public TrackingPeriodJson(LocalTime start, LocalTime end, String keyLogger, String[] screenshotAndTitle) {
         this.start = start;
         this.end = end;
-        this.windowName = windowName;
         this.keyLogger = keyLogger;
-        this.screenshot = screenshot;
+        this.screenshot = screenshotAndTitle[0];
+        this.windowName = screenshotAndTitle[1];
     }
 
     public LocalTime getStart() {

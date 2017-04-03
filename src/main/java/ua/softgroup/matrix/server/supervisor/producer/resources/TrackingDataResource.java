@@ -199,18 +199,20 @@ public class TrackingDataResource {
                 .map(workTimePeriod -> new TrackingPeriodJson(
                         workTimePeriod.getStart(),
                         workTimePeriod.getEnd(),
-                        null,
                         workTimePeriod.getTrackingData().getKeyboardText(),
                         convertRandomScreenshotToBase64(workTimePeriod.getTrackingData().getScreenshots())
                 ))
                 .collect(Collectors.toList());
     }
 
-    private String convertRandomScreenshotToBase64(Set<Screenshot> screenshots) {
-        return screenshots.stream()
-                .map(screenshot -> "data:image/png;base64," + Base64.getEncoder().encodeToString(screenshot.getImageBytes()))
+    private String[] convertRandomScreenshotToBase64(Set<Screenshot> screenshots) {
+        Screenshot screenshot = screenshots.stream()
                 .findAny()
-                .orElse(null);
+                .orElseGet(Screenshot::new);
+
+        return new String[] {
+                "data:image/png;base64," + Base64.getEncoder().encodeToString(screenshot.getImageBytes()),
+                screenshot.getScreenshotTitle()};
     }
 
 }

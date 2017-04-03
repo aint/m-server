@@ -19,15 +19,19 @@ public class Screenshot extends AbstractEntity<Long> {
     @Column
     private LocalDateTime creationTime;
 
+    @Column(columnDefinition = "TEXT")
+    private String screenshotTitle;
+
     @ManyToOne
     private TrackingData trackingData;
 
     public Screenshot() {
     }
 
-    public Screenshot(byte[] imageBytes, LocalDateTime creationTime, TrackingData trackingData) {
+    public Screenshot(byte[] imageBytes, LocalDateTime creationTime, String screenshotTitle, TrackingData trackingData) {
         this.imageBytes = imageBytes;
         this.creationTime = creationTime;
+        this.screenshotTitle = screenshotTitle;
         this.trackingData = trackingData;
     }
 
@@ -45,6 +49,14 @@ public class Screenshot extends AbstractEntity<Long> {
 
     public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
+    }
+
+    public String getScreenshotTitle() {
+        return screenshotTitle;
+    }
+
+    public void setScreenshotTitle(String screenshotTitle) {
+        this.screenshotTitle = screenshotTitle;
     }
 
     public TrackingData getTrackingData() {

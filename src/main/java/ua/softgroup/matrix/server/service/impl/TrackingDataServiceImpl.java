@@ -50,7 +50,7 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
     @Override
     @Transactional
     public void saveTrackingData(String userToken, Long projectId, String keyboardText, Double mouseFootage,
-                                 List<ActiveWindowModel> activeWindowList, byte[] screenshot) {
+                                 List<ActiveWindowModel> activeWindowList, byte[] screenshot, String screenshotTitle) {
 
         logger.info("Saving tracking data: symbols {}, mouse {}, windows {}", keyboardText.length(), mouseFootage, activeWindowList.size());
 
@@ -65,7 +65,7 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
         trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
         trackingData.setMouseFootage(trackingData.getMouseFootage() + mouseFootage);
         if (screenshot != null) {
-            trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), trackingData));
+            trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), screenshotTitle, trackingData));
         }
         activeWindowList.stream()
                 .map(entry -> new WindowTime(entry.getWindowTitle(), entry.getStartTime(), entry.getWorkingPeriodSeconds(), trackingData))
