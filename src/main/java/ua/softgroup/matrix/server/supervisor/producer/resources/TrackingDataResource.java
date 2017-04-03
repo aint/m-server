@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
+import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.service.ProjectService;
@@ -133,6 +134,7 @@ public class TrackingDataResource {
 
     private GeneralWorkDataJson convertToUserAndProjectTrackingData(WorkDay workDay) {
         return new GeneralWorkDataJson(
+                workDay.getDate(),
                 workDayService.getStartWorkOf(workDay),
                 workDayService.getEndWorkOf(workDay),
                 workDay.getWorkSeconds(),
@@ -145,30 +147,43 @@ public class TrackingDataResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "5) getUserControlData", response = TrackingDataJson.class, responseContainer = "List")
     @Transactional
-    @JsonView(TrackingDataViewType.USER.class)
+    @JsonView(TrackingDataViewType.PROJECT.class)
     public Response getTrackingDataByUser(@ApiParam(example = "14") @Min(0) @PathParam("userId") Long userId,
                                           @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                           @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
-        userService.getById(userId).orElseThrow(NotFoundException::new);
+        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
 
-        List<GeneralWorkDataJson> result =
-                workDayService.getUserWorkDaysBetween(userId, parseData(fromDate), parseData(toDate))
-                        .stream()
-                        .map(this::convertToUserTrackingData)
-                        .collect(Collectors.toList());
+        LocalDate from = parseData(fromDate);
+        LocalDate to = parseData(toDate);
+        to = to.isAfter(LocalDate.now()) ? LocalDate.now().plusDays(1) : to;
+
+        List<TrackingDataJson> result = Stream.iterate(from, date -> date.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(from, to))
+                .map(localDate -> workDayService.getAllWorkDaysOf(user, localDate))
+                .filter(not(Set::isEmpty))
+                .map(this::convertToUserTrackingData)
+                .collect(Collectors.toList());
 
         return Response.ok(result).build();
     }
 
-    private GeneralWorkDataJson convertToUserTrackingData(WorkDay workDay) {
-        return new GeneralWorkDataJson(
-                workDay.getProject().getSupervisorId(),
-                null,
-                workDayService.getStartWorkOf(workDay),
-                workDayService.getEndWorkOf(workDay),
-                workDay.getWorkSeconds(),
-                convertWorkTimePeriods(workDay.getWorkTimePeriods())
+    private TrackingDataJson convertToUserTrackingData(Set<WorkDay> workDays) {
+        List<TrackingPeriodJson> trackingDataPeriods = workDays.stream()
+                .flatMap(workDay -> convertWorkTimePeriods(workDay.getWorkTimePeriods()).stream())
+                .collect(Collectors.toList());
+
+        return new TrackingDataJson(
+                getDateOfWorkDay(workDays),
+                workDays.stream()
+                        .map(workDay -> new GeneralWorkDataJson(
+                                workDay.getProject().getSupervisorId(),
+                                "project",
+                                workDayService.getStartWorkOf(workDay),
+                                workDayService.getEndWorkOf(workDay),
+                                workDay.getWorkSeconds(),
+                                trackingDataPeriods))
+                        .collect(Collectors.toList())
         );
     }
 
@@ -193,7 +208,7 @@ public class TrackingDataResource {
 
     private String convertRandomScreenshotToBase64(Set<Screenshot> screenshots) {
         return screenshots.stream()
-                .map(screenshot -> Base64.getEncoder().encodeToString(screenshot.getImageBytes()))
+                .map(screenshot -> "data:image/png;base64," + Base64.getEncoder().encodeToString(screenshot.getImageBytes()))
                 .findAny()
                 .orElse(null);
     }
