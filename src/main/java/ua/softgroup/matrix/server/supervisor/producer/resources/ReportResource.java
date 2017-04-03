@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
 /**
@@ -109,21 +110,17 @@ public class ReportResource {
                                          @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                          @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
-        LocalDate from = LocalDate.parse(fromDate, formatter);
-        LocalDate to = LocalDate.parse(toDate, formatter);
-
         long projectCount = projectIds.stream()
-                .map(projectService::getById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(projectService::getBySupervisorId)
+                .filter(projects -> !projects.isEmpty())
                 .count();
 
-        if ((projectCount == 0) && (!projectIds.isEmpty())) {
+        if (projectCount == 0) {
             throw new NotFoundException();
         }
 
         List<ReportResponse> reports = projectIds.stream()
-                .flatMap(projectId -> workDayService.getProjectWorkDaysBetween(projectId, from, to).stream())
+                .flatMap(projectId -> workDayService.getProjectWorkDaysBetween(projectId, parseData(fromDate), parseData(toDate)).stream())
                 .map(this::convertWorkDayToReportJson)
                 .collect(Collectors.toList());
 
