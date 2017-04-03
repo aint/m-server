@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -186,18 +187,30 @@ public class ReportResource {
 
     @POST
     @Path("/check/users")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("14) checkAllUsersReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When reports of the specified users has been successfully checked"))
     public Response checkReportsOfUsers(@Context ServletContext context,
-                                        @ApiParam(example = "[1, 2]") List<Long> userIds) {
+                                        @NotEmpty @FormParam("userIds") List<Long> userIds,
+                                        @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
+
+        long userCount = userIds.stream()
+                .map(userService::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .count();
+
+        if (userCount == 0) {
+            throw new NotFoundException();
+        }
 
         Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         userIds.stream()
                 .flatMap(userId -> workDayService.getUserNotCheckedWorkDays(userId).stream())
                 .forEach(workDay -> {
                     workDay.setJailerId(checkerId == null ? 0L : checkerId);
+                    workDay.setCoefficient(coefficient);
                     workDay.setChecked(true);
                     workDayService.save(workDay);
                 });
@@ -207,12 +220,22 @@ public class ReportResource {
 
     @POST
     @Path("/check/projects")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("15) checkAllEntitiesReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When reports of the specified projects has been successfully checked"))
     public Response checkReportsOfProject(@Context ServletContext context,
-                                          @ApiParam(example = "[1, 2]") List<Long> projectIds) {
+                                          @NotEmpty @FormParam("entityIds") List<Long> projectIds,
+                                          @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
+
+        long projectCount = projectIds.stream()
+                .map(projectService::getBySupervisorId)
+                .filter(projects -> !projects.isEmpty())
+                .count();
+
+        if (projectCount == 0) {
+            throw new NotFoundException();
+        }
 
         Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         projectIds.stream()
