@@ -2,6 +2,7 @@ package ua.softgroup.matrix.server.supervisor.producer.json.tracking;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -10,13 +11,16 @@ import java.util.List;
  */
 public class GeneralWorkDataJson {
 
-    @JsonView(TrackingDataViewType.PROJECT.class)
+    @JsonView(TrackingDataViewType.USER.class)
     private Long userId;
 
-    @JsonView(TrackingDataViewType.USER.class)
+    @JsonView(TrackingDataViewType.PROJECT.class)
     private Long entityId;
-    @JsonView(TrackingDataViewType.USER.class)
+    @JsonView(TrackingDataViewType.PROJECT.class)
     private String entityType = "project";
+
+    @JsonView(TrackingDataViewType.DATE.class)
+    private LocalDate date;
 
     private LocalTime start;
     private LocalTime end;
@@ -26,8 +30,9 @@ public class GeneralWorkDataJson {
     public GeneralWorkDataJson() {
     }
 
-    public GeneralWorkDataJson(LocalTime start, LocalTime end, int dayWorkTimeSeconds,
+    public GeneralWorkDataJson(LocalDate date, LocalTime start, LocalTime end, int dayWorkTimeSeconds,
                                List<TrackingPeriodJson> periods) {
+        this.date = date;
         this.start = start;
         this.end = end;
         this.dayWorkTimeSeconds = dayWorkTimeSeconds;
@@ -75,6 +80,14 @@ public class GeneralWorkDataJson {
 
     public void setEntityType(String entityType) {
         this.entityType = entityType;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public LocalTime getStart() {

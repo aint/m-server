@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import ua.softgroup.matrix.server.persistent.entity.TrackingData;
 import ua.softgroup.matrix.server.supervisor.producer.resources.DesktopResource;
 import ua.softgroup.matrix.server.supervisor.producer.resources.ReportResource;
-import ua.softgroup.matrix.server.supervisor.producer.resources.WorkDaysResource;
 import ua.softgroup.matrix.server.supervisor.producer.resources.TimeResource;
+import ua.softgroup.matrix.server.supervisor.producer.resources.TrackingDataResource;
+import ua.softgroup.matrix.server.supervisor.producer.resources.WorkDaysResource;
 
 import javax.ws.rs.ApplicationPath;
 

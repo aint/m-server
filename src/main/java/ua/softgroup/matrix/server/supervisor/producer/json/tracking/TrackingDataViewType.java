@@ -6,4 +6,5 @@ package ua.softgroup.matrix.server.supervisor.producer.json.tracking;
 public interface TrackingDataViewType {
     interface USER {}
     interface PROJECT {}
+    interface DATE {}
 }

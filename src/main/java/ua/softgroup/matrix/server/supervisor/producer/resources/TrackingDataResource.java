@@ -63,7 +63,7 @@ public class TrackingDataResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "3) getEntityControlData", response = TrackingDataJson.class, responseContainer = "List")
     @Transactional
-    @JsonView(TrackingDataViewType.PROJECT.class)
+    @JsonView(TrackingDataViewType.USER.class)
     public Response getTrackingDataByProject(@ApiParam(example = "14") @Min(0) @PathParam("entityId") Long projectId,
                                              @ApiParam(example = "projects") @PathParam("entityType") String entityType,
                                              @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
@@ -110,6 +110,7 @@ public class TrackingDataResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "4) getEntityUserControlData", response = TrackingDataJson.class, responseContainer = "List")
     @Transactional
+    @JsonView(TrackingDataViewType.DATE.class)
     public Response getTrackingDataByProjectAndUser(
                             @ApiParam(example = "14") @Min(0) @PathParam("entityId") Long projectId,
                             @ApiParam(example = "projects")   @PathParam("entityType") String entityType,

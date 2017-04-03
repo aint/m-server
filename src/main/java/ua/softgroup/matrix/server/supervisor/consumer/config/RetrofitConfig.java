@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.consumer.config;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,8 @@ public class RetrofitConfig {
         return builder
                 .createXmlMapper(false)
                 .build()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .configure(MapperFeature.DEFAULT_VIEW_INCLUSION, true);
     }
 
 }
