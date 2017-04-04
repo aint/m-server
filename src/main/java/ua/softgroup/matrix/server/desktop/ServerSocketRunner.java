@@ -5,30 +5,46 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.api.ServerCommands;
 import ua.softgroup.matrix.api.model.datamodels.AuthModel;
 import ua.softgroup.matrix.api.model.datamodels.CheckPointModel;
 import ua.softgroup.matrix.api.model.datamodels.ReportModel;
+import ua.softgroup.matrix.api.model.datamodels.SynchronizationModel;
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
 import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 
 @Component
 public class ServerSocketRunner implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(ServerSocketRunner.class);
 
+    private static final char[] PRIVATE_PASSPHRASE = "make_matrix_great_again".toCharArray();
+    private static final char[] PUBLIC_PASSPHRASE = "public".toCharArray();
+    private static final String PUBLIC_KEY_FILE = "keys/client.public";
+    private static final String PRIVATE_KEY_FILE = "keys/server.private";
+    private static final String KEYSTORE_TYPE = "JKS";
+    private static final String ALGORITHM = "SunX509";
+
+    private KeyStore clientKeyStore;
+    private KeyStore serverKeyStore;
+
     private final MatrixServerApi matrixServerApi;
     private final Environment environment;
-
-    private ServerSocket serverSocket;
 
     @Autowired
     public ServerSocketRunner(MatrixServerApi matrixServerApi, Environment environment) {
@@ -37,14 +53,39 @@ public class ServerSocketRunner implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws IOException {
-        serverSocket = new ServerSocket(Integer.parseInt(environment.getRequiredProperty("socket.server.port")));
+    public void run(String... args) throws IOException, GeneralSecurityException {
+        int serverPort = Integer.parseInt(environment.getRequiredProperty("socket.server.port"));
+        SSLServerSocket serverSocket = (SSLServerSocket) setupSSLContext().getServerSocketFactory().createServerSocket(serverPort);
+        serverSocket.setNeedClientAuth(true);
 
         LOG.info("Waiting for a client...");
 
         while (true) {
             new Thread(new SocketClientRunnable(serverSocket.accept())).start();
         }
+    }
+
+    private void setupClientKeyStore() throws GeneralSecurityException, IOException {
+        clientKeyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+        clientKeyStore.load(new ClassPathResource(PUBLIC_KEY_FILE).getInputStream(), PUBLIC_PASSPHRASE);
+    }
+    private void setupServerKeystore() throws GeneralSecurityException, IOException {
+        serverKeyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+        serverKeyStore.load(new ClassPathResource(PRIVATE_KEY_FILE).getInputStream(), PRIVATE_PASSPHRASE);
+    }
+    private SSLContext setupSSLContext() throws GeneralSecurityException, IOException {
+        setupClientKeyStore();
+        setupServerKeystore();
+
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(ALGORITHM);
+        tmf.init(clientKeyStore);
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(ALGORITHM);
+        kmf.init(serverKeyStore, PRIVATE_PASSPHRASE);
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextInt();
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), secureRandom);
+        return sslContext;
     }
 
     private class SocketClientRunnable implements Runnable {
