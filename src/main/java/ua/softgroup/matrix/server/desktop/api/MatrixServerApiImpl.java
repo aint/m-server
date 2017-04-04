@@ -10,6 +10,7 @@ import ua.softgroup.matrix.api.model.datamodels.CheckPointModel;
 import ua.softgroup.matrix.api.model.datamodels.InitializeModel;
 import ua.softgroup.matrix.api.model.datamodels.ReportModel;
 import ua.softgroup.matrix.api.model.datamodels.ReportsContainerDataModel;
+import ua.softgroup.matrix.api.model.datamodels.SynchronizationModel;
 import ua.softgroup.matrix.api.model.datamodels.TimeModel;
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
@@ -114,6 +115,27 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                                                                      requestModel.getProjectId(),
                                                                      checkPointModel.getIdleTime())
         );
+    }
+
+    @Override
+    public ResponseModel syncCheckpoints(RequestModel<SynchronizationModel> requestModel) {
+        SynchronizationModel syncModel = requestModel.getDataContainer().or(throwException());
+        syncModel.getCheckPointModels().forEach(checkPointModel -> {
+                    trackingDataService.saveTrackingData(
+                            requestModel.getToken(),
+                            requestModel.getProjectId(),
+                            checkPointModel.getKeyboardLogs(),
+                            checkPointModel.getMouseFootage(),
+                            checkPointModel.getActiveWindows(),
+                            checkPointModel.getScreenshot(),
+                            checkPointModel.getScreenshotWindowTitle());
+                    projectService.saveCheckpointTime(requestModel.getToken(),
+                            requestModel.getProjectId(),
+                            checkPointModel.getIdleTime());
+                }
+        );
+
+        return new ResponseModel(ResponseStatus.SUCCESS);
     }
 
     private Supplier throwException() {

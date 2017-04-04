@@ -5,6 +5,7 @@ import ua.softgroup.matrix.api.model.datamodels.CheckPointModel;
 import ua.softgroup.matrix.api.model.datamodels.InitializeModel;
 import ua.softgroup.matrix.api.model.datamodels.ReportModel;
 import ua.softgroup.matrix.api.model.datamodels.ReportsContainerDataModel;
+import ua.softgroup.matrix.api.model.datamodels.SynchronizationModel;
 import ua.softgroup.matrix.api.model.datamodels.TimeModel;
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
@@ -23,5 +24,7 @@ public interface MatrixServerApi {
     ResponseModel endWork(RequestModel requestModel);
 
     ResponseModel<TimeModel> processCheckpoint(RequestModel<CheckPointModel> requestModel);
+
+    ResponseModel syncCheckpoints(RequestModel<SynchronizationModel> requestModel);
 
 }

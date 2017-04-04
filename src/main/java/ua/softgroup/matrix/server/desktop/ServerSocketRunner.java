@@ -174,6 +174,11 @@ public class ServerSocketRunner implements CommandLineRunner {
                     sendObject(matrixServerApi.processCheckpoint(requestModel));
                     break;
                 }
+                case SYNCHRONIZE: {
+                    RequestModel<SynchronizationModel> requestModel = (RequestModel<SynchronizationModel>) readObject();
+                    sendObject(matrixServerApi.syncCheckpoints(requestModel));
+                    break;
+                }
                 case CLOSE: {
                     clientSocket.close();
                     break;
