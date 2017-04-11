@@ -48,6 +48,12 @@ public class WorkDay extends AbstractEntity<Long> {
     private Double coefficient = 1.0;
 
     @Column
+    private Integer symbolsCount = 0;
+
+    @Column
+    private Integer windowsSwitchedCount = 0;
+
+    @Column
     private Integer rate = 0;
 
     @Column
@@ -140,6 +146,22 @@ public class WorkDay extends AbstractEntity<Long> {
 
     public void setJailerId(Long jailerId) {
         this.jailerId = jailerId;
+    }
+
+    public Integer getSymbolsCount() {
+        return symbolsCount;
+    }
+
+    public void setSymbolsCount(Integer symbolsCount) {
+        this.symbolsCount = symbolsCount;
+    }
+
+    public Integer getWindowsSwitchedCount() {
+        return windowsSwitchedCount;
+    }
+
+    public void setWindowsSwitchedCount(Integer windowsSwitchedCount) {
+        this.windowsSwitchedCount = windowsSwitchedCount;
     }
 
     public Double getCoefficient() {

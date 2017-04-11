@@ -87,6 +87,30 @@ public class WorkDayServiceImpl extends AbstractEntityTransactionalService<WorkD
     }
 
     @Override
+    public int getTotalWorkSeconds(Long userId, LocalDate from, LocalDate to) {
+        return Optional.ofNullable(getRepository().getTotalWorkSeconds(userId, from, to))
+                       .orElse(0);
+    }
+
+    @Override
+    public int getTotalIdleSeconds(Long userId, LocalDate from, LocalDate to) {
+        return Optional.ofNullable(getRepository().getTotalIdleSeconds(userId, from, to))
+                       .orElse(0);
+    }
+
+    @Override
+    public int getSymbolsCount(Long userId, LocalDate from, LocalDate to) {
+        return Optional.ofNullable(getRepository().getSymbolsCount(userId, from, to))
+                       .orElse(0);
+    }
+
+    @Override
+    public int getWindowsSwitchedCount(Long userId, LocalDate from, LocalDate to) {
+        return Optional.ofNullable(getRepository().getWindowsSwitchedCount(userId, from, to))
+                       .orElse(0);
+    }
+
+    @Override
     public Optional<WorkDay> getByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate) {
         return Optional.ofNullable(getRepository().findByAuthorAndProjectAndDate(author, project, localDate));
     }

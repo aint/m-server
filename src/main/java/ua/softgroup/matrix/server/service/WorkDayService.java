@@ -26,6 +26,14 @@ public interface WorkDayService extends GeneralEntityService<WorkDay> {
 
     int getTotalIdleSeconds(User author, LocalDate date);
 
+    int getTotalWorkSeconds(Long userId, LocalDate from, LocalDate to);
+
+    int getTotalIdleSeconds(Long userId, LocalDate from, LocalDate to);
+
+    int getSymbolsCount(Long userId, LocalDate from, LocalDate to);
+
+    int getWindowsSwitchedCount(Long userId, LocalDate from, LocalDate to);
+
     Optional<WorkDay> getByAuthorAndProjectAndDate(User author, Project project, LocalDate localDate);
 
     Set<WorkDay> getAllWorkDaysOf(Long userId, Long projectSupervisorId, LocalDate from, LocalDate to);

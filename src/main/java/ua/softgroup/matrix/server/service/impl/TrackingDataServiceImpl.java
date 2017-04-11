@@ -63,6 +63,7 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
 
 //        TrackingData trackingData = getTrackingDataOf(userToken, projectId, LocalDate.now());
         trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
+        workDay.setSymbolsCount(workDay.getSymbolsCount() + keyboardText.length());
         trackingData.setMouseFootage(trackingData.getMouseFootage() + mouseFootage);
         if (screenshot != null) {
             trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), screenshotTitle, trackingData));
@@ -70,6 +71,7 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
         activeWindowList.stream()
                 .map(entry -> new WindowTime(entry.getWindowTitle(), entry.getStartTime(), entry.getWorkingPeriodSeconds(), trackingData))
                 .forEach(windowTime -> trackingData.getActiveWindows().add(windowTime));
+        workDay.setWindowsSwitchedCount(workDay.getWindowsSwitchedCount() + activeWindowList.size());
 
         save(trackingData);
     }

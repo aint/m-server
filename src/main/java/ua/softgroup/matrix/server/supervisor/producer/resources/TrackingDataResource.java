@@ -13,14 +13,17 @@ import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
+import ua.softgroup.matrix.server.supervisor.producer.json.UserTimeAndCountResponse;
 import ua.softgroup.matrix.server.supervisor.producer.json.tracking.GeneralWorkDataJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.tracking.TrackingDataJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.tracking.TrackingDataViewType;
 import ua.softgroup.matrix.server.supervisor.producer.json.tracking.TrackingPeriodJson;
 
 import javax.validation.constraints.Min;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -31,10 +34,12 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ua.softgroup.matrix.server.supervisor.producer.Utils.calculateIdlePercent;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.not;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
 
@@ -162,6 +167,46 @@ public class TrackingDataResource {
                 .filter(not(Set::isEmpty))
                 .map(this::convertToUserTrackingData)
                 .collect(Collectors.toList());
+
+        return Response.ok(result).build();
+    }
+
+    @POST
+    @Path("/users/")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "8) getFeaturedTogetherControlData", response = UserTimeAndCountResponse.class, responseContainer = "List")
+    public Response getFeaturedTogetherControlData(@ApiParam(example = "[1, 2, 13]") @FormParam("usersIds") List<Long> userIds,
+                                                   @ApiParam(example = "2017-01-01") @FormParam("fromDate") String fromDate,
+                                                   @ApiParam(example = "2017-12-31") @FormParam("toDate") String toDate) {
+
+        LocalDate from = parseData(fromDate);
+        LocalDate to = parseData(toDate);
+
+        long userCount = userIds.stream()
+                .map(userService::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .count();
+
+        if ((userCount == 0) && (!userIds.isEmpty())) {
+            throw new NotFoundException();
+        }
+
+        List<UserTimeAndCountResponse> result = userIds.stream()
+                .map(userId -> {
+                    int workSeconds = workDayService.getTotalWorkSeconds(userId, from, to);
+                    int idleSeconds = workDayService.getTotalIdleSeconds(userId, from, to);
+                    return new UserTimeAndCountResponse(
+                            userId,
+                            workSeconds,
+                            idleSeconds,
+                            calculateIdlePercent(workSeconds, idleSeconds),
+                            workDayService.getSymbolsCount(userId, from, to),
+                            workDayService.getWindowsSwitchedCount(userId, from, to)
+                    );
+                })
+                .collect(Collectors.toList());
+
 
         return Response.ok(result).build();
     }
