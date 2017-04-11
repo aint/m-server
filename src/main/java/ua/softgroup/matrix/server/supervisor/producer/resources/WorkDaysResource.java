@@ -141,12 +141,11 @@ public class WorkDaysResource {
     }
 
     @GET
-    @Path("/{entityType}/{entityId}")
+    @Path("/project/{entityId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "2) getEntityWorkingDays", response = ProjectWorkingDay.class, responseContainer = "List")
     @Transactional
     public Response getEntityWorkingDays(@ApiParam(example = "14") @Min(0) @PathParam("entityId") Long projectId,
-                                         @ApiParam(example = "projects")   @PathParam("entityType") String entityType,
                                          @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                          @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 

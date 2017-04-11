@@ -73,13 +73,13 @@ public class ReportResource {
         return Response.ok(convertWorkDayToReportJson(workDay)).build();
     }
 
-    @GET
+    @POST
     @Path("/users")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "10) getUsersReports", response = ReportResponse.class, responseContainer = "List")
-    public Response getReportsOfUsers(@ApiParam(example = "[1, 2, 13]") @QueryParam("userIds") List<Long> userIds,
-                                      @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
-                                      @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
+    public Response getReportsOfUsers(@ApiParam(example = "[1, 2, 13]") @FormParam("usersIds") List<Long> userIds,
+                                      @ApiParam(example = "2017-01-01") @FormParam("fromDate") String fromDate,
+                                      @ApiParam(example = "2017-12-31") @FormParam("toDate") String toDate) {
 
         LocalDate from = LocalDate.parse(fromDate, formatter);
         LocalDate to = LocalDate.parse(toDate, formatter);
@@ -102,13 +102,13 @@ public class ReportResource {
         return Response.ok(reports).build();
     }
 
-    @GET
-    @Path("/projects")
+    @POST
+    @Path("/project")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "11) getEntitiesReports", response = ReportResponse.class, responseContainer = "List")
-    public Response getReportsOfProjects(@ApiParam(example = "[1, 2, 13]") @QueryParam("entityIds") List<Long> projectIds,
-                                         @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
-                                         @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
+    public Response getReportsOfProjects(@ApiParam(example = "[1, 2, 13]") @FormParam("entitiesIds") List<Long> projectIds,
+                                         @ApiParam(example = "2017-01-01") @FormParam("fromDate") String fromDate,
+                                         @ApiParam(example = "2017-12-31") @FormParam("toDate") String toDate) {
 
         long projectCount = projectIds.stream()
                 .map(projectService::getBySupervisorId)
@@ -189,7 +189,7 @@ public class ReportResource {
     @ApiOperation("14) checkAllUsersReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When reports of the specified users has been successfully checked"))
     public Response checkReportsOfUsers(@Context ServletContext context,
-                                        @NotEmpty @FormParam("userIds") List<Long> userIds,
+                                        @NotEmpty @FormParam("usersIds") List<Long> userIds,
                                         @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
         long userCount = userIds.stream()
@@ -216,13 +216,13 @@ public class ReportResource {
     }
 
     @POST
-    @Path("/check/projects")
+    @Path("/check/project")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("15) checkAllEntitiesReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When reports of the specified projects has been successfully checked"))
     public Response checkReportsOfProject(@Context ServletContext context,
-                                          @NotEmpty @FormParam("entityIds") List<Long> projectIds,
+                                          @NotEmpty @FormParam("entitiesIds") List<Long> projectIds,
                                           @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
         long projectCount = projectIds.stream()
@@ -247,15 +247,17 @@ public class ReportResource {
     }
 
     @POST
-    @Path("/check")
+    @Path("/check/all")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("16) checkAllReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When all unchecked reports has been successfully checked"))
-    public Response checkAllReports(@Context ServletContext context) {
+    public Response checkAllReports(@Context ServletContext context,
+                                    @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
         Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         workDayService.getAllNotCheckedWorkDays()
                 .forEach(workDay -> {
                     workDay.setJailerId(checkerId == null ? 0L : checkerId);
+                    workDay.setCoefficient(coefficient);
                     workDay.setChecked(true);
                     workDayService.save(workDay);
                 });

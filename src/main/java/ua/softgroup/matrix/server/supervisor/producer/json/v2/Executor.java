@@ -13,20 +13,20 @@ public class Executor {
     private int dayWorkTimeSeconds;
     private int idleTimeSeconds;
     private double idlePercentage;
-    private Report reports;
+    private Report report;
 
     public Executor() {
     }
 
     public Executor(Long id, LocalTime start, LocalTime end, int dayWorkTimeSeconds, int idleTimeSeconds,
-                    double idlePercentage, Report reports) {
+                    double idlePercentage, Report report) {
         this.id = id;
         this.start = start;
         this.end = end;
         this.dayWorkTimeSeconds = dayWorkTimeSeconds;
         this.idleTimeSeconds = idleTimeSeconds;
         this.idlePercentage = idlePercentage;
-        this.reports = reports;
+        this.report = report;
     }
 
     public Long getId() {
@@ -77,11 +77,11 @@ public class Executor {
         this.idlePercentage = idlePercentage;
     }
 
-    public Report getReports() {
-        return reports;
+    public Report getReport() {
+        return report;
     }
 
-    public void setReports(Report reports) {
-        this.reports = reports;
+    public void setReport(Report report) {
+        this.report = report;
     }
 }

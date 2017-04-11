@@ -3,6 +3,7 @@ package ua.softgroup.matrix.server.supervisor.producer.resources;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
@@ -65,14 +66,15 @@ public class TimeResource {
     }
 
     @GET
-    @Path("/projects/{entityId}")
+    @Path("/project/{entityId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "17) getEntityCommonStatistic", response = UserTimeResponse.class, responseContainer = "List")
     @ApiResponses({
             @ApiResponse(code = 400, message = "When project id < 0", response = ErrorJson.class),
             @ApiResponse(code = 404, message = "When project not found", response = ErrorJson.class)
     })
-    public Response getProjectWorkTime(@Min(0) @PathParam("entityId") Long projectId) {
+    public Response getProjectWorkTime(@ApiParam(example = "project") @Min(0) @PathParam("entityId") Long projectId) {
+
         if (projectService.getBySupervisorId(projectId).isEmpty()) {
             throw new NotFoundException();
         }

@@ -60,13 +60,12 @@ public class TrackingDataResource {
 
 
     @GET
-    @Path("/{entityType}/{entityId}")
+    @Path("/project/{entityId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "3) getEntityControlData", response = TrackingDataJson.class, responseContainer = "List")
     @Transactional
     @JsonView(TrackingDataViewType.USER.class)
     public Response getTrackingDataByProject(@ApiParam(example = "14") @Min(0) @PathParam("entityId") Long projectId,
-                                             @ApiParam(example = "projects") @PathParam("entityType") String entityType,
                                              @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                              @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
@@ -107,19 +106,18 @@ public class TrackingDataResource {
     }
 
     @GET
-    @Path("/{entityType}/{entityId}/users/{userId}")
+    @Path("/project/{entityId}/users/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "4) getEntityUserControlData", response = TrackingDataJson.class, responseContainer = "List")
     @Transactional
     @JsonView(TrackingDataViewType.DATE.class)
     public Response getTrackingDataByProjectAndUser(
                             @ApiParam(example = "14") @Min(0) @PathParam("entityId") Long projectId,
-                            @ApiParam(example = "projects")   @PathParam("entityType") String entityType,
                             @ApiParam(example = "14") @Min(0) @PathParam("userId") Long userId,
                             @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                             @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
-        if (projectService.getBySupervisorId(projectId).isEmpty() || !userService.getById(userId).isPresent()) {
+        if (!userService.getById(userId).isPresent() || projectService.getBySupervisorId(projectId).isEmpty()) {
             throw new NotFoundException();
         }
 
