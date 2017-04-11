@@ -60,7 +60,8 @@ public class MatrixServerApiImpl implements MatrixServerApi {
                 projectService.getUserActiveProjects(token),
                 trackerSettings.getStartIdleAfterSeconds(),
                 trackerSettings.getScreenshotPeriodFrequency(),
-                trackerSettings.getCheckpointFrequencyInSeconds());
+                trackerSettings.getCheckpointFrequencyInSeconds(),
+                null);
         return new ResponseModel<>(initializeModel);
     }
 
