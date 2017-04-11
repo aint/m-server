@@ -19,7 +19,7 @@ public class WorkTimePeriod extends AbstractEntity<Long> {
     private LocalTime end;
 
     @OneToOne(mappedBy = "workTimePeriod", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private TrackingData trackingData = new TrackingData();
+    private TrackingData trackingData;
 
     @ManyToOne
     private WorkDay workDay;

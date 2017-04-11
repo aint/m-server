@@ -148,7 +148,7 @@ public class ReportResource {
                 workDay.getId(),
                 workDay.getDate(),
                 workDay.getAuthor().getId(),
-                workDay.getProject().getId(),
+                workDay.getProject().getSupervisorId(),
                 workDay.getJailerId(),
                 workDay.isChecked(),
                 workDay.getCoefficient(),

@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
+import ua.softgroup.matrix.server.persistent.entity.TrackingData;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.entity.WorkTimePeriod;
@@ -242,10 +243,14 @@ public class TrackingDataResource {
                 .map(workTimePeriod -> new TrackingPeriodJson(
                         workTimePeriod.getStart(),
                         workTimePeriod.getEnd(),
-                        workTimePeriod.getTrackingData().getKeyboardText(),
-                        convertRandomScreenshotToBase64(workTimePeriod.getTrackingData().getScreenshots())
+                        getTrackingData(workTimePeriod).getKeyboardText(),
+                        convertRandomScreenshotToBase64(getTrackingData(workTimePeriod).getScreenshots())
                 ))
                 .collect(Collectors.toList());
+    }
+
+    private TrackingData getTrackingData(WorkTimePeriod workTimePeriod) {
+        return Optional.ofNullable(workTimePeriod.getTrackingData()).orElseGet(TrackingData::new);
     }
 
     private String[] convertRandomScreenshotToBase64(Set<Screenshot> screenshots) {
