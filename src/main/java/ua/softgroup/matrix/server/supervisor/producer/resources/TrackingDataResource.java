@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ua.softgroup.matrix.server.persistent.entity.Screenshot;
@@ -33,13 +35,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Base64.getEncoder;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.calculateIdlePercent;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.not;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
@@ -51,6 +53,8 @@ import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
 @Path("/tracking")
 @Api("/tracking")
 public class TrackingDataResource {
+
+    private static final Logger logger = LoggerFactory.getLogger(TrackingDataResource.class);
 
     private final UserService userService;
     private final ProjectService projectService;
@@ -258,8 +262,9 @@ public class TrackingDataResource {
                 .findAny()
                 .orElseGet(Screenshot::new);
 
+        byte[] imageBytes = screenshot.getImageBytes();
         return new String[] {
-                "data:image/png;base64," + Base64.getEncoder().encodeToString(screenshot.getImageBytes()),
+                "data:image/png;base64," + getEncoder().encodeToString(imageBytes != null ? imageBytes : new byte[]{}),
                 screenshot.getScreenshotTitle()};
     }
 
