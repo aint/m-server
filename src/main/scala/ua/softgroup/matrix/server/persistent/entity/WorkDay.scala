@@ -6,7 +6,7 @@ import java.util
 
 import org.hibernate.annotations.CreationTimestamp
 
-import scala.beans.BeanProperty
+import scala.beans.{BeanProperty, BooleanBeanProperty}
 
 /**
   * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>
@@ -41,7 +41,7 @@ class WorkDay extends AbstractEntity[java.lang.Long] {
   var reportUpdated: LocalDateTime = _
 
   @Column
-  @BeanProperty
+  @BooleanBeanProperty
   var checked: Boolean = _
 
   @Column
@@ -75,6 +75,11 @@ class WorkDay extends AbstractEntity[java.lang.Long] {
   @OneToMany(mappedBy = "workDay", cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BeanProperty
   var workTimePeriods: util.Set[WorkTimePeriod] = new util.HashSet[WorkTimePeriod]
+
+  def this(id: Long) {
+    this()
+    this.setId(id)
+  }
 
   def this(workSeconds: Integer, idleSeconds: Integer) {
     this()
