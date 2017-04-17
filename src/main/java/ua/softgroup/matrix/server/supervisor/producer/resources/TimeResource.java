@@ -11,18 +11,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ua.softgroup.matrix.server.persistent.entity.Project;
-import ua.softgroup.matrix.server.persistent.entity.TimeAudit;
 import ua.softgroup.matrix.server.persistent.entity.User;
 import ua.softgroup.matrix.server.persistent.entity.WorkDay;
 import ua.softgroup.matrix.server.persistent.repository.TimeAuditRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
-import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
-import ua.softgroup.matrix.server.supervisor.producer.json.JsonViewType;
+import ua.softgroup.matrix.server.supervisor.producer.Utils;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.UserProjectTimeResponse;
 import ua.softgroup.matrix.server.supervisor.producer.json.UserTimeResponse;
+import ua.softgroup.matrix.server.supervisor.producer.json.time.TimeManagement;
+import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
 
 import javax.servlet.ServletContext;
 import javax.validation.constraints.Min;
@@ -116,40 +116,33 @@ public class TimeResource {
     }
 
     @POST
-    @Path("/{user_id}/{project_id}")
+    @Path("/manage")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @JsonView(JsonViewType.OUT.class)
-    @ApiOperation(
-            value = "Add a work time for the user's project",
-            notes = "Showing not relevant response/request json due to Swagger bug",
-            response = TimeJson.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 400, message = "When user/project id < 0", response = ErrorJson.class),
-            @ApiResponse(code = 404, message = "When user/project not found", response = ErrorJson.class)
-    })
-    public Response addWorkTime(@Context ServletContext context,
-                                @Min(0) @PathParam("user_id") Long userId,
-                                @Min(0) @PathParam("project_id") Long projectId,
-                                @JsonView(JsonViewType.IN.class) TimeJson timeJson) {
+    @ApiOperation(value = "Add a work time for the user's project", response = TimeJson.class)
+    public Response timeManagement(@Context ServletContext context, @JsonView TimeManagement timeManagement) {
+        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+        LOG.info("Principal {} request time management {}", principalId, timeManagement);
 
-        LOG.info("POST JSON {}", timeJson);
-        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
-        Project project = projectService.getBySupervisorIdAndUser(projectId, user).orElseThrow(NotFoundException::new);
+        User user = userService.getById(timeManagement.getUserId()).orElseThrow(NotFoundException::new);
+        Project project = projectService.getBySupervisorIdAndUser(timeManagement.getEntityId(), user)
+                                        .orElseThrow(NotFoundException::new);
 
-        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, timeJson.getDate())
-                                        .orElse(new WorkDay(user, project, timeJson.getDate()));
-        workDay.setWorkSeconds(workDay.getWorkSeconds() + timeJson.getTotalMinutes());
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, Utils.parseData(timeManagement.getOnDate()))
+                                        .orElseGet(() -> new WorkDay(user, project, Utils.parseData(timeManagement.getOnDate())));
+        double idlePercentBefore = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
+        workDay.setWorkSeconds("add".equals(timeManagement.getAction())
+                ? workDay.getWorkSeconds() + timeManagement.getTime()
+                : workDay.getWorkSeconds() - timeManagement.getTime());
+        double idlePercentAfter = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
+        workDay.setIdleSeconds(timeManagement.getIdleAction() == 1
+                ? (int) (workDay.getIdleSeconds() * idlePercentBefore / idlePercentAfter)
+                : workDay.getIdleSeconds());
+
         workDayService.save(workDay);
 
-        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
-        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
-        timeAuditRepository.save(new TimeAudit(timeJson.getTotalMinutes(), timeJson.getReason(), principal, workDay));
-
-        int totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project);
-
-        return Response.ok(new TimeJson(workDay.getWorkSeconds(), totalWorkSeconds)).build();
+//        User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
+//        timeAuditRepository.save(new TimeAudit(timeManagement.getTime(), "reason", principal, workDay));
+        return Response.ok().build();
     }
 
 }
