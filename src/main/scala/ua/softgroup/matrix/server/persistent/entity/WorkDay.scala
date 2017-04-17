@@ -62,11 +62,11 @@ class WorkDay extends AbstractEntity[java.lang.Long] {
 
   @Column
   @BeanProperty
-  var rate: Int = _
+  var rate: Integer = _
 
   @Column
   @BeanProperty
-  var currencyId: Int = _
+  var currencyId: Integer = _
 
   @ManyToOne
   @BeanProperty

@@ -39,11 +39,11 @@ class Project extends AbstractEntity[java.lang.Long] {
 
   @Column
   @BeanProperty
-  var rate: Int = _
+  var rate: Integer = _
 
   @Column
   @BeanProperty
-  var rateCurrencyId: Int = _
+  var rateCurrencyId: Integer = _
 
   @Column
   @BeanProperty
@@ -59,7 +59,7 @@ class Project extends AbstractEntity[java.lang.Long] {
 
   @OneToMany(mappedBy = "project", cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BeanProperty
-  var workDays: util.Set[WorkDay] = _
+  var workDays: util.Set[WorkDay] = new util.HashSet[WorkDay]
 
   def this(id: Long) {
     this()
@@ -67,7 +67,7 @@ class Project extends AbstractEntity[java.lang.Long] {
   }
 
   override def toString: String = {
-    "Project(id=%s, supervisorId=%d, title=%s, description=%s, authorName=%s, startDate=%s, endDate=%s, rate=%d, rateCurrencyId=%d, workStarted=%s, checkpointTime=%s)"
+    "Project(id=%s, supervisorId=%d, title=%s, description=%s, authorName=%s, startDate=%s, endDate=%s, rate=%s, rateCurrencyId=%s, workStarted=%s, checkpointTime=%s)"
       .format(super.getId, supervisorId, title, description, authorName, startDate, endDate, rate, rateCurrencyId, workStarted, checkpointTime)
   }
 }

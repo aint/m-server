@@ -29,22 +29,23 @@ class User {
 
   @Column
   @BeanProperty
-  var externalHourlyRate: Int = _
+  var externalHourlyRate: Integer = _
 
   @Column
   @BeanProperty
-  var externalHourlyRateCurrencyId: Int = _
+  var externalHourlyRateCurrencyId: Integer = _
 
   @Column
   @BeanProperty
-  var internalHourlyRate: Int = _
+  var internalHourlyRate: Integer = _
 
   @Column
   @BeanProperty
-  var internalHourlyRateCurrencyId: Int = _
+  var internalHourlyRateCurrencyId: Integer = _
 
   override def toString: String = {
-    "User(id=%d, trackerToken=%s, username=%s, password=%s, externalHourlyRate=%d, externalHourlyRateCurrencyId=%d, internalHourlyRate=%d, internalHourlyRateCurrencyId=%d)"
+    "User(id=%d, trackerToken=%s, username=%s, password=%s, externalHourlyRate=%s, externalHourlyRateCurrencyId=%s, internalHourlyRate=%s, internalHourlyRateCurrencyId=%s)"
       .format(id, trackerToken, username, password, externalHourlyRate, externalHourlyRateCurrencyId, internalHourlyRate, internalHourlyRateCurrencyId)
   }
+
 }
