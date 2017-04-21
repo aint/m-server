@@ -15,7 +15,7 @@ import ua.softgroup.matrix.api.model.datamodels.SynchronizationModel;
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseModel;
 import ua.softgroup.matrix.api.model.responsemodels.ResponseStatus;
-import ua.softgroup.matrix.server.desktop.api.MatrixServerApi;
+import ua.softgroup.matrix.server.socket.ServerSocketApi;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -43,11 +43,11 @@ public class ServerSocketRunner implements CommandLineRunner {
     private KeyStore clientKeyStore;
     private KeyStore serverKeyStore;
 
-    private final MatrixServerApi matrixServerApi;
+    private final ServerSocketApi matrixServerApi;
     private final Environment environment;
 
     @Autowired
-    public ServerSocketRunner(MatrixServerApi matrixServerApi, Environment environment) {
+    public ServerSocketRunner(ServerSocketApi matrixServerApi, Environment environment) {
         this.matrixServerApi = matrixServerApi;
         this.environment = environment;
     }
