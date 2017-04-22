@@ -1,5 +1,6 @@
 package ua.softgroup.matrix.server.socket
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import ua.softgroup.matrix.api.model.datamodels._
@@ -17,9 +18,12 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
                                         trackerSettingsService: TrackerSettingsService,
                                         trackingDataService: TrackingDataService) extends ServerSocketApi {
 
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def authenticate(authRequestModel: RequestModel[AuthModel]): ResponseModel[InitializeModel] = {
     val authModel = authRequestModel.getDataContainer.or(() => dataContainerEmptyException)
+    logger.info(s"Authentication of user '${authModel.getUsername}' with password '${authModel.getPassword}'")
+
     val token = userService.authenticate(authModel)
     if (token == null) return new ResponseModel[InitializeModel](ResponseStatus.INVALID_CREDENTIALS)
     val trackerSettings = trackerSettingsService.getTrackerSettings(token)
@@ -39,6 +43,8 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
     val projectId = requestModel.getProjectId
     val token = requestModel.getToken
 
+    logger.info(s"User '$token' request reports of project '$projectId'")
+
     new ResponseModel[ReportsContainerDataModel](
       new ReportsContainerDataModel(workDayService.getWorkDaysOf(token, projectId))
     )
@@ -49,12 +55,16 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
     val token = reportRequestModel.getToken
     val projectId = reportRequestModel.getProjectId
 
+    logger.info(s"User '$token' save report to project '$projectId'")
+
     new ResponseModel[DataModel](workDayService.saveReportOrUpdate(token, projectId, reportModel))
   }
 
   override def startWork(requestModel: RequestModel[_ <: DataModel]): ResponseModel[_ <: DataModel] = {
     val token = requestModel.getToken
     val projectId = requestModel.getProjectId
+
+    logger.info(s"User '$token' start work on project '$projectId'")
 
     new ResponseModel[TimeModel](projectService.saveStartWorkTime(token, projectId))
   }
@@ -63,11 +73,15 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
     val token = requestModel.getToken
     val projectId = requestModel.getProjectId
 
+    logger.info(s"User '$token' end work on project '$projectId'")
+
     new ResponseModel[TimeModel](projectService.saveEndWorkTime(token, projectId))
   }
 
   override def processCheckpoint(requestModel: RequestModel[CheckPointModel]): ResponseModel[TimeModel] = {
     val checkPointModel = requestModel.getDataContainer.or(() => dataContainerEmptyException)
+
+    logger.info(s"Process checkpoint of user '${requestModel.getToken} on project '${requestModel.getProjectId}'")
 
     trackingDataService.saveTrackingData(
       requestModel.getToken,
@@ -84,6 +98,8 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
   }
 
   override def syncCheckpoints(requestModel: RequestModel[SynchronizationModel]): ResponseModel[_ <: DataModel] = {
+    logger.info(s"Sync checkpoints of user '${requestModel.getToken} on project '${requestModel.getProjectId}'")
+
     requestModel.getDataContainer.or(() => dataContainerEmptyException)
       .getCheckPointModels.forEach((checkPointModel: CheckPointModel) => {
         trackingDataService.saveTrackingData(
