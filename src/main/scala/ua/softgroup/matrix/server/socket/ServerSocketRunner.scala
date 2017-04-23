@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.core.env.Environment
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
+import ua.softgroup.matrix.server.socket.api.ServerSocketApi
 
 /**
   * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>

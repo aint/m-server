@@ -1,4 +1,4 @@
-package ua.softgroup.matrix.server.socket
+package ua.softgroup.matrix.server.socket.api
 
 import ua.softgroup.matrix.api.model.datamodels._
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel

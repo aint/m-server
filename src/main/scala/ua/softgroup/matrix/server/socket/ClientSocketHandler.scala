@@ -9,6 +9,7 @@ import ua.softgroup.matrix.api.ServerCommands._
 import ua.softgroup.matrix.api.model.datamodels._
 import ua.softgroup.matrix.api.model.requestmodels.RequestModel
 import ua.softgroup.matrix.api.model.responsemodels.{ResponseModel, ResponseStatus}
+import ua.softgroup.matrix.server.socket.api.ServerSocketApi
 
 /**
   * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>

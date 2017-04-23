@@ -1,4 +1,4 @@
-package ua.softgroup.matrix.server.socket
+package ua.softgroup.matrix.server.socket.api
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
