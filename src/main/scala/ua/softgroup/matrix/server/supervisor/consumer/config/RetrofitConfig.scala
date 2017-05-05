@@ -12,7 +12,7 @@ import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoin
   * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>
   */
 @Configuration
-object RetrofitConfig {
+class RetrofitConfig {
 
   private val SUPERVISOR_API = "supervisor.api"
 
