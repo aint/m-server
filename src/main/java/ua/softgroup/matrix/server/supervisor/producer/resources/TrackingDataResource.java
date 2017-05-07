@@ -98,10 +98,6 @@ public class TrackingDataResource {
     }
 
     private TrackingDataJson convertToProjectTrackingData(Set<WorkDay> workDays) {
-        List<TrackingPeriodJson> trackingDataPeriods = workDays.stream()
-                .flatMap(workDay -> convertWorkTimePeriods(workDay.getWorkTimePeriods()).stream())
-                .collect(Collectors.toList());
-
         return new TrackingDataJson(
                 getDateOfWorkDay(workDays),
                 workDays.stream()
@@ -110,7 +106,7 @@ public class TrackingDataResource {
                                 workDayService.getStartWorkOf(workDay),
                                 workDayService.getEndWorkOf(workDay),
                                 workDay.getWorkSeconds(),
-                                trackingDataPeriods))
+                                convertWorkTimePeriods(workDay.getWorkTimePeriods())))
                         .collect(Collectors.toList())
         );
     }
@@ -217,10 +213,6 @@ public class TrackingDataResource {
     }
 
     private TrackingDataJson convertToUserTrackingData(Set<WorkDay> workDays) {
-        List<TrackingPeriodJson> trackingDataPeriods = workDays.stream()
-                .flatMap(workDay -> convertWorkTimePeriods(workDay.getWorkTimePeriods()).stream())
-                .collect(Collectors.toList());
-
         return new TrackingDataJson(
                 getDateOfWorkDay(workDays),
                 workDays.stream()
@@ -230,7 +222,7 @@ public class TrackingDataResource {
                                 workDayService.getStartWorkOf(workDay),
                                 workDayService.getEndWorkOf(workDay),
                                 workDay.getWorkSeconds(),
-                                trackingDataPeriods))
+                                convertWorkTimePeriods(workDay.getWorkTimePeriods())))
                         .collect(Collectors.toList())
         );
     }
