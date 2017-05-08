@@ -35,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -236,6 +237,7 @@ public class TrackingDataResource {
 
     private List<TrackingPeriodJson> convertWorkTimePeriods(Set<WorkTimePeriod> workTimePeriods) {
         return workTimePeriods.stream()
+                .sorted(Comparator.comparing(WorkTimePeriod::getStart))
                 .map(workTimePeriod -> new TrackingPeriodJson(
                         workTimePeriod.getStart(),
                         workTimePeriod.getEnd(),
