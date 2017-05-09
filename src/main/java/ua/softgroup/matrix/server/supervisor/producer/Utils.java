@@ -25,4 +25,8 @@ public class Utils {
         return LocalDate.parse(data, formatter);
     }
 
+    public static LocalDate validateEndRangeDate(LocalDate endDate) {
+        return endDate.isAfter(LocalDate.now()) ? LocalDate.now().plusDays(1) : endDate.plusDays(1);
+    }
+
 }

@@ -39,6 +39,8 @@ import java.util.stream.Stream;
 
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.calculateIdlePercent;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.not;
+import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
+import static ua.softgroup.matrix.server.supervisor.producer.Utils.validateEndRangeDate;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -72,9 +74,8 @@ public class WorkDaysResource {
 
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
 
-        LocalDate from = LocalDate.parse(fromDate, formatter);
-        LocalDate to = LocalDate.parse(toDate, formatter);
-        to = to.isAfter(LocalDate.now()) ? LocalDate.now().plusDays(1) : to;
+        LocalDate from = parseData(fromDate);
+        LocalDate to = validateEndRangeDate(parseData(toDate));
 
         List<UserWorkingDay> result = Stream.iterate(from, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(from, to))
@@ -153,9 +154,8 @@ public class WorkDaysResource {
             throw new NotFoundException();
         }
 
-        LocalDate from = LocalDate.parse(fromDate, formatter);
-        LocalDate to = LocalDate.parse(toDate, formatter);
-        to = to.isAfter(LocalDate.now()) ? LocalDate.now().plusDays(1) : to;
+        LocalDate from = parseData(fromDate);
+        LocalDate to = validateEndRangeDate(parseData(toDate));
 
         List<ProjectWorkingDay> result = Stream.iterate(from, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(from, to))

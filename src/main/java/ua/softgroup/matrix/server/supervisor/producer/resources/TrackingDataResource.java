@@ -46,6 +46,7 @@ import static java.util.Base64.getEncoder;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.calculateIdlePercent;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.not;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
+import static ua.softgroup.matrix.server.supervisor.producer.Utils.validateEndRangeDate;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -85,8 +86,7 @@ public class TrackingDataResource {
         }
 
         LocalDate from = parseData(fromDate);
-        LocalDate to = parseData(toDate);
-        to = to.isAfter(LocalDate.now()) ? LocalDate.now().plusDays(1) : to;
+        LocalDate to = validateEndRangeDate(parseData(toDate));
 
         List<TrackingDataJson> result = Stream.iterate(from, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(from, to))
@@ -160,8 +160,7 @@ public class TrackingDataResource {
         User user = userService.getById(userId).orElseThrow(NotFoundException::new);
 
         LocalDate from = parseData(fromDate);
-        LocalDate to = parseData(toDate);
-        to = to.isAfter(LocalDate.now()) ? LocalDate.now().plusDays(1) : to;
+        LocalDate to = validateEndRangeDate(parseData(toDate));
 
         List<TrackingDataJson> result = Stream.iterate(from, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(from, to))
