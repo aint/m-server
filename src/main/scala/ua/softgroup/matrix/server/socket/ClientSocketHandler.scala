@@ -3,7 +3,7 @@ package ua.softgroup.matrix.server.socket
 import java.io.{IOException, ObjectInputStream, ObjectOutputStream}
 import java.net.Socket
 
-import org.slf4j.LoggerFactory
+import org.slf4j.{LoggerFactory, MDC}
 import ua.softgroup.matrix.api.ServerCommands
 import ua.softgroup.matrix.api.ServerCommands._
 import ua.softgroup.matrix.api.model.datamodels._
@@ -22,6 +22,7 @@ class ClientSocketHandler(clientSocket: Socket, matrixServerApi: ServerSocketApi
   private var objectInputStream: ObjectInputStream = _
 
   override def run(): Unit = {
+    MDC.put("IP", s"${clientSocket.getInetAddress.getHostAddress}")
     logger.info(s"Desktop client connected ${clientSocket.getInetAddress.getHostAddress}:${clientSocket.getPort}")
 
     try {
@@ -39,6 +40,7 @@ class ClientSocketHandler(clientSocket: Socket, matrixServerApi: ServerSocketApi
         logger.error("Error", e)
         sendFailAndClose()
     }
+    MDC.clear()
   }
 
   private def readServerCommand = objectInputStream.readObject.asInstanceOf[ServerCommands]
