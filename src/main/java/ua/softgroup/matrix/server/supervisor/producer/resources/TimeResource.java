@@ -17,7 +17,6 @@ import ua.softgroup.matrix.server.persistent.repository.TimeAuditRepository;
 import ua.softgroup.matrix.server.service.ProjectService;
 import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
-import ua.softgroup.matrix.server.supervisor.producer.Utils;
 import ua.softgroup.matrix.server.supervisor.producer.json.TimeJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.UserProjectTimeResponse;
 import ua.softgroup.matrix.server.supervisor.producer.json.UserTimeResponse;
@@ -36,10 +35,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.calculateIdlePercent;
+import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
 import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
 /**
@@ -123,12 +124,17 @@ public class TimeResource {
         Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         LOG.info("Principal {} request time management {}", principalId, timeManagement);
 
+        LocalDate date = parseData(timeManagement.getOnDate());
+        if (date.isAfter(LocalDate.now())) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Date can't be in future").build();
+        }
+
         User user = userService.getById(timeManagement.getUserId()).orElseThrow(NotFoundException::new);
         Project project = projectService.getBySupervisorIdAndUser(timeManagement.getEntityId(), user)
                                         .orElseThrow(NotFoundException::new);
 
-        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, Utils.parseData(timeManagement.getOnDate()))
-                                        .orElseGet(() -> new WorkDay(user, project, Utils.parseData(timeManagement.getOnDate())));
+        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, date)
+                                        .orElseGet(() -> new WorkDay(user, project, date));
         double idlePercentBefore = calculateIdlePercent(workDay.getWorkSeconds(), workDay.getIdleSeconds());
         workDay.setWorkSeconds("add".equals(timeManagement.getAction())
                 ? workDay.getWorkSeconds() + timeManagement.getTime()
