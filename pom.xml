@@ -214,9 +214,9 @@
         <artifactId>wagon-maven-plugin</artifactId>
         <version>1.0</version>
         <configuration>
-          <serverId>uba</serverId>
-          <fromFile>${project.build.directory}/${project.build.finalName}.jar</fromFile>
-          <url>scp://192.168.11.84/home/adminl/</url>
+          <serverId>matrix</serverId>
+          <fromFile>${project.build.directory}/${project.build.finalName}-bin.tar</fromFile>
+          <url>scp://192.168.11.84/home/adminl/matrix</url>
         </configuration>
         <executions>
           <execution>
@@ -227,6 +227,13 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
       </plugin>
 
       <plugin>
