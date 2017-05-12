@@ -20,6 +20,10 @@ import ua.softgroup.matrix.server.service.UserService;
 import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.service.WorkTimePeriodService;
 
+import javax.imageio.ImageIO;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +34,9 @@ import java.util.Optional;
 public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<TrackingData> implements TrackingDataService {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackingDataServiceImpl.class);
+
+    private static final String CWD = System.getProperty("user.dir");
+    private static final String SCREENSHOT_EXT = "png";
 
     private final ProjectService projectService;
     private final UserService userService;
@@ -66,7 +73,16 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
         workDay.setSymbolsCount(workDay.getSymbolsCount() + keyboardText.length());
         trackingData.setMouseFootage(trackingData.getMouseFootage() + mouseFootage);
         if (screenshot != null) {
-            trackingData.getScreenshots().add(new Screenshot(screenshot, LocalDateTime.now(), screenshotTitle, trackingData));
+
+            try (InputStream is = new ByteArrayInputStream(screenshot)) {
+                File screenshotFile = new File(CWD + "/screenshots/" + System.nanoTime() + "." + SCREENSHOT_EXT);
+                screenshotFile.getParentFile().mkdirs();
+                ImageIO.write(ImageIO.read(is), SCREENSHOT_EXT, screenshotFile);
+
+                trackingData.getScreenshots().add(new Screenshot(LocalDateTime.now(), screenshotTitle, screenshotFile.getPath(), trackingData));
+            } catch (Exception e) {
+                logger.error("Failed to save screenshot", e);
+            }
         }
         activeWindowList.stream()
                 .map(entry -> new WindowTime(entry.getWindowTitle(), entry.getStartTime(), entry.getWorkingPeriodSeconds(), trackingData))

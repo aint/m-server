@@ -33,6 +33,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
@@ -251,14 +254,20 @@ public class TrackingDataResource {
     }
 
     private String[] convertRandomScreenshotToBase64(Set<Screenshot> screenshots) {
-        Screenshot screenshot = screenshots.stream()
+        String[] result = new String[2];
+        screenshots.stream()
                 .findAny()
-                .orElseGet(Screenshot::new);
+                .ifPresent(screenshot -> {
+                    result[0] = screenshot.getScreenshotTitle();
+                    try {
+                        byte[] imageBytes = Files.readAllBytes(Paths.get(screenshot.getPath()));
+                        result[1] = "data:image/png;base64," + getEncoder().encodeToString(imageBytes);
+                    } catch (IOException e) {
+                        logger.error("Failed to encode screenshot to Base64", e);
+                    }
+                });
 
-        byte[] imageBytes = screenshot.getImageBytes();
-        return new String[] {
-                "data:image/png;base64," + getEncoder().encodeToString(imageBytes != null ? imageBytes : new byte[]{}),
-                screenshot.getScreenshotTitle()};
+        return result;
     }
 
 }

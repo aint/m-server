@@ -12,10 +12,6 @@ import scala.beans.BeanProperty
 @SerialVersionUID(-5537683353413610686L)
 class Screenshot extends AbstractEntity[java.lang.Long] {
 
-  @Lob
-  @BeanProperty
-  var imageBytes: Array[Byte] = _
-
   @Column
   @BeanProperty
   var creationTime: LocalDateTime = _
@@ -24,18 +20,22 @@ class Screenshot extends AbstractEntity[java.lang.Long] {
   @BeanProperty
   var screenshotTitle: String = _
 
+  @Column
+  @BeanProperty
+  var path: String = _
+
   @ManyToOne
   @BeanProperty
   var trackingData: TrackingData = _
 
-  def this(imageBytes: Array[Byte], creationTime: LocalDateTime, screenshotTitle: String, trackingData: TrackingData) {
+  def this(creationTime: LocalDateTime, screenshotTitle: String, path: String, trackingData: TrackingData) {
     this()
-    this.imageBytes = imageBytes
     this.creationTime = creationTime
     this.screenshotTitle = screenshotTitle
+    this.path = path
     this.trackingData = trackingData
   }
 
-  override def toString = s"Screenshot(id=${super.getId}, creationTime=$creationTime, screenshotTitle=$screenshotTitle)"
+  override def toString = s"Screenshot(id=${super.getId}, creationTime=$creationTime, screenshotTitle=$screenshotTitle, path=$path)"
 
 }
