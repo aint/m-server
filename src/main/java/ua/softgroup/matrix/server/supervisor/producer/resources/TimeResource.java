@@ -109,7 +109,7 @@ public class TimeResource {
                     int workSeconds = workDayService.getTotalWorkSeconds(user, project);
                     int idleSeconds = workDayService.getTotalIdleSeconds(user, project);
                     double idlePercentage = calculateIdlePercent(workSeconds, idleSeconds);
-                    return new UserProjectTimeResponse(project.getId(), workSeconds, idleSeconds, idlePercentage);
+                    return new UserProjectTimeResponse(project.getSupervisorId(), workSeconds, idleSeconds, idlePercentage);
                 })
                 .collect(Collectors.toList());
 
