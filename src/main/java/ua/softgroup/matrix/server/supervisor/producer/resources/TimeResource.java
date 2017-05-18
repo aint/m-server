@@ -143,6 +143,7 @@ public class TimeResource {
         workDay.setIdleSeconds(timeManagement.getIdleAction() == 1
                 ? (int) (workDay.getIdleSeconds() * idlePercentBefore / idlePercentAfter)
                 : workDay.getIdleSeconds());
+        workDay.setReason(timeManagement.getReason());
 
         workDayService.save(workDay);
 

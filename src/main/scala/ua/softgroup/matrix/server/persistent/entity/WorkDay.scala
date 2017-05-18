@@ -68,6 +68,10 @@ class WorkDay extends AbstractEntity[java.lang.Long] {
   @BeanProperty
   var currencyId: Integer = _
 
+  @Column
+  @BeanProperty
+  var reason: String = _
+
   @ManyToOne
   @BeanProperty
   var project: Project = _
@@ -95,8 +99,8 @@ class WorkDay extends AbstractEntity[java.lang.Long] {
   }
 
   override def toString: String = {
-    s"WorkDay(id=%s, date=%s, workSeconds=%d, idleSeconds=%d, reportText=%s, checked=%b, jailerId=%d, coefficient=%f, symbolsCount=%d, windowsSwitchedCount=%d, rate=%d, currencyId=%d)"
-      .format(super.getId, date, workSeconds, idleSeconds, reportText, checked, jailerId, coefficient, symbolsCount, windowsSwitchedCount, rate, currencyId)
+    s"WorkDay(id=%s, date=%s, workSeconds=%d, idleSeconds=%d, reportText=%s, checked=%b, jailerId=%d, coefficient=%f, symbolsCount=%d, windowsSwitchedCount=%d, rate=%s, currencyId=%s, reson=%s)"
+      .format(super.getId, date, workSeconds, idleSeconds, reportText, checked, jailerId, coefficient, symbolsCount, windowsSwitchedCount, rate, currencyId, reason)
   }
 
 }
