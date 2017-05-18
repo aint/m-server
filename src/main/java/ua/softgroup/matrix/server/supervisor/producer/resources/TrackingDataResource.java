@@ -258,10 +258,10 @@ public class TrackingDataResource {
         screenshots.stream()
                 .findAny()
                 .ifPresent(screenshot -> {
-                    result[0] = screenshot.getScreenshotTitle();
                     try {
                         byte[] imageBytes = Files.readAllBytes(Paths.get(screenshot.getPath()));
                         result[1] = "data:image/png;base64," + getEncoder().encodeToString(imageBytes);
+                        result[0] = screenshot.getScreenshotTitle();
                     } catch (IOException e) {
                         logger.error("Failed to encode screenshot to Base64", e);
                     }

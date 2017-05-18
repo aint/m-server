@@ -26,6 +26,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -35,8 +37,10 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
 
     private static final Logger logger = LoggerFactory.getLogger(TrackingDataServiceImpl.class);
 
-    private static final String CWD = System.getProperty("user.dir");
+    private static final String SCREENSHOTS_FOLDER_PATH = System.getProperty("user.home") + "/screenshots/";
     private static final String SCREENSHOT_EXT = "png";
+
+    private static final DateTimeFormatter monthYearFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
 
     private final ProjectService projectService;
     private final UserService userService;
@@ -68,14 +72,14 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
         TrackingData trackingData = Optional.ofNullable(workTimePeriod.getTrackingData())
                                             .orElseGet(() -> new TrackingData(workTimePeriod));
 
-//        TrackingData trackingData = getTrackingDataOf(userToken, projectId, LocalDate.now());
         trackingData.setKeyboardText(trackingData.getKeyboardText() + keyboardText);
         workDay.setSymbolsCount(workDay.getSymbolsCount() + keyboardText.length());
         trackingData.setMouseFootage(trackingData.getMouseFootage() + mouseFootage);
         if (screenshot != null) {
 
             try (InputStream is = new ByteArrayInputStream(screenshot)) {
-                File screenshotFile = new File(CWD + "/screenshots/" + System.nanoTime() + "." + SCREENSHOT_EXT);
+                String path = SCREENSHOTS_FOLDER_PATH + monthYearFormatter.format(YearMonth.now());
+                File screenshotFile = new File( path + "/" + System.nanoTime() + "." + SCREENSHOT_EXT);
                 screenshotFile.getParentFile().mkdirs();
                 ImageIO.write(ImageIO.read(is), SCREENSHOT_EXT, screenshotFile);
 
@@ -91,14 +95,6 @@ public class TrackingDataServiceImpl extends AbstractEntityTransactionalService<
 
         save(trackingData);
     }
-
-//    private TrackingData getTrackingDataOf(String userToken, Long projectId, LocalDate date) {
-//        User user = userService.getByTrackerToken(userToken).orElseThrow(NoSuchElementException::new);
-//        Project project = projectService.getById(projectId).orElseThrow(NoSuchElementException::new);
-//        WorkDay workDay = workDayService.getByAuthorAndProjectAndDate(user, project, date).orElseThrow(NoSuchElementException::new);
-//        TrackingData trackingData = getRepository().findByWorkDay(workDay);
-//        return trackingData != null ? trackingData : new TrackingData(workDay);
-//    }
 
     @Override
     protected TrackingDataRepository getRepository() {
