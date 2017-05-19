@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Optional;
 
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
+
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
  */
@@ -24,7 +26,6 @@ import java.util.Optional;
 public class TokenAuthenticationFilter implements ContainerRequestFilter {
     private static final Logger LOG = LoggerFactory.getLogger(TokenAuthenticationFilter.class);
 
-    public static final String PRINCIPAL_ID_ATTRIBUTE = "principal_id";
     private static final String SWAGGER_JSON = "swagger.json";
     private static final String TOKEN = "TOKEN";
 
@@ -46,16 +47,8 @@ public class TokenAuthenticationFilter implements ContainerRequestFilter {
                                .orElseThrow(() -> new NotAuthorizedException(new ErrorJson("Authorization header must be provided")));
 
         if (!tokenHelper.validateToken(token)) {
-            requestContext.abortWith(
-                    Response.status(Response.Status.FORBIDDEN).entity(new ErrorJson("Token is not valid")).build());
+            requestContext.abortWith(Response.status(FORBIDDEN).entity(new ErrorJson("Token is not valid")).build());
         }
-        setPrincipalAttribute(token);
-    }
-
-    private void setPrincipalAttribute(String token) {
-        Long subject = Long.valueOf(tokenHelper.extractSubjectFromToken(token));
-        LOG.info("Process a request from user {} ", subject);
-        context.setAttribute(PRINCIPAL_ID_ATTRIBUTE, subject);
     }
 
     private void logIpAddress() {

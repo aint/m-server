@@ -23,7 +23,6 @@ import ua.softgroup.matrix.server.supervisor.producer.json.UserTimeResponse;
 import ua.softgroup.matrix.server.supervisor.producer.json.time.TimeManagement;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
 
-import javax.servlet.ServletContext;
 import javax.validation.constraints.Min;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -32,7 +31,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
@@ -41,7 +39,6 @@ import java.util.stream.Collectors;
 
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.calculateIdlePercent;
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
-import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -120,9 +117,8 @@ public class TimeResource {
     @Path("/manage")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Add a work time for the user's project", response = TimeJson.class)
-    public Response timeManagement(@Context ServletContext context, @JsonView TimeManagement timeManagement) {
-        Long principalId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
-        LOG.info("Principal {} request time management {}", principalId, timeManagement);
+    public Response timeManagement(@JsonView TimeManagement timeManagement) {
+        LOG.info("Time management {}", timeManagement);
 
         LocalDate date = parseData(timeManagement.getOnDate());
         if (date.isAfter(LocalDate.now())) {

@@ -17,7 +17,6 @@ import ua.softgroup.matrix.server.service.WorkDayService;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson;
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.ReportResponse;
 
-import javax.servlet.ServletContext;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -30,7 +29,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
@@ -40,7 +38,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ua.softgroup.matrix.server.supervisor.producer.Utils.parseData;
-import static ua.softgroup.matrix.server.supervisor.producer.filter.TokenAuthenticationFilter.PRINCIPAL_ID_ATTRIBUTE;
 
 /**
  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -169,13 +166,12 @@ public class ReportResource {
             @ApiResponse(code = 400, message = "When report id or coefficient < 0", response = ErrorJson.class),
             @ApiResponse(code = 404, message = "When report not found", response = ErrorJson.class)
     })
-    public Response checkReport(@Context ServletContext context,
-                                @Min(0) @PathParam("reportId") Long reportId,
+    public Response checkReport(@Min(0) @PathParam("reportId") Long reportId,
+                                @NotNull @DecimalMin(value = "1") @FormParam("checkedById") Long checkedById,
                                 @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
         WorkDay workDay = workDayService.getById(reportId).orElseThrow(NotFoundException::new);
-        Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
-        workDay.setJailerId(checkerId == null ? 0L : checkerId);
+        workDay.setJailerId(checkedById);
         workDay.setChecked(true);
         workDay.setCoefficient(coefficient);
         workDayService.save(workDay);
@@ -188,8 +184,8 @@ public class ReportResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("14) checkAllUsersReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When reports of the specified users has been successfully checked"))
-    public Response checkReportsOfUsers(@Context ServletContext context,
-                                        @NotEmpty @FormParam("usersIds") List<Long> userIds,
+    public Response checkReportsOfUsers(@NotEmpty @FormParam("usersIds") List<Long> userIds,
+                                        @NotNull @DecimalMin(value = "1") @FormParam("checkedById") Long checkedById,
                                         @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
         long userCount = userIds.stream()
@@ -202,11 +198,10 @@ public class ReportResource {
             throw new NotFoundException();
         }
 
-        Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         userIds.stream()
                 .flatMap(userId -> workDayService.getUserNotCheckedWorkDays(userId).stream())
                 .forEach(workDay -> {
-                    workDay.setJailerId(checkerId == null ? 0L : checkerId);
+                    workDay.setJailerId(checkedById);
                     workDay.setCoefficient(coefficient);
                     workDay.setChecked(true);
                     workDayService.save(workDay);
@@ -221,8 +216,8 @@ public class ReportResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("15) checkAllEntitiesReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When reports of the specified projects has been successfully checked"))
-    public Response checkReportsOfProject(@Context ServletContext context,
-                                          @NotEmpty @FormParam("entitiesIds") List<Long> projectIds,
+    public Response checkReportsOfProject(@NotEmpty @FormParam("entitiesIds") List<Long> projectIds,
+                                          @NotNull @DecimalMin(value = "1") @FormParam("checkedById") Long checkedById,
                                           @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
         long projectCount = projectIds.stream()
@@ -234,11 +229,10 @@ public class ReportResource {
             throw new NotFoundException();
         }
 
-        Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
         projectIds.stream()
                 .flatMap(projectId -> workDayService.getProjectNotCheckedWorkDays(projectId).stream())
                 .forEach(workDay -> {
-                    workDay.setJailerId(checkerId == null ? 0L : checkerId);
+                    workDay.setJailerId(checkedById);
                     workDay.setChecked(true);
                     workDayService.save(workDay);
                 });
@@ -251,12 +245,12 @@ public class ReportResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("16) checkAllReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When all unchecked reports has been successfully checked"))
-    public Response checkAllReports(@Context ServletContext context,
+    public Response checkAllReports(@NotNull @DecimalMin(value = "1") @FormParam("checkedById") Long checkedById,
                                     @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
-        Long checkerId = (Long) context.getAttribute(PRINCIPAL_ID_ATTRIBUTE);
+
         workDayService.getAllNotCheckedWorkDays()
                 .forEach(workDay -> {
-                    workDay.setJailerId(checkerId == null ? 0L : checkerId);
+                    workDay.setJailerId(checkedById);
                     workDay.setCoefficient(coefficient);
                     workDay.setChecked(true);
                     workDayService.save(workDay);
