@@ -74,7 +74,7 @@ public class ReportResource {
     @Path("/users")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "10) getUsersReports", response = ReportResponse.class, responseContainer = "List")
-    public Response getReportsOfUsers(@ApiParam(example = "[1, 2, 13]") @FormParam("usersIds") List<Long> userIds,
+    public Response getReportsOfUsers(@ApiParam(example = "[1, 2, 13]") @FormParam("usersIds[]") List<Long> userIds,
                                       @ApiParam(example = "2017-01-01") @FormParam("fromDate") String fromDate,
                                       @ApiParam(example = "2017-12-31") @FormParam("toDate") String toDate) {
 
@@ -103,7 +103,7 @@ public class ReportResource {
     @Path("/project")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "11) getEntitiesReports", response = ReportResponse.class, responseContainer = "List")
-    public Response getReportsOfProjects(@ApiParam(example = "[1, 2, 13]") @FormParam("entitiesIds") List<Long> projectIds,
+    public Response getReportsOfProjects(@ApiParam(example = "[1, 2, 13]") @FormParam("entitiesIds[]") List<Long> projectIds,
                                          @ApiParam(example = "2017-01-01") @FormParam("fromDate") String fromDate,
                                          @ApiParam(example = "2017-12-31") @FormParam("toDate") String toDate) {
 
@@ -184,7 +184,7 @@ public class ReportResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("14) checkAllUsersReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When reports of the specified users has been successfully checked"))
-    public Response checkReportsOfUsers(@NotEmpty @FormParam("usersIds") List<Long> userIds,
+    public Response checkReportsOfUsers(@NotEmpty @FormParam("usersIds[]") List<Long> userIds,
                                         @NotNull @DecimalMin(value = "1") @FormParam("checkedById") Long checkedById,
                                         @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 
@@ -216,7 +216,7 @@ public class ReportResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("15) checkAllEntitiesReports")
     @ApiResponses(@ApiResponse(code = 200, message = "When reports of the specified projects has been successfully checked"))
-    public Response checkReportsOfProject(@NotEmpty @FormParam("entitiesIds") List<Long> projectIds,
+    public Response checkReportsOfProject(@NotEmpty @FormParam("entitiesIds[]") List<Long> projectIds,
                                           @NotNull @DecimalMin(value = "1") @FormParam("checkedById") Long checkedById,
                                           @NotNull @DecimalMin(value = "0") @FormParam("coefficient") Double coefficient) {
 

@@ -179,7 +179,7 @@ public class TrackingDataResource {
     @Path("/users/")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "8) getFeaturedTogetherControlData", response = UserTimeAndCountResponse.class, responseContainer = "List")
-    public Response getFeaturedTogetherControlData(@ApiParam(example = "[1, 2, 13]") @FormParam("usersIds") List<Long> userIds,
+    public Response getFeaturedTogetherControlData(@ApiParam(example = "[1, 2, 13]") @FormParam("usersIds[]") List<Long> userIds,
                                                    @ApiParam(example = "2017-01-01") @FormParam("fromDate") String fromDate,
                                                    @ApiParam(example = "2017-12-31") @FormParam("toDate") String toDate) {
 
