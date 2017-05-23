@@ -19,7 +19,6 @@ import ua.softgroup.matrix.server.supervisor.producer.json.v2.UserWorkingDay;
 
 import javax.validation.constraints.Min;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -72,7 +71,7 @@ public class WorkDaysResource {
                                        @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                        @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
-        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
+        User user = userService.getById(userId).orElseGet(User::new);
 
         LocalDate from = parseData(fromDate);
         LocalDate to = validateEndRangeDate(parseData(toDate));
@@ -149,10 +148,6 @@ public class WorkDaysResource {
     public Response getEntityWorkingDays(@ApiParam(example = "14") @Min(0) @PathParam("entityId") Long projectId,
                                          @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                          @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
-
-        if (projectService.getBySupervisorId(projectId).isEmpty()) {
-            throw new NotFoundException();
-        }
 
         LocalDate from = parseData(fromDate);
         LocalDate to = validateEndRangeDate(parseData(toDate));

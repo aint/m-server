@@ -84,10 +84,6 @@ public class TrackingDataResource {
                                              @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                              @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
-        if (projectService.getBySupervisorId(projectId).isEmpty()) {
-            throw new NotFoundException();
-        }
-
         LocalDate from = parseData(fromDate);
         LocalDate to = validateEndRangeDate(parseData(toDate));
 
@@ -127,10 +123,6 @@ public class TrackingDataResource {
                             @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                             @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
-        if (!userService.getById(userId).isPresent() || projectService.getBySupervisorId(projectId).isEmpty()) {
-            throw new NotFoundException();
-        }
-
         List<GeneralWorkDataJson> result =
                 workDayService.getAllWorkDaysOf(userId, projectId, parseData(fromDate), parseData(toDate))
                         .stream()
@@ -160,7 +152,7 @@ public class TrackingDataResource {
                                           @ApiParam(example = "2017-01-01") @QueryParam("fromDate") String fromDate,
                                           @ApiParam(example = "2017-12-31") @QueryParam("toDate") String toDate) {
 
-        User user = userService.getById(userId).orElseThrow(NotFoundException::new);
+        User user = userService.getById(userId).orElseGet(User::new);
 
         LocalDate from = parseData(fromDate);
         LocalDate to = validateEndRangeDate(parseData(toDate));
