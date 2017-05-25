@@ -32,9 +32,9 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
       new InitializeModel(
         token,
         projectService.getUserActiveProjects(token),
-        trackerSettings.getStartIdleAfterSeconds,
-        trackerSettings.getScreenshotPeriodFrequency,
-        trackerSettings.getCheckpointFrequencyInSeconds,
+        trackerSettings.startIdleAfterSeconds,
+        trackerSettings.screenshotPeriodFrequency,
+        trackerSettings.checkpointFrequencyInSeconds,
         null)
     )
   }
