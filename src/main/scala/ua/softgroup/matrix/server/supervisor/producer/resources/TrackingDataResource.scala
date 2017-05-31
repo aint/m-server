@@ -152,7 +152,6 @@ class TrackingDataResource @Autowired()(userService: UserService,
           workDay.workSeconds,
           convertWorkTimePeriods(asScalaSet(workDay.workTimePeriods).toSet)))
         .toList
-        .asJava
     )
 
   private def convertToUserAndProjectTrackingData(workDay: WorkDay) =
@@ -175,18 +174,17 @@ class TrackingDataResource @Autowired()(userService: UserService,
           workDay.workSeconds,
           convertWorkTimePeriods(asScalaSet(workDay.workTimePeriods).toSet)))
         .toList
-        .asJava
     )
 
-  private def convertWorkTimePeriods(workTimePeriods: Set[WorkTimePeriod]): util.List[TrackingPeriodJson] = {
-    seqAsJavaList(workTimePeriods.toStream
+  private def convertWorkTimePeriods(workTimePeriods: Set[WorkTimePeriod]): List[TrackingPeriodJson] = {
+    workTimePeriods.toStream
       .sortWith(sortByDate)
       .map(period => new TrackingPeriodJson(
         period.start,
         period.end,
         getTrackingData(period).keyboardText,
         logTry(convertRandomScreenshotToBase64(getTrackingData(period).screenshots)) getOrElse new Array[String](2)))
-      .toList)
+      .toList
   }
 
   private def sortByDate(p1: WorkTimePeriod, p2: WorkTimePeriod) = p1.start isBefore p2.start

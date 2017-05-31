@@ -1,7 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.producer.json.tracking
 
 import java.time.LocalDate
-import java.util
 
 import scala.beans.BeanProperty
 
@@ -14,9 +13,9 @@ class TrackingDataJson {
   var date: LocalDate = _
 
   @BeanProperty
-  var workData: util.List[GeneralWorkDataJson] = _
+  var workData: List[GeneralWorkDataJson] = _
 
-  def this(date: LocalDate, workData: util.List[GeneralWorkDataJson]) {
+  def this(date: LocalDate, workData: List[GeneralWorkDataJson]) {
     this()
     this.date = date
     this.workData = workData

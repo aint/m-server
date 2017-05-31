@@ -1,7 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.producer.json.tracking
 
 import java.time.{LocalDate, LocalTime}
-import java.util
 
 import com.fasterxml.jackson.annotation.JsonView
 
@@ -34,10 +33,10 @@ class GeneralWorkDataJson {
   @BeanProperty
   var dayWorkTimeSeconds: Int = _
   @BeanProperty
-  var periods: util.List[TrackingPeriodJson] = _
+  var periods: List[TrackingPeriodJson] = _
 
   def this(date: LocalDate, start: LocalTime, end: LocalTime, dayWorkTimeSeconds: Int,
-           periods: util.List[TrackingPeriodJson]) {
+           periods: List[TrackingPeriodJson]) {
     this()
     this.date = date
     this.start = start
@@ -47,7 +46,7 @@ class GeneralWorkDataJson {
   }
 
   def this(userId: Long, start: LocalTime, end: LocalTime, dayWorkTimeSeconds: Int,
-           periods: util.List[TrackingPeriodJson]) {
+           periods: List[TrackingPeriodJson]) {
     this()
     this.userId = userId
     this.start = start
@@ -57,7 +56,7 @@ class GeneralWorkDataJson {
   }
 
   def this(entityId: Long, entityType: String, start: LocalTime, end: LocalTime,
-           dayWorkTimeSeconds: Int, periods: util.List[TrackingPeriodJson]) {
+           dayWorkTimeSeconds: Int, periods: List[TrackingPeriodJson]) {
     this()
     this.entityId = entityId
 //    this.entityType = entityType
