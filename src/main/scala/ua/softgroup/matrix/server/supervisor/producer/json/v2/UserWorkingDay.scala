@@ -1,8 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.producer.json.v2
 
 import java.time.{LocalDate, LocalTime}
-import java.util
-import java.util.Set
 
 import scala.beans.BeanProperty
 
@@ -30,14 +28,14 @@ class UserWorkingDay {
   var totalIdlePercentage: Double = _
 
   @BeanProperty
-  var periods: util.Set[Period] = _
+  var periods: Set[Period] = _
 
   @BeanProperty
-  var reports: util.Set[Report] = _
+  var reports: Set[Report] = _
 
   def this(date: LocalDate, start: LocalTime, end: LocalTime, totalWorkTimeSeconds: Int,
            totalIdleTimeSeconds: Int, totalIdlePercentage: Double,
-           periods: util.Set[Period], reports: util.Set[Report]) {
+           periods: Set[Period], reports: Set[Report]) {
     this()
     this.date = date
     this.start = start

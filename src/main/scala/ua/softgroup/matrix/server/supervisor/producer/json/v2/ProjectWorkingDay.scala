@@ -1,7 +1,6 @@
 package ua.softgroup.matrix.server.supervisor.producer.json.v2
 
 import java.time.LocalDate
-import java.util
 
 import scala.beans.BeanProperty
 
@@ -23,7 +22,7 @@ class ProjectWorkingDay {
   var totalIdlePercentage: Double = _
 
   @BeanProperty
-  var executors: util.Set[Executor] = _
+  var executors: Set[Executor] = _
 
   override def toString: String = {
     "ProjectWorkingDay(date=%s, totalDayWorkTimeSeconds=%d, totalIdleTimeSeconds=%d, totalIdlePercentage=%f, executors=%s)"
