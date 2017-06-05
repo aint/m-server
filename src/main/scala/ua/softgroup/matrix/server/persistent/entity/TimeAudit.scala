@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import javax.persistence.{Column, Entity, OneToOne}
 
 import org.hibernate.annotations.CreationTimestamp
+import org.springframework.data.jpa.domain.AbstractPersistable
 
 import scala.beans.BeanProperty
 
@@ -12,7 +13,7 @@ import scala.beans.BeanProperty
   */
 @Entity
 @SerialVersionUID(7093407748878141348L)
-class TimeAudit extends AbstractEntity[java.lang.Long] {
+class TimeAudit extends AbstractPersistable[java.lang.Long] {
 
   @Column
   @CreationTimestamp

@@ -1,7 +1,9 @@
 package ua.softgroup.matrix.server.persistent.entity
 
 import java.time.LocalDateTime
-import javax.persistence.{Column, Entity, Lob, ManyToOne}
+import javax.persistence.{Column, Entity, ManyToOne}
+
+import org.springframework.data.jpa.domain.AbstractPersistable
 
 import scala.beans.BeanProperty
 
@@ -10,7 +12,7 @@ import scala.beans.BeanProperty
   */
 @Entity
 @SerialVersionUID(-5537683353413610686L)
-class Screenshot extends AbstractEntity[java.lang.Long] {
+class Screenshot extends AbstractPersistable[java.lang.Long] {
 
   @Column
   @BeanProperty

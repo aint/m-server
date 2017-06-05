@@ -3,6 +3,8 @@ package ua.softgroup.matrix.server.persistent.entity
 import java.util
 import javax.persistence._
 
+import org.springframework.data.jpa.domain.AbstractPersistable
+
 import scala.beans.BeanProperty
 
 /**
@@ -10,7 +12,7 @@ import scala.beans.BeanProperty
   */
 @Entity
 @SerialVersionUID(-6554909949520971201L)
-class TrackingData extends AbstractEntity[java.lang.Long] {
+class TrackingData extends AbstractPersistable[java.lang.Long] {
 
   @Column(columnDefinition = "longtext")
   @BeanProperty

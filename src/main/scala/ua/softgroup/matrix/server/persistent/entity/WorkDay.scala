@@ -5,6 +5,7 @@ import javax.persistence._
 import java.util
 
 import org.hibernate.annotations.CreationTimestamp
+import org.springframework.data.jpa.domain.AbstractPersistable
 
 import scala.beans.{BeanProperty, BooleanBeanProperty}
 
@@ -13,7 +14,7 @@ import scala.beans.{BeanProperty, BooleanBeanProperty}
   */
 @Entity
 @SerialVersionUID(-5318207364986821484L)
-class WorkDay extends AbstractEntity[java.lang.Long] {
+class WorkDay extends AbstractPersistable[java.lang.Long] {
 
   @Column
   @CreationTimestamp

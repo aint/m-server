@@ -3,6 +3,8 @@ package ua.softgroup.matrix.server.persistent.entity
 import java.time.LocalTime
 import javax.persistence.{Column, Entity, ManyToOne}
 
+import org.springframework.data.jpa.domain.AbstractPersistable
+
 import scala.beans.BeanProperty
 
 /**
@@ -10,7 +12,7 @@ import scala.beans.BeanProperty
   */
 @Entity
 @SerialVersionUID(-3216454660635129210L)
-class WindowTime extends AbstractEntity[java.lang.Long] {
+class WindowTime extends AbstractPersistable[java.lang.Long] {
 
   @Column(columnDefinition = "TEXT")
   @BeanProperty

@@ -4,6 +4,8 @@ import java.time.{LocalDate, LocalDateTime}
 import java.util
 import javax.persistence._
 
+import org.springframework.data.jpa.domain.AbstractPersistable
+
 import scala.beans.BeanProperty
 
 /**
@@ -11,7 +13,7 @@ import scala.beans.BeanProperty
   */
 @Entity
 @SerialVersionUID(1L)
-class Project extends AbstractEntity[java.lang.Long] {
+class Project extends AbstractPersistable[java.lang.Long] {
 
   @Column
   @BeanProperty

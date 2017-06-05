@@ -3,6 +3,8 @@ package ua.softgroup.matrix.server.persistent.entity
 import java.time.LocalTime
 import javax.persistence._
 
+import org.springframework.data.jpa.domain.AbstractPersistable
+
 import scala.beans.BeanProperty
 
 /**
@@ -10,7 +12,7 @@ import scala.beans.BeanProperty
   */
 @Entity
 @SerialVersionUID(2140610419978157701L)
-class WorkTimePeriod extends AbstractEntity[java.lang.Long] {
+class WorkTimePeriod extends AbstractPersistable[java.lang.Long] {
 
   @Column
   @BeanProperty
