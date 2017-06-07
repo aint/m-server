@@ -11,7 +11,7 @@ import ua.softgroup.matrix.server.persistent.entity.{TimeAudit, User}
   */
 trait TimeAuditRepository extends CrudRepository[TimeAudit, java.lang.Long] {
 
-  def findByAdder(adder: User): util.Set[TimeAudit]
+  def findByPrincipalId(principalId: Long): util.Set[TimeAudit]
 
   def findByCreationDateBetween(start: LocalDateTime, end: LocalDateTime): util.Set[TimeAudit]
 
