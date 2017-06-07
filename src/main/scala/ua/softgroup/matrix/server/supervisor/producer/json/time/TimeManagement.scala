@@ -31,9 +31,12 @@ class TimeManagement {
   @BeanProperty
   var reason: String = _
 
+  @BeanProperty
+  var managedById: Long = _
+
   override def toString: String = {
-    "TimeManagment(entityId=%d, entityType=%s, userId=%d, onDate=%s, time=%d, idleAction=%d, action=%s, reason=%s)"
-      .format(entityId, entityType, userId, onDate, time, idleAction, action, reason)
+    "TimeManagment(entityId=%d, entityType=%s, userId=%d, onDate=%s, time=%d, idleAction=%d, action=%s, reason=%s, managedById=%d)"
+      .format(entityId, entityType, userId, onDate, time, idleAction, action, reason, managedById)
   }
 
 }

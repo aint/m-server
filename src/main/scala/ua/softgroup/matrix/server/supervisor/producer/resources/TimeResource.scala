@@ -109,8 +109,7 @@ class TimeResource @Autowired() (projectService: ProjectService,
 
     workDayService.save(workDay)
 
-//    User principal = userService.getById(principalId).orElseThrow(NotFoundException::new);
-//    timeAuditRepository.save(new TimeAudit(timeManagement.getTime(), "reason", principal, workDay));
+    timeAuditService.save(time, timeManagement.reason, timeManagement.managedById, workDay)
 
     Response.ok.build
   }
