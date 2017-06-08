@@ -8,6 +8,8 @@ import ua.softgroup.matrix.api.model.requestmodels.RequestModel
 import ua.softgroup.matrix.api.model.responsemodels.{ResponseModel, ResponseStatus}
 import ua.softgroup.matrix.server.service.{ProjectService, TrackerSettingsService, TrackingDataService, _}
 
+import scala.collection.JavaConverters._
+
 /**
   * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>
   */
@@ -88,7 +90,7 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
       requestModel.getProjectId,
       checkPointModel.getKeyboardLogs,
       checkPointModel.getMouseFootage,
-      checkPointModel.getActiveWindows,
+      asScalaBuffer(checkPointModel.getActiveWindows).toList,
       checkPointModel.getScreenshot,
       checkPointModel.getScreenshotWindowTitle)
 
@@ -107,7 +109,7 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
           requestModel.getProjectId,
           checkPointModel.getKeyboardLogs,
           checkPointModel.getMouseFootage,
-          checkPointModel.getActiveWindows,
+          asScalaBuffer(checkPointModel.getActiveWindows).toList,
           checkPointModel.getScreenshot,
           checkPointModel.getScreenshotWindowTitle)
 
