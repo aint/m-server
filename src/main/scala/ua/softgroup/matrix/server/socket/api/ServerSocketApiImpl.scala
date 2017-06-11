@@ -26,8 +26,10 @@ class ServerSocketApiImpl @Autowired() (userService: UserService,
     val authModel = authRequestModel.getDataContainer.or(() => dataContainerEmptyException)
     logger.info(s"Authentication of user '${authModel.getUsername}' with password '${authModel.getPassword}'")
 
-    val token = userService.authenticate(authModel)
-    if (token == null) return new ResponseModel[InitializeModel](ResponseStatus.INVALID_CREDENTIALS)
+    val token: String = userService.authenticate(authModel) match {
+      case Some(t) => t
+      case None => return new ResponseModel[InitializeModel](ResponseStatus.INVALID_CREDENTIALS)
+    }
     val trackerSettings = trackerSettingsService.getTrackerSettings(token)
 
     new ResponseModel[InitializeModel](

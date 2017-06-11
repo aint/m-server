@@ -15,7 +15,7 @@ import ua.softgroup.matrix.server.service.UserService
 import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint
 import ua.softgroup.matrix.server.supervisor.consumer.json.{LoginJson, UserJson}
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 /**
   * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
@@ -26,35 +26,38 @@ class UserServiceImpl @Autowired() (repository: UserRepository,
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  override def authenticate(authModel: AuthModel): String = {
-    try
-      tryToAuthenticate(authModel.getUsername, authModel.getPassword)
-    catch {
-      case e: IOException =>
-        logger.warn("Authentication error: {}", e)
-        authenticateFromDb(authModel.getUsername, authModel.getPassword)
+  override def authenticate(authModel: AuthModel): Option[String] = {
+    val username = authModel.getUsername
+    val password = authModel.getPassword
+
+    Try(authenticate(username, password)) match {
+      case Success(optionToken) => optionToken
+      case Failure(f) =>
+        logger.error("Authentication error", f.getCause)
+        authenticateFromDb(username, password)
     }
   }
 
-  private def authenticateFromDb(username: String, password: String): String = {
+  private def authenticateFromDb(username: String, password: String): Option[String] = {
     val user = repository.findByUsername(username)
     if (user != null && BCrypt.checkpw(password, user.getPassword)) {
-      logger.info(s"Offline authentication. Given token ${user.getTrackerToken}")
-      user.getTrackerToken
+      logger.info(s"Offline authentication. User '$username' authenticated successfully with token '${user.getTrackerToken}'")
+      Option(user.getTrackerToken)
     }
-    null
+    logger.info(s"Offline authentication. User '$username' not found or passwords aren't equals")
+    Option.empty
   }
 
-  private def tryToAuthenticate(username: String, password: String): String = {
+  private def authenticate(username: String, password: String): Option[String] = {
     val loginJson = executeLoginQuery(username, password).body
     if (loginJson.getSuccess) {
       saveUser(loginJson.getUser, password)
       val token = loginJson.getTrackerToken
-      logger.info(s"User authenticated successfully: $token")
-      return token
+      logger.info(s"User '$username' authenticated successfully with token '$token'")
+      return Option(token)
     }
     logger.info(s"Authentication failed: ${loginJson.getMessage}")
-    null
+    Option.empty
   }
 
   private def executeLoginQuery(username: String, password: String): Response[LoginJson] = {
@@ -83,7 +86,7 @@ class UserServiceImpl @Autowired() (repository: UserRepository,
     repository.save(user)
   }
 
-  override def getByUsername(username: String): Optional[User] = Optional.ofNullable(repository.findByUsername(username))
+  override def getByUsername(username: String): Option[User] = Option(repository.findByUsername(username))
 
   override def getByTrackerToken(token: String): Optional[User] = Optional.ofNullable(repository.findByTrackerToken(token))
 
@@ -91,19 +94,6 @@ class UserServiceImpl @Autowired() (repository: UserRepository,
 
   override def save(entity: User): User = repository.save(entity)
 
-  private def logTry[A](computation: => A): Try[A] = {
-    Try(computation) recoverWith {
-      case e: IOException =>
-        logger.error("Failed to encode screenshot to Base64", e)
-        Failure(e)
-    }
-  }
-
-  /**
-    * Checks entity existence by the given primary ''id''
-    *
-    * @param id entity's primary key
-    * @return ''true'' if an entity with the given ''id'' exists; ''false'' otherwise
-    */
   override def isExist(id: Long): Boolean = repository.exists(id)
+
 }

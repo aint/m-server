@@ -10,9 +10,9 @@ import ua.softgroup.matrix.server.persistent.entity.User
   */
 trait UserService extends GenericEntityService[User] {
 
-  def authenticate(authModel: AuthModel): String
+  def authenticate(authModel: AuthModel): Option[String]
 
-  def getByUsername(username: String): Optional[User]
+  def getByUsername(username: String): Option[User]
 
   def getByTrackerToken(token: String): Optional[User]
 
