@@ -52,7 +52,9 @@ class TrackerSettingsServiceImpl @Autowired() (supervisorEndpoint: SupervisorEnd
       throw new IOException(response.errorBody.string)
     }
 
-    JavaConverters.asScalaBuffer(response.body.getList).map(e => (e.getKey, e.getValue)).toMap
+    response.body.getList
+      .map(e => (e.key, e.value))
+      .toMap
   }
 
 }

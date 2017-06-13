@@ -7,16 +7,4 @@ import scala.beans.BeanProperty
 /**
   * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>
   */
-class SettingJson {
-
-  @JsonProperty
-  @BeanProperty
-  var key: String = _
-
-  @JsonProperty
-  @BeanProperty
-  var value: Int = _
-
-  override def toString = s"SettingJson(key=$key, value=$value)"
-
-}
+class SettingJson(var key: String, var value: Int)

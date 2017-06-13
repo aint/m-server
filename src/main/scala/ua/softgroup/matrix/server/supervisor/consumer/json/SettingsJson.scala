@@ -17,7 +17,7 @@ class SettingsJson {
 
   @JsonProperty
   @BeanProperty
-  var list: util.List[SettingJson] = _
+  var list: List[SettingJson] = _
 
   override def toString = s"SettingsJson(success=$success, list=$list)"
 

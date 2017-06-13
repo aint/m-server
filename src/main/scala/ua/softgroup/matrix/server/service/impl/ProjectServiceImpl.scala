@@ -128,7 +128,7 @@ class ProjectServiceImpl @Autowired() (
 
     try {
       if (currencyMap.isEmpty) queryCurrencies(token)
-      projectStream = queryUserActiveProjects(token).getList
+      projectStream = queryUserActiveProjects(token).list
         .map(project => addUserAndSaveProject(project, user))
     } catch {
       case e: Exception =>
@@ -167,8 +167,8 @@ class ProjectServiceImpl @Autowired() (
 
     if (!response.isSuccessful) throw new IOException(s"Failed to query get-currencies. ${response.errorBody.string}")
 
-    currencyMap = asScalaBuffer(response.body.getList)
-      .map(currencyJson => (currencyJson.getId, currencyJson.getName))
+    currencyMap = response.body.list
+      .map(currencyJson => (currencyJson.id, currencyJson.name))
       .toMap
   }
 
@@ -184,15 +184,15 @@ class ProjectServiceImpl @Autowired() (
   }
 
   private def addUserAndSaveProject(projectJson: ProjectJson, user: User) = {
-    val project = getBySupervisorIdAndUser(projectJson.getId, user).orElseGet(() => new Project)
-    project.setSupervisorId(projectJson.getId)
-    project.setAuthorName(projectJson.getAuthorName)
-    project.setDescription(projectJson.getDescription)
-    project.setTitle(projectJson.getTitle)
-    project.setStartDate(projectJson.getStartDate)
-    project.setEndDate(projectJson.getEndDate)
-    project.setRate(projectJson.getRate)
-    project.setRateCurrencyId(projectJson.getRateCurrencyId)
+    val project = getBySupervisorIdAndUser(projectJson.id, user).orElseGet(() => new Project)
+    project.setSupervisorId(projectJson.id)
+    project.setAuthorName(projectJson.authorName)
+    project.setDescription(projectJson.description)
+    project.setTitle(projectJson.title)
+    project.setStartDate(projectJson.startDate)
+    project.setEndDate(projectJson.endDate)
+    project.setRate(projectJson.rate)
+    project.setRateCurrencyId(projectJson.rateCurrencyId)
     project.setUser(user)
 
     repository.save(project)

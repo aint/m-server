@@ -7,58 +7,32 @@ import scala.beans.BeanProperty
 /**
   * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>
   */
-class ProfileJson {
+class ProfileJson(@JsonProperty("first_name")
+                  var firstName: String,
 
-  @JsonProperty("first_name")
-  @BeanProperty
-  var firstName: String = _
+                  @JsonProperty("last_name")
+                  var lastName: String,
 
-  @JsonProperty("last_name")
-  @BeanProperty
-  var lastName: String = _
+                  @JsonProperty("middle_name")
+                  var middleName: String,
 
-  @JsonProperty("middle_name")
-  @BeanProperty
-  var middleName: String = _
+                  @JsonProperty("monthly_rate")
+                  var monthlyRate: Int,
 
-  @JsonProperty("monthly_rate")
-  @BeanProperty
-  var monthlyRate: Int = _
+                  @JsonProperty("monthly_rate_currency_id")
+                  var monthlyRateCurrencyId: Int,
 
-  @JsonProperty("monthly_rate_currency_id")
-  @BeanProperty
-  var monthlyRateCurrencyId: Int = _
+                  @JsonProperty("external_hourly_rate")
+                  var externalHourlyRate: Int,
 
-  @JsonProperty("external_hourly_rate")
-  @BeanProperty
-  var externalHourlyRate: Int = _
+                  @JsonProperty("external_hourly_rate_currency_id")
+                  var externalHourlyRateCurrencyId: Int,
 
-  @JsonProperty("external_hourly_rate_currency_id")
-  @BeanProperty
-  var externalHourlyRateCurrencyId: Int = _
+                  @JsonProperty("internal_hourly_rate")
+                  var internalHourlyRate: Int,
 
-  @JsonProperty("internal_hourly_rate")
-  @BeanProperty
-  var internalHourlyRate: Int = _
+                  @JsonProperty("internal_hourly_rate_currency_id")
+                  var internalHourlyRateCurrencyId: Int,
 
-  @JsonProperty("internal_hourly_rate_currency_id")
-  @BeanProperty
-  var internalHourlyRateCurrencyId: Int = _
-
-  @JsonProperty("email_home")
-  @BeanProperty
-  var emailHome: String = _
-
-  override def toString: String = "ProfileJson(" +
-    "firstName=" + firstName +
-    ", lastName=" + lastName +
-    ", middleName=" + middleName +
-    ", monthlyRate=" + monthlyRate +
-    ", monthlyRateCurrencyId=" + monthlyRateCurrencyId +
-    ", externalHourlyRate=" + externalHourlyRate +
-    ", externalHourlyRateCurrencyId=" + externalHourlyRateCurrencyId +
-    ", internalHourlyRate=" + internalHourlyRate +
-    ", internalHourlyRateCurrencyId=" + internalHourlyRateCurrencyId +
-    ", emailHome=" + emailHome + ")"
-
-}
+                  @JsonProperty("email_home")
+                  var emailHome: String)

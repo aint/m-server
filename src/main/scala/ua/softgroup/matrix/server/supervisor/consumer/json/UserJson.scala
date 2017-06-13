@@ -7,28 +7,13 @@ import scala.beans.BeanProperty
 /**
   * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>
   */
-class UserJson {
+class UserJson(var id: Long,
 
-  @JsonProperty
-  @BeanProperty
-  var id: Long = _
+               var email: String,
 
-  @JsonProperty
-  @BeanProperty
-  var email: String = _
+               var username: String,
 
-  @JsonProperty
-  @BeanProperty
-  var username: String = _
+               @JsonProperty("tracker_token")
+               var trackerToken: String,
 
-  @JsonProperty("tracker_token")
-  @BeanProperty
-  var trackerToken: String = _
-
-  @JsonProperty
-  @BeanProperty
-  var profile: ProfileJson = _
-
-  override def toString = s"UserJson(id=$id, email=$email, username=$username, trackerToken=$trackerToken, profile=$profile)"
-
-}
+               var profile: ProfileJson)

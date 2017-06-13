@@ -50,13 +50,13 @@ class UserServiceImpl @Autowired() (repository: UserRepository,
 
   private def authenticate(username: String, password: String): Option[String] = {
     val loginJson = executeLoginQuery(username, password).body
-    if (loginJson.getSuccess) {
-      saveUser(loginJson.getUser, password)
-      val token = loginJson.getTrackerToken
+    if (loginJson.success) {
+      saveUser(loginJson.user, password)
+      val token = loginJson.trackerToken
       logger.info(s"User '$username' authenticated successfully with token '$token'")
       return Option(token)
     }
-    logger.info(s"Authentication failed: ${loginJson.getMessage}")
+    logger.info(s"Authentication failed: ${loginJson.message}")
     Option.empty
   }
 
@@ -72,16 +72,16 @@ class UserServiceImpl @Autowired() (repository: UserRepository,
 
   private def saveUser(userJson: UserJson, password: String) = {
     logger.debug(s"UserJson $userJson")
-    val user = Optional.ofNullable(repository.findOne(userJson.getId)).orElse(new User)
+    val user = Optional.ofNullable(repository.findOne(userJson.id)).orElse(new User)
     logger.debug(s"UserEntity $user")
-    user.setId(userJson.getId)
+    user.setId(userJson.id)
     user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt))
-    user.setUsername(userJson.getUsername)
-    user.setTrackerToken(userJson.getTrackerToken)
-    user.setExternalHourlyRate(userJson.getProfile.getExternalHourlyRate)
-    user.setExternalHourlyRateCurrencyId(userJson.getProfile.getExternalHourlyRateCurrencyId)
-    user.setInternalHourlyRate(userJson.getProfile.getInternalHourlyRate)
-    user.setInternalHourlyRateCurrencyId(userJson.getProfile.getInternalHourlyRateCurrencyId)
+    user.setUsername(userJson.username)
+    user.setTrackerToken(userJson.trackerToken)
+    user.setExternalHourlyRate(userJson.profile.externalHourlyRate)
+    user.setExternalHourlyRateCurrencyId(userJson.profile.externalHourlyRateCurrencyId)
+    user.setInternalHourlyRate(userJson.profile.internalHourlyRate)
+    user.setInternalHourlyRateCurrencyId(userJson.profile.internalHourlyRateCurrencyId)
 
     repository.save(user)
   }
