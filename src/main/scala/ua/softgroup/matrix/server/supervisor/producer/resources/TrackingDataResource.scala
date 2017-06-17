@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import ua.softgroup.matrix.server.persistent.entity._
 import ua.softgroup.matrix.server.service.{ProjectService, UserService, WorkDayService}
-import ua.softgroup.matrix.server.supervisor.producer.Utils.{calculateIdlePercent, parseData, validateEndRangeDate}
 import ua.softgroup.matrix.server.supervisor.producer.json.UserTimeAndCountResponse
 import ua.softgroup.matrix.server.supervisor.producer.json.tracking.{GeneralWorkDataJson, TrackingDataJson, TrackingDataViewType, TrackingPeriodJson}
+import ua.softgroup.matrix.server.Utils._
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Try}
@@ -50,8 +50,8 @@ class TrackingDataResource @Autowired()(userService: UserService,
 
     logger.info(s"Get tracking data of project $projectId from $fromDate to $toDate")
 
-    val from = parseData(fromDate)
-    val to = validateEndRangeDate(parseData(toDate))
+    val from = fromDate.parseToDate
+    val to = toDate.parseToDate.validateEndRangeDate
 
     val result = (0 until ChronoUnit.DAYS.between(from, to).toInt).toStream
       .map(index => workDayService.getAllWorkDaysOf(projectId, from.plusDays(index)))
@@ -75,8 +75,8 @@ class TrackingDataResource @Autowired()(userService: UserService,
 
     logger.info(s"Get tracking data of user $userId and project $projectId from $fromDate to $toDate")
 
-    val from = parseData(fromDate)
-    val to = parseData(toDate)
+    val from = fromDate.parseToDate
+    val to = toDate.parseToDate
 
     val result = asScalaSet(workDayService.getAllWorkDaysOf(userId, projectId, from, to))
       .map(convertToUserAndProjectTrackingData)
@@ -98,8 +98,8 @@ class TrackingDataResource @Autowired()(userService: UserService,
     logger.info(s"Get tracking data of user $userId from $fromDate to $toDate")
 
     val user = userService.getById(userId).orElseGet(() => new User)
-    val from = parseData(fromDate)
-    val to = validateEndRangeDate(parseData(toDate))
+    val from = fromDate.parseToDate
+    val to = toDate.parseToDate.validateEndRangeDate
 
     val result = (0 until ChronoUnit.DAYS.between(from, to).toInt).toStream
       .map(index => workDayService.getAllWorkDaysOf(user, from.plusDays(index)))
@@ -120,8 +120,8 @@ class TrackingDataResource @Autowired()(userService: UserService,
 
     logger.info(s"Get tracking data of users $userIds from $fromDate to $toDate")
 
-    val from = parseData(fromDate)
-    val to = parseData(toDate)
+    val from = fromDate.parseToDate
+    val to = toDate.parseToDate
 
     val result = asScalaBuffer(userIds)
       .filter(_ > 0)

@@ -17,6 +17,7 @@ import ua.softgroup.matrix.server.supervisor.producer.Utils.{calculateIdlePercen
 import ua.softgroup.matrix.server.supervisor.producer.json.time.TimeManagement
 import ua.softgroup.matrix.server.supervisor.producer.json.{TimeJson, UserProjectTimeResponse, UserTimeResponse}
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.ErrorJson
+import ua.softgroup.matrix.server.Utils._
 
 import scala.collection.JavaConverters
 
@@ -85,7 +86,7 @@ class TimeResource @Autowired() (projectService: ProjectService,
   def timeManagement(@ApiParam @JsonView timeManagement: TimeManagement): Response = {
     logger.info(s"manageTime $timeManagement")
 
-    val date = parseData(timeManagement.getOnDate)
+    val date = timeManagement.getOnDate.parseToDate
     if (date.isAfter(LocalDate.now)) return Response.status(Status.BAD_REQUEST)
                                                     .entity("Date can't be in future")
                                                     .build

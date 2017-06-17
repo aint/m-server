@@ -9,12 +9,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import ua.softgroup.matrix.api.model.datamodels.{ProjectModel, TimeModel}
+import ua.softgroup.matrix.server.Utils
 import ua.softgroup.matrix.server.persistent.entity.{Project, User, WorkDay, WorkTimePeriod}
 import ua.softgroup.matrix.server.persistent.repository.ProjectRepository
 import ua.softgroup.matrix.server.service.{ProjectService, UserService, WorkDayService, WorkTimePeriodService}
 import ua.softgroup.matrix.server.supervisor.consumer.endpoint.SupervisorEndpoint
 import ua.softgroup.matrix.server.supervisor.consumer.json.ProjectJson
-import ua.softgroup.matrix.server.supervisor.producer.Utils.calculateIdlePercent
 
 import scala.collection.JavaConverters._
 
@@ -82,7 +82,7 @@ class ProjectServiceImpl @Autowired() (
     save(project)
 
     val totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project)
-    val downtimePercent = calculateIdlePercent(workDay.getWorkSeconds, workDay.getIdleSeconds)
+    val downtimePercent = Utils.calculateIdlePercent(workDay.getWorkSeconds, workDay.getIdleSeconds)
     new TimeModel(totalWorkSeconds, workDay.getWorkSeconds, downtimePercent)
   }
 
@@ -113,7 +113,7 @@ class ProjectServiceImpl @Autowired() (
     workTimePeriodService.save(workTimePeriod)
 
     val totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project)
-    val downtimePercent = calculateIdlePercent(workDay.getWorkSeconds, workDay.getIdleSeconds)
+    val downtimePercent = Utils.calculateIdlePercent(workDay.getWorkSeconds, workDay.getIdleSeconds)
     val arrivalTime = if (workDayService.getStartWorkOf(workDay) == null) project.getWorkStarted.toLocalTime
                       else workDayService.getStartWorkOf(workDay)
 
@@ -212,7 +212,7 @@ class ProjectServiceImpl @Autowired() (
     val user = project.getUser
     val totalWorkSeconds = workDayService.getTotalWorkSeconds(user, project)
     val currentMonthIdleSeconds = workDayService.getCurrentMonthIdleSeconds(user, project)
-    val downtimePercent = calculateIdlePercent(totalWorkSeconds, currentMonthIdleSeconds)
+    val downtimePercent = Utils.calculateIdlePercent(totalWorkSeconds, currentMonthIdleSeconds)
     val workDay = workDayService.getByAuthorAndProjectAndDate(user, project, LocalDate.now).orElseGet(() => new WorkDay)
     val arrivalTime = workDayService.getStartWorkOf(if (workDay.isNew) null else workDay)
 

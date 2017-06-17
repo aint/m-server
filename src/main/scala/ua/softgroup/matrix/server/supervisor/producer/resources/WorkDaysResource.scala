@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import ua.softgroup.matrix.server.persistent.entity.{User, WorkDay}
 import ua.softgroup.matrix.server.service.{ProjectService, UserService, WorkDayService}
-import ua.softgroup.matrix.server.supervisor.producer.Utils.{calculateIdlePercent, parseData, validateEndRangeDate}
 import ua.softgroup.matrix.server.supervisor.producer.json.v2._
+import ua.softgroup.matrix.server.Utils._
 
 import scala.collection.JavaConverters.asScalaSet
 
@@ -44,8 +44,8 @@ class WorkDaysResource @Autowired()(projectService: ProjectService,
 
     val user: User = userService.getById(userId).orElseGet(() => new User)
 
-    val from: LocalDate = parseData(fromDate)
-    val to: LocalDate = validateEndRangeDate(parseData(toDate))
+    val from: LocalDate = fromDate.parseToDate
+    val to: LocalDate = toDate.parseToDate.validateEndRangeDate
 
     val result = (0 until ChronoUnit.DAYS.between(from, to).toInt).toStream
       .map(index => workDayService.getAllWorkDaysOf(user, from.plusDays(index)))
@@ -67,8 +67,8 @@ class WorkDaysResource @Autowired()(projectService: ProjectService,
 
     logger.info(s"Get working day of project $projectId from $fromDate to $toDate")
 
-    val from = parseData(fromDate)
-    val to = validateEndRangeDate(parseData(toDate))
+    val from = fromDate.parseToDate
+    val to = toDate.parseToDate.validateEndRangeDate
 
     val result = (0 until ChronoUnit.DAYS.between(from, to).toInt).toStream
       .map(index => workDayService.getAllWorkDaysOf(projectId, from.plusDays(index)))

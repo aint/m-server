@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ua.softgroup.matrix.server.persistent.entity.WorkDay
 import ua.softgroup.matrix.server.service.{ProjectService, UserService, WorkDayService}
-import ua.softgroup.matrix.server.supervisor.producer.Utils.parseData
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.{ErrorJson, ReportResponse}
+import ua.softgroup.matrix.server.Utils._
 
 import scala.collection.JavaConverters._
 
@@ -53,9 +53,9 @@ class ReportResource @Autowired()(userService: UserService,
 
     logger.info(s"Get reports of users $userIds from $fromDate to $toDate")
 
-    val from = parseData(fromDate)
-    val to = parseData(toDate)
 
+    val from = fromDate.parseToDate
+    val to = toDate.parseToDate
     val result = asScalaBuffer(userIds)
       .filter(_ > 0)
       .flatMap(userId => asScalaSet(workDayService.getUserWorkDaysBetween(userId, from, to)))
@@ -76,8 +76,8 @@ class ReportResource @Autowired()(userService: UserService,
 
     logger.info(s"Get reports of projects $projectIds from $fromDate to $toDate")
 
-    val from = parseData(fromDate)
-    val to = parseData(toDate)
+    val from = fromDate.parseToDate
+    val to = toDate.parseToDate
 
     val result = asScalaBuffer(projectIds)
       .filter(_ > 0)
@@ -96,8 +96,8 @@ class ReportResource @Autowired()(userService: UserService,
 
     logger.info(s"Get ll reports from $fromDate to $toDate")
 
-    val from = parseData(fromDate)
-    val to = parseData(toDate)
+    val from = fromDate.parseToDate
+    val to = toDate.parseToDate
 
     val result = asScalaSet(workDayService.getWorkDaysBetween(from, to))
       .map(convertWorkDayToReportJson)
