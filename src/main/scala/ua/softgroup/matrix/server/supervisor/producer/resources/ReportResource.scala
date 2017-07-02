@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.NotEmpty
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
 import ua.softgroup.matrix.server.persistent.entity.WorkDay
 import ua.softgroup.matrix.server.service.{ProjectService, UserService, WorkDayService}
 import ua.softgroup.matrix.server.supervisor.producer.json.v2.{ErrorJson, ReportResponse}
@@ -20,6 +21,9 @@ import ua.softgroup.matrix.server.Utils._
 import scala.collection.JavaConverters._
 
 /**
+  * This endpoint implements time related functionality.
+  * Implements 9, 10, 11, 12, 13, 14, 15 and 16 methods from the Supervisor API specs.
+  *
   * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
   */
 @Component

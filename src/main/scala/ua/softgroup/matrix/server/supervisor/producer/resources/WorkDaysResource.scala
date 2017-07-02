@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+
 import ua.softgroup.matrix.server.persistent.entity.{User, WorkDay}
 import ua.softgroup.matrix.server.service.{ProjectService, UserService, WorkDayService}
 import ua.softgroup.matrix.server.supervisor.producer.json.v2._
@@ -20,7 +21,10 @@ import ua.softgroup.matrix.server.Utils._
 import scala.collection.JavaConverters.asScalaSet
 
 /**
-  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com> 
+  * This endpoint implements work days related functionality.
+  * Implements 1 and 2 methods from the Supervisor API specs.
+  *
+  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
   */
 @Component
 @Path("/workdays")

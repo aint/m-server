@@ -27,6 +27,9 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Try}
 
 /**
+  * This endpoint implements tracking related functionality.
+  * Implements 3, 4, 5 and 8 methods from the Supervisor API specs.
+  *
   * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
   */
 @Component

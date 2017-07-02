@@ -22,7 +22,10 @@ import ua.softgroup.matrix.server.Utils._
 import scala.collection.JavaConverters
 
 /**
-  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com> 
+  * This endpoint implements time related functionality.
+  * Implements 6, 17 and 18 methods from the Supervisor API specs.
+  *
+  * @author Oleksandr Tyshkovets <sg.olexander@gmail.com>
   */
 @Component
 @Path("/times")
